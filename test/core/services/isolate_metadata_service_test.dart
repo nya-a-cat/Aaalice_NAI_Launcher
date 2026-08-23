@@ -232,7 +232,14 @@ Future<void> _deleteTempDirectoryWhenWorkersReleaseFiles(
       await directory.delete(recursive: true);
       return;
     } on FileSystemException {
-      if (attempt == attempts) rethrow;
+      if (attempt == attempts) {
+        // A synchronously killed isolate can retain its Windows file handle
+        // until the Dart test process exits, even after onExit is delivered.
+        // Hosted runners are ephemeral, so leave that isolated temp directory
+        // for the operating system to reclaim at process shutdown.
+        if (Platform.isWindows) return;
+        rethrow;
+      }
       await Future<void>.delayed(const Duration(milliseconds: 100));
     }
   }

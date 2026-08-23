@@ -506,10 +506,7 @@ class IsolateMetadataService {
       await retiredWorker.disposeAndWait();
       if (!_initialized || generation != _lifecycleGeneration) return;
 
-      replacement = _ParseWorker(
-        id: workerId,
-        onBecameIdle: _processQueue,
-      );
+      replacement = _ParseWorker(id: workerId, onBecameIdle: _processQueue);
       await replacement.initialize();
       if (!_initialized || generation != _lifecycleGeneration) {
         replacement.dispose();
@@ -731,10 +728,7 @@ class _ParseWorker {
     isolate?.kill(priority: Isolate.immediate);
 
     if (isolate != null && exitFuture != null) {
-      await exitFuture.timeout(
-        const Duration(seconds: 2),
-        onTimeout: () {},
-      );
+      await exitFuture.timeout(const Duration(seconds: 2), onTimeout: () {});
     }
 
     _receivePort.close();
