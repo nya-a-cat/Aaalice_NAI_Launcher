@@ -1,6 +1,9 @@
 name: Pull Request Validation
 
 on:
+  push:
+    branches:
+      - ci/fast-windows-build
   pull_request:
     branches:
       - main
