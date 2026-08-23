@@ -27,7 +27,7 @@ runs:
         pub-cache: true
 
     - name: Restore generated-code cache
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: |
           .dart_tool/build
@@ -39,35 +39,15 @@ runs:
 
     - name: Restore Flutter and native Windows build cache
       if: inputs.cache-windows-build == 'true'
-      uses: actions/cache@v5
+      uses: actions/cache@v6
       with:
         path: |
           .dart_tool/flutter_build
+          build/native_assets
           build/windows
         key: ${{ inputs.cache-namespace }}-windows-build-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-${{ github.run_id }}-${{ github.job }}
         restore-keys: |
           ${{ inputs.cache-namespace }}-windows-build-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-
-
-    - name: Clear staged Windows bundle
-      if: inputs.cache-windows-build == 'true' && runner.os == 'Windows'
-      shell: pwsh
-      run: |
-        $buildRoot = [IO.Path]::GetFullPath(
-          (Join-Path $env:GITHUB_WORKSPACE 'build\windows')
-        )
-        $stagedBundle = [IO.Path]::GetFullPath(
-          (Join-Path $buildRoot 'x64\runner\Release')
-        )
-        $expectedPrefix = $buildRoot.TrimEnd('\') + '\'
-        if (-not $stagedBundle.StartsWith(
-          $expectedPrefix,
-          [StringComparison]::OrdinalIgnoreCase
-        )) {
-          throw "Refusing to clear path outside Windows build root: $stagedBundle"
-        }
-        if (Test-Path -LiteralPath $stagedBundle) {
-          Remove-Item -LiteralPath $stagedBundle -Recurse -Force
-        }
 
     - name: Resolve dependencies from cache
       if: steps.flutter.outputs.PUB-CACHE-HIT == 'true'
