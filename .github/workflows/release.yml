@@ -93,7 +93,8 @@ jobs:
 
   build-windows:
     name: Build Windows
-    runs-on: windows-2022
+    # A trusted tag may use a prewarmed runner configured by repository vars.
+    runs-on: ${{ vars.WINDOWS_FLUTTER_RUNNER || 'windows-2022' }}
     needs: prepare
 
     steps:
@@ -109,8 +110,8 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
-          cache: true
-          pub-cache: true
+          cache: ${{ vars.WINDOWS_FLUTTER_SDK_CACHE || 'true' }}
+          pub-cache: ${{ vars.WINDOWS_PUB_CACHE || 'true' }}
 
       - name: Restore generated-code cache
         uses: actions/cache@v6
