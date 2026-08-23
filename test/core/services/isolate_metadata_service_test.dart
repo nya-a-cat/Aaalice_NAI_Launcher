@@ -224,7 +224,7 @@ String _largeText(String char) => ''.padRight(6 * 1024 * 1024, char);
 Future<void> _deleteTempDirectoryWhenWorkersReleaseFiles(
   Directory directory,
 ) async {
-  const attempts = 20;
+  const attempts = 50;
   for (var attempt = 1; attempt <= attempts; attempt++) {
     if (!await directory.exists()) return;
 
@@ -233,7 +233,7 @@ Future<void> _deleteTempDirectoryWhenWorkersReleaseFiles(
       return;
     } on FileSystemException {
       if (attempt == attempts) rethrow;
-      await Future<void>.delayed(const Duration(milliseconds: 25));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
     }
   }
 }
