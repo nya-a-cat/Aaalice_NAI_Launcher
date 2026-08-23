@@ -479,11 +479,11 @@ class IsolateMetadataService {
     if (workerIndex < 0) return;
 
     _workers.removeAt(workerIndex);
-    worker.dispose();
 
     _restartingWorkers++;
     unawaited(
       _initializeReplacementWorker(
+        worker,
         worker.id,
         workerIndex,
         _lifecycleGeneration,
@@ -492,13 +492,24 @@ class IsolateMetadataService {
   }
 
   Future<void> _initializeReplacementWorker(
+    _ParseWorker retiredWorker,
     int workerId,
     int workerIndex,
     int generation,
   ) async {
-    final replacement = _ParseWorker(id: workerId, onBecameIdle: _processQueue);
+    _ParseWorker? replacement;
 
     try {
+      // Wait for the killed isolate to report its exit before assigning more
+      // work. On Windows this also gives the VM a deterministic point to
+      // release native file handles held by the synchronous parser.
+      await retiredWorker.disposeAndWait();
+      if (!_initialized || generation != _lifecycleGeneration) return;
+
+      replacement = _ParseWorker(
+        id: workerId,
+        onBecameIdle: _processQueue,
+      );
       await replacement.initialize();
       if (!_initialized || generation != _lifecycleGeneration) {
         replacement.dispose();
@@ -510,7 +521,7 @@ class IsolateMetadataService {
       _workers.insert(insertIndex, replacement);
       _restartedWorkers++;
     } catch (e, stackTrace) {
-      replacement.dispose();
+      replacement?.dispose();
       _workerStartupError = e.toString();
       AppLogger.e(
         '[IsolateMetadata] Failed to restart worker $workerId',
@@ -594,10 +605,13 @@ class _ParseWorker {
   Isolate? _isolate;
   SendPort? _sendPort;
   final _receivePort = ReceivePort();
+  final _exitPort = ReceivePort();
   bool _isBusy = false;
   int? _currentRequestId;
   Completer<IsolateParseResult>? _currentCompleter;
+  Completer<void>? _exitCompleter;
   StreamSubscription? _subscription;
+  StreamSubscription? _exitSubscription;
 
   _ParseWorker({required this.id, this.onBecameIdle});
 
@@ -605,10 +619,18 @@ class _ParseWorker {
 
   /// 初始化工作线程
   Future<void> initialize() async {
+    _exitCompleter = Completer<void>();
+    _exitSubscription = _exitPort.listen((_) {
+      final exitCompleter = _exitCompleter;
+      if (exitCompleter != null && !exitCompleter.isCompleted) {
+        exitCompleter.complete();
+      }
+    });
     _isolate = await Isolate.spawn(
       _isolateEntryPoint,
       _WorkerInitMessage(sendPort: _receivePort.sendPort, workerId: id),
       debugName: 'MetadataWorker-$id',
+      onExit: _exitPort.sendPort,
     );
 
     // 将 ReceivePort 转换为广播流，允许多次监听
@@ -690,6 +712,38 @@ class _ParseWorker {
     _isolate?.kill(priority: Isolate.immediate);
     _isolate = null;
     _receivePort.close();
+    _exitSubscription?.cancel();
+    _exitSubscription = null;
+    _exitPort.close();
+  }
+
+  Future<void> disposeAndWait() async {
+    cancelCurrent();
+    final responseSubscription = _subscription;
+    _subscription = null;
+    if (responseSubscription != null) {
+      await responseSubscription.cancel();
+    }
+
+    final isolate = _isolate;
+    final exitFuture = _exitCompleter?.future;
+    _isolate = null;
+    isolate?.kill(priority: Isolate.immediate);
+
+    if (isolate != null && exitFuture != null) {
+      await exitFuture.timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {},
+      );
+    }
+
+    _receivePort.close();
+    final exitSubscription = _exitSubscription;
+    _exitSubscription = null;
+    if (exitSubscription != null) {
+      await exitSubscription.cancel();
+    }
+    _exitPort.close();
   }
 
   void _handleResponse(dynamic message) {
