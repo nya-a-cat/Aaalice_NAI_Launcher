@@ -148,7 +148,9 @@ jobs:
         id: windows-build-cache
         uses: actions/cache/restore@v5
         with:
-          path: build/windows
+          path: |
+            .dart_tool/flutter_build
+            build/windows
           key: nai-windows-build-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-${{ github.run_id }}
           restore-keys: |
             nai-windows-build-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-
@@ -189,5 +191,7 @@ jobs:
       - name: Save Windows incremental build cache
         uses: actions/cache/save@v5
         with:
-          path: build/windows
+          path: |
+            .dart_tool/flutter_build
+            build/windows
           key: ${{ steps.windows-build-cache.outputs.cache-primary-key }}
