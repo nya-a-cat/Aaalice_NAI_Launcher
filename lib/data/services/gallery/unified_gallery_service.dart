@@ -528,6 +528,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       dir,
       retryMissingMetadata: retryMissingMetadata,
       retryFailedMetadata: retryFailedMetadata,
+      knownTotalFiles: knownTotalFiles,
       // 【扫描时日志太频繁，禁用】
       // onFileProcessed: (result, stats) {
       //   // 每处理一个文件就更新状态
@@ -577,7 +578,6 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       dir,
       retryMissingMetadata: retryMissingMetadata,
       retryFailedMetadata: retryFailedMetadata,
-      knownTotalFiles: knownTotalFiles,
       knownTotalFiles: knownTotalFiles,
       // 【扫描时日志太频繁，禁用】
       // onFileProcessed: (result, stats) {
