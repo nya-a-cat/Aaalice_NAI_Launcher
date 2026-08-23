@@ -54,19 +54,23 @@ jobs:
             lib/data/services/gallery/gallery_stream_scanner.dart `
             lib/data/services/gallery/unified_gallery_service.dart `
             lib/data/services/metadata/isolate_metadata_service.dart `
+            lib/presentation/router/app_router.dart `
             test/core/services/isolate_metadata_service_test.dart `
-            test/data/services/gallery/gallery_stream_scanner_retry_test.dart
+            test/data/services/gallery/gallery_stream_scanner_retry_test.dart `
+            test/presentation/router/app_router_auth_redirect_test.dart
 
-      - name: Upload formatted gallery sources
+      - name: Upload formatted changed sources
         uses: actions/upload-artifact@v4
         with:
-          name: formatted-gallery-sources
+          name: formatted-changed-sources
           path: |
             lib/data/services/gallery/gallery_stream_scanner.dart
             lib/data/services/gallery/unified_gallery_service.dart
             lib/data/services/metadata/isolate_metadata_service.dart
+            lib/presentation/router/app_router.dart
             test/core/services/isolate_metadata_service_test.dart
             test/data/services/gallery/gallery_stream_scanner_retry_test.dart
+            test/presentation/router/app_router_auth_redirect_test.dart
           if-no-files-found: error
           retention-days: 1
 
@@ -76,15 +80,18 @@ jobs:
           lib/data/services/gallery/gallery_stream_scanner.dart
           lib/data/services/gallery/unified_gallery_service.dart
           lib/data/services/metadata/isolate_metadata_service.dart
+          lib/presentation/router/app_router.dart
           test/core/services/isolate_metadata_service_test.dart
           test/data/services/gallery/gallery_stream_scanner_retry_test.dart
+          test/presentation/router/app_router_auth_redirect_test.dart
 
-      - name: Run gallery regression tests
+      - name: Run changed-code regression tests
         run: >-
           flutter test
           test/core/services/isolate_metadata_service_test.dart
           test/data/services/gallery/gallery_stream_scanner_retry_test.dart
           test/data/services/gallery/unified_gallery_service_scan_policy_test.dart
+          test/presentation/router/app_router_auth_redirect_test.dart
 
       - name: Build Windows release
         run: flutter build windows --release
@@ -111,7 +118,9 @@ jobs:
             lib/data/services/gallery/gallery_stream_scanner.dart
             lib/data/services/gallery/unified_gallery_service.dart
             lib/data/services/metadata/isolate_metadata_service.dart
+            lib/presentation/router/app_router.dart
             test/core/services/isolate_metadata_service_test.dart
             test/data/services/gallery/gallery_stream_scanner_retry_test.dart
+            test/presentation/router/app_router_auth_redirect_test.dart
           if-no-files-found: error
           retention-days: 7
