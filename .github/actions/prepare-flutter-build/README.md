@@ -25,6 +25,10 @@ that state can produce an incomplete Windows bundle.
 `cache-windows-build` should be enabled only on Windows build jobs. Analysis and
 test jobs still reuse the SDK, Pub, and generated-code layers.
 
+Dependency resolution enforces the committed lockfile. The repository workflows
+set `PUB_HOSTED_URL` to the hosted source recorded in that lockfile, preventing
+source URL normalization from dirtying `pubspec.lock` during CI.
+
 The maintainer-dispatched portable workflow also caches the completed bundle by
 commit, Flutter version, and build mode. An exact hit skips Flutter setup and
 compilation, then uploads the verified bundle directly.

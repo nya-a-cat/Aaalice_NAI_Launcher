@@ -33,6 +33,7 @@ runs:
         channel: stable
         cache: ${{ inputs.cache-flutter-sdk }}
         pub-cache: ${{ inputs.cache-pub-dependencies }}
+        pub-cache-key: "${{ inputs.cache-namespace }}-flutter-pub-:os:-:channel:-:version:-:arch:-:hash:"
 
     - name: Restore generated-code cache
       uses: actions/cache@v6
@@ -60,12 +61,12 @@ runs:
     - name: Resolve dependencies from cache
       if: steps.flutter.outputs.PUB-CACHE-HIT == 'true'
       shell: pwsh
-      run: flutter pub get --offline
+      run: flutter pub get --enforce-lockfile --offline
 
     - name: Resolve dependencies from network
       if: steps.flutter.outputs.PUB-CACHE-HIT != 'true'
       shell: pwsh
-      run: flutter pub get
+      run: flutter pub get --enforce-lockfile
 
     - name: Generate localizations
       shell: pwsh

@@ -1,9 +1,6 @@
 name: Pull Request Validation
 
 on:
-  push:
-    branches:
-      - ci/fast-windows-build
   pull_request:
     branches:
       - main
@@ -34,6 +31,7 @@ concurrency:
 
 env:
   FLUTTER_VERSION: "3.44.2"
+  PUB_HOSTED_URL: "https://pub.flutter-io.cn"
 
 jobs:
   changes:
