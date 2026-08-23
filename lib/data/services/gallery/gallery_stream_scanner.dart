@@ -13,13 +13,7 @@ import '../metadata/isolate_metadata_service.dart';
 import 'scan_config.dart';
 import 'scan_state_manager.dart';
 
-typedef ExistingFileCacheEntry = (
-  int,
-  int,
-  int,
-  MetadataStatus,
-  DateTime?,
-);
+typedef ExistingFileCacheEntry = (int, int, int, MetadataStatus, DateTime?);
 
 /// 文件处理阶段
 enum FileProcessingStage {
@@ -166,7 +160,7 @@ class GalleryStreamScanner {
 
   /// 私有构造函数
   GalleryStreamScanner._internal({required GalleryDataSource dataSource})
-      : _dataSource = dataSource;
+    : _dataSource = dataSource;
 
   /// @deprecated 使用 [instance] 代替
   ///
@@ -190,7 +184,7 @@ class GalleryStreamScanner {
   Future<void> startScanning(
     Directory rootDir, {
     void Function(FileProcessingResult result, StreamScanStats stats)?
-        onFileProcessed,
+    onFileProcessed,
     bool checkConsistency = true,
     bool retryMissingMetadata = false,
     bool retryFailedMetadata = false,
@@ -289,7 +283,8 @@ class GalleryStreamScanner {
 
           // 更新统计
           processedCount++;
-          final isProcessed = result.stage == FileProcessingStage.completed ||
+          final isProcessed =
+              result.stage == FileProcessingStage.completed ||
               result.stage == FileProcessingStage.error;
           final isSkipped = result.stage == FileProcessingStage.skipped;
           final isError = result.stage == FileProcessingStage.error;
@@ -525,9 +520,9 @@ class GalleryStreamScanner {
           AppLogger.d(
             retryMissingMetadata
                 ? '[StreamScan] Retry missing metadata: $fileName, '
-                    'last scanned at $lastScannedAt'
+                      'last scanned at $lastScannedAt'
                 : '[StreamScan] Skip re-scan (no metadata): $fileName, '
-                    'last scanned at $lastScannedAt',
+                      'last scanned at $lastScannedAt',
             'GalleryStreamScanner',
           );
         } else if (metadataStatus == MetadataStatus.failed) {
@@ -535,9 +530,9 @@ class GalleryStreamScanner {
           AppLogger.d(
             retryFailedMetadata
                 ? '[StreamScan] Retry failed metadata: $fileName, '
-                    'last scanned at $lastScannedAt'
+                      'last scanned at $lastScannedAt'
                 : '[StreamScan] Skip re-scan (failed metadata): $fileName, '
-                    'last scanned at $lastScannedAt',
+                      'last scanned at $lastScannedAt',
             'GalleryStreamScanner',
           );
         } else {
@@ -582,7 +577,7 @@ class GalleryStreamScanner {
               stat.modified.millisecondsSinceEpoch,
               oldImageId,
               oldRecord.$4,
-              DateTime.now()
+              DateTime.now(),
             );
           }
           _pathToId.remove(movedFromPath);
@@ -715,10 +710,7 @@ class GalleryStreamScanner {
   ) {
     // 更新本地 stats controller（供内部使用）
     _statsController.add(
-      stats.copyWith(
-        currentStage: stage,
-        currentFile: fileName,
-      ),
+      stats.copyWith(currentStage: stage, currentFile: fileName),
     );
 
     // 【修复】同步更新 ScanStateManager，让 UI 能看到阶段变化
@@ -761,8 +753,10 @@ class GalleryStreamScanner {
       yield file;
     }
 
-    await for (final entity
-        in rootDir.list(recursive: true, followLinks: false)) {
+    await for (final entity in rootDir.list(
+      recursive: true,
+      followLinks: false,
+    )) {
       if (_shouldCancel) break;
 
       if (entity is File) {
@@ -791,8 +785,10 @@ class GalleryStreamScanner {
     const supportedExtensions = ['.png', '.jpg', '.jpeg', '.webp'];
     var count = 0;
 
-    await for (final entity
-        in rootDir.list(recursive: true, followLinks: false)) {
+    await for (final entity in rootDir.list(
+      recursive: true,
+      followLinks: false,
+    )) {
       if (_shouldCancel) break;
 
       if (entity is File) {
@@ -838,28 +834,28 @@ List<String> buildRetryPriorityPaths(
   required bool retryMissingMetadata,
   required bool retryFailedMetadata,
 }) {
-  final candidates = existingMap.entries.where((entry) {
-    final status = entry.value.$4;
-    return (retryMissingMetadata && status == MetadataStatus.none) ||
-        (retryFailedMetadata && status == MetadataStatus.failed);
-  }).toList()
-    ..sort((a, b) {
-      final aScannedAt = a.value.$5;
-      final bScannedAt = b.value.$5;
+  final candidates =
+      existingMap.entries.where((entry) {
+        final status = entry.value.$4;
+        return (retryMissingMetadata && status == MetadataStatus.none) ||
+            (retryFailedMetadata && status == MetadataStatus.failed);
+      }).toList()..sort((a, b) {
+        final aScannedAt = a.value.$5;
+        final bScannedAt = b.value.$5;
 
-      if (aScannedAt == null && bScannedAt == null) {
+        if (aScannedAt == null && bScannedAt == null) {
+          return a.key.compareTo(b.key);
+        }
+        if (aScannedAt == null) return -1;
+        if (bScannedAt == null) return 1;
+
+        final compare = aScannedAt.compareTo(bScannedAt);
+        if (compare != 0) {
+          return compare;
+        }
+
         return a.key.compareTo(b.key);
-      }
-      if (aScannedAt == null) return -1;
-      if (bScannedAt == null) return 1;
-
-      final compare = aScannedAt.compareTo(bScannedAt);
-      if (compare != 0) {
-        return compare;
-      }
-
-      return a.key.compareTo(b.key);
-    });
+      });
 
   return candidates.map((entry) => entry.key).toList(growable: false);
 }

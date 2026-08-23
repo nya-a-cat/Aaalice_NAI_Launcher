@@ -449,27 +449,29 @@ class IsolateMetadataService {
     Stopwatch stopwatch,
   ) async {
     try {
-      final result = await worker.execute(task).timeout(
-        task.config.timeout,
-        onTimeout: () async {
-          _timeoutTasks++;
-          AppLogger.w(
-            '[IsolateMetadata] Task timeout: ${task.filePath}',
-            'IsolateMetadataService',
-          );
+      final result = await worker
+          .execute(task)
+          .timeout(
+            task.config.timeout,
+            onTimeout: () async {
+              _timeoutTasks++;
+              AppLogger.w(
+                '[IsolateMetadata] Task timeout: ${task.filePath}',
+                'IsolateMetadataService',
+              );
 
-          // A synchronous parser cannot be interrupted inside an isolate.
-          // Replace the worker so a pathological image cannot occupy a pool
-          // slot forever and block every later gallery item.
-          await _restartWorker(worker);
+              // A synchronous parser cannot be interrupted inside an isolate.
+              // Replace the worker so a pathological image cannot occupy a pool
+              // slot forever and block every later gallery item.
+              await _restartWorker(worker);
 
-          return IsolateParseResult.error(
-            'Parse timeout after ${task.config.timeout.inSeconds}s',
-            parseTime: stopwatch.elapsed,
-            wasTimeout: true,
+              return IsolateParseResult.error(
+                'Parse timeout after ${task.config.timeout.inSeconds}s',
+                parseTime: stopwatch.elapsed,
+                wasTimeout: true,
+              );
+            },
           );
-        },
-      );
 
       stopwatch.stop();
 
