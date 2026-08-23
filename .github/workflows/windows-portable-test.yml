@@ -1,0 +1,99 @@
+name: Windows portable test build
+
+on:
+  push:
+    branches:
+      - fix/gallery-large-index-stall
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-portable-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.44.2"
+
+jobs:
+  build-windows-portable:
+    runs-on: windows-2022
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v4
+        with:
+          nuget-version: latest
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Generate localizations
+        run: flutter gen-l10n
+
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Check formatting
+        shell: pwsh
+        run: |
+          dart format --output=none --set-exit-if-changed `
+            lib/data/services/gallery/gallery_stream_scanner.dart `
+            lib/data/services/gallery/unified_gallery_service.dart `
+            lib/data/services/metadata/isolate_metadata_service.dart `
+            test/core/services/isolate_metadata_service_test.dart `
+            test/data/services/gallery/gallery_stream_scanner_retry_test.dart
+
+      - name: Analyze changed code
+        run: >-
+          flutter analyze
+          lib/data/services/gallery/gallery_stream_scanner.dart
+          lib/data/services/gallery/unified_gallery_service.dart
+          lib/data/services/metadata/isolate_metadata_service.dart
+          test/core/services/isolate_metadata_service_test.dart
+          test/data/services/gallery/gallery_stream_scanner_retry_test.dart
+
+      - name: Run gallery regression tests
+        run: >-
+          flutter test
+          test/core/services/isolate_metadata_service_test.dart
+          test/data/services/gallery/gallery_stream_scanner_retry_test.dart
+          test/data/services/gallery/unified_gallery_service_scan_policy_test.dart
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Package portable zip
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $releaseDirectory = 'build/windows/x64/runner/Release'
+          $outputDirectory = 'dist'
+          $archive = Join-Path $outputDirectory 'NAI_Launcher_Windows_Gallery_Fix_Portable.zip'
+          New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
+          Compress-Archive -Path "$releaseDirectory/*" -DestinationPath $archive -CompressionLevel Optimal
+          $hash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $([IO.Path]::GetFileName($archive))" | Set-Content -LiteralPath "$archive.sha256" -Encoding ascii
+
+      - name: Upload Windows portable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-portable-gallery-fix
+          path: |
+            dist/NAI_Launcher_Windows_Gallery_Fix_Portable.zip
+            dist/NAI_Launcher_Windows_Gallery_Fix_Portable.zip.sha256
+          if-no-files-found: error
+          retention-days: 7
