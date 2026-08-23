@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - fix/gallery-large-index-stall
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,35 +17,45 @@ env:
   FLUTTER_VERSION: "3.44.2"
 
 jobs:
-  build-windows-portable:
+  validate:
     runs-on: windows-2022
-    timeout-minutes: 60
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           lfs: true
 
       - name: Setup Flutter
+        id: flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+          pub-cache: true
 
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v4
+      - name: Restore generated-code cache
+        uses: actions/cache/restore@v5
         with:
-          nuget-version: latest
+          path: |
+            .dart_tool/build
+            lib/**/*.g.dart
+            lib/**/*.freezed.dart
+          key: nai-codegen-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            nai-codegen-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock') }}-
 
-      - name: Resolve dependencies
+      - name: Resolve dependencies from cache
+        if: steps.flutter.outputs.PUB-CACHE-HIT == 'true'
+        run: flutter pub get --offline
+
+      - name: Resolve dependencies from network
+        if: steps.flutter.outputs.PUB-CACHE-HIT != 'true'
         run: flutter pub get
 
-      - name: Generate localizations
-        run: flutter gen-l10n
-
-      - name: Generate code
+      - name: Generate code incrementally
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Format changed code
@@ -63,7 +74,7 @@ jobs:
             test/presentation/router/app_router_auth_redirect_test.dart
 
       - name: Upload formatted changed sources
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: formatted-changed-sources
           path: |
@@ -102,37 +113,81 @@ jobs:
           test/data/services/gallery/unified_gallery_service_scan_policy_test.dart
           test/presentation/router/app_router_auth_redirect_test.dart
 
-      - name: Build Windows release
-        run: flutter build windows --release
+  build-windows-portable:
+    runs-on: windows-2022
+    timeout-minutes: 45
 
-      - name: Package portable zip
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $releaseDirectory = 'build/windows/x64/runner/Release'
-          $outputDirectory = 'dist'
-          $archive = Join-Path $outputDirectory 'NAI_Launcher_Windows_Gallery_Fix_Portable.zip'
-          New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
-          Compress-Archive -Path "$releaseDirectory/*" -DestinationPath $archive -CompressionLevel Optimal
-          $hash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
-          "$hash  $([IO.Path]::GetFileName($archive))" | Set-Content -LiteralPath "$archive.sha256" -Encoding ascii
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          lfs: true
+
+      - name: Setup Flutter
+        id: flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+          pub-cache: true
+
+      - name: Restore generated-code cache
+        id: codegen-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            .dart_tool/build
+            lib/**/*.g.dart
+            lib/**/*.freezed.dart
+          key: nai-codegen-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            nai-codegen-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock') }}-
+
+      - name: Restore Windows incremental build cache
+        id: windows-build-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: build/windows
+          key: nai-windows-build-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-${{ github.run_id }}
+          restore-keys: |
+            nai-windows-build-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-
+
+      - name: Resolve dependencies from cache
+        if: steps.flutter.outputs.PUB-CACHE-HIT == 'true'
+        run: flutter pub get --offline
+
+      - name: Resolve dependencies from network
+        if: steps.flutter.outputs.PUB-CACHE-HIT != 'true'
+        run: flutter pub get
+
+      - name: Generate code incrementally
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build Windows release incrementally
+        run: flutter build windows --release --no-pub
 
       - name: Upload Windows portable artifact
-        uses: actions/upload-artifact@v4
+        id: portable-artifact
+        uses: actions/upload-artifact@v6
         with:
           name: windows-portable-gallery-fix
-          path: |
-            dist/NAI_Launcher_Windows_Gallery_Fix_Portable.zip
-            dist/NAI_Launcher_Windows_Gallery_Fix_Portable.zip.sha256
-            lib/main.dart
-            lib/data/services/gallery/gallery_stream_scanner.dart
-            lib/data/services/gallery/unified_gallery_service.dart
-            lib/data/services/metadata/isolate_metadata_service.dart
-            lib/data/services/metadata/unified_metadata_parser.dart
-            lib/presentation/providers/local_gallery_provider.dart
-            lib/presentation/router/app_router.dart
-            test/core/services/isolate_metadata_service_test.dart
-            test/data/services/gallery/gallery_stream_scanner_retry_test.dart
-            test/presentation/router/app_router_auth_redirect_test.dart
+          path: build/windows/x64/runner/Release
           if-no-files-found: error
           retention-days: 7
+          compression-level: 0
+
+      - name: Save generated-code cache
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            .dart_tool/build
+            lib/**/*.g.dart
+            lib/**/*.freezed.dart
+          key: ${{ steps.codegen-cache.outputs.cache-primary-key }}
+
+      - name: Save Windows incremental build cache
+        uses: actions/cache/save@v5
+        with:
+          path: build/windows
+          key: ${{ steps.windows-build-cache.outputs.cache-primary-key }}
