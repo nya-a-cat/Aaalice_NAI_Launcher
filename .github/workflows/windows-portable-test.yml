@@ -130,9 +130,22 @@ jobs:
           cache-windows-build: "true"
 
       - name: Build Windows release incrementally
+        id: windows-build
+        continue-on-error: true
         run: flutter build windows --release --no-pub
 
+      - name: Diagnose CMake install failure
+        if: steps.windows-build.outcome == 'failure'
+        shell: pwsh
+        working-directory: build/windows/x64
+        run: |
+          cmake `
+            -DBUILD_TYPE=Release `
+            --log-level=VERBOSE `
+            -P cmake_install.cmake
+
       - name: Upload Windows portable artifact
+        if: steps.windows-build.outcome == 'success'
         id: portable-artifact
         uses: actions/upload-artifact@v6
         with:
