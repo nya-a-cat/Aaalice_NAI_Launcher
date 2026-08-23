@@ -51,9 +51,12 @@ jobs:
         shell: pwsh
         run: |
           dart format `
+            lib/main.dart `
             lib/data/services/gallery/gallery_stream_scanner.dart `
             lib/data/services/gallery/unified_gallery_service.dart `
             lib/data/services/metadata/isolate_metadata_service.dart `
+            lib/data/services/metadata/unified_metadata_parser.dart `
+            lib/presentation/providers/local_gallery_provider.dart `
             lib/presentation/router/app_router.dart `
             test/core/services/isolate_metadata_service_test.dart `
             test/data/services/gallery/gallery_stream_scanner_retry_test.dart `
@@ -64,9 +67,12 @@ jobs:
         with:
           name: formatted-changed-sources
           path: |
+            lib/main.dart
             lib/data/services/gallery/gallery_stream_scanner.dart
             lib/data/services/gallery/unified_gallery_service.dart
             lib/data/services/metadata/isolate_metadata_service.dart
+            lib/data/services/metadata/unified_metadata_parser.dart
+            lib/presentation/providers/local_gallery_provider.dart
             lib/presentation/router/app_router.dart
             test/core/services/isolate_metadata_service_test.dart
             test/data/services/gallery/gallery_stream_scanner_retry_test.dart
@@ -77,9 +83,12 @@ jobs:
       - name: Analyze changed code
         run: >-
           flutter analyze
+          lib/main.dart
           lib/data/services/gallery/gallery_stream_scanner.dart
           lib/data/services/gallery/unified_gallery_service.dart
           lib/data/services/metadata/isolate_metadata_service.dart
+          lib/data/services/metadata/unified_metadata_parser.dart
+          lib/presentation/providers/local_gallery_provider.dart
           lib/presentation/router/app_router.dart
           test/core/services/isolate_metadata_service_test.dart
           test/data/services/gallery/gallery_stream_scanner_retry_test.dart
@@ -115,9 +124,12 @@ jobs:
           path: |
             dist/NAI_Launcher_Windows_Gallery_Fix_Portable.zip
             dist/NAI_Launcher_Windows_Gallery_Fix_Portable.zip.sha256
+            lib/main.dart
             lib/data/services/gallery/gallery_stream_scanner.dart
             lib/data/services/gallery/unified_gallery_service.dart
             lib/data/services/metadata/isolate_metadata_service.dart
+            lib/data/services/metadata/unified_metadata_parser.dart
+            lib/presentation/providers/local_gallery_provider.dart
             lib/presentation/router/app_router.dart
             test/core/services/isolate_metadata_service_test.dart
             test/data/services/gallery/gallery_stream_scanner_retry_test.dart
