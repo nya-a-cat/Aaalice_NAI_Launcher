@@ -8,7 +8,6 @@ import '../../../core/database/datasources/gallery_data_source.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../models/gallery/local_image_record.dart';
 import '../../models/gallery/nai_image_metadata.dart';
-import '../image_metadata_service.dart';
 import '../metadata/isolate_metadata_service.dart';
 import 'scan_config.dart';
 import 'scan_state_manager.dart';
@@ -138,7 +137,6 @@ class GalleryStreamScanner {
 
   final GalleryDataSource _dataSource;
   final ScanStateManager _stateManager = ScanStateManager.instance;
-  final _metadataService = ImageMetadataService();
   final _isolateMetadataService = IsolateMetadataService.instance;
 
   // 状态
@@ -327,10 +325,9 @@ class GalleryStreamScanner {
             phase: _stageToPhase(result.stage),
           );
 
-          // 让出时间片，避免阻塞UI
-          if (processedCount % 10 == 0) {
-            await Future.delayed(Duration.zero);
-          }
+          // Yield after every file so database callbacks, input, and frames are
+          // never starved by a large sequence of fast scan operations.
+          await Future<void>.delayed(Duration.zero);
         }
 
         // 扫描完成
@@ -597,14 +594,20 @@ class GalleryStreamScanner {
 
       // 阶段2: 提取元数据（仅对真正的新文件或变更文件）
       _updateStage(stats, FileProcessingStage.extracting, fileName);
-      final parseResult = await _isolateMetadataService.parseMetadata(
-        file.path,
-        config: const IsolateParseConfig(
-          timeout: Duration(seconds: 10),
-          useGradualRead: true,
-          useCache: true,
-        ),
-      );
+      final parseResult = p.extension(file.path).toLowerCase() == '.png'
+          ? await _isolateMetadataService.parseMetadata(
+              file.path,
+              config: const IsolateParseConfig(
+                timeout: Duration(seconds: 10),
+                useGradualRead: false,
+                useCache: false,
+                textChunksOnly: true,
+              ),
+            )
+          : IsolateParseResult.error(
+              'Bulk metadata indexing supports PNG text chunks only',
+              parseTime: Duration.zero,
+            );
       final metadata = parseResult.metadata;
 
       if (parseResult.wasTimeout) {
@@ -640,7 +643,6 @@ class GalleryStreamScanner {
 
       if (metadata != null && metadata.hasData) {
         await _dataSource.upsertMetadata(imageId, metadata);
-        _metadataService.cacheMetadata(path, metadata);
 
         // 更新 ScanStateManager 的元数据计数
         _stateManager.incrementMetadataCacheCount();

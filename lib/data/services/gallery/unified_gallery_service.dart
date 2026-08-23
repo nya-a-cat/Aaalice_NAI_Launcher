@@ -388,20 +388,27 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         }
       }
 
-      // 按修改时间排序（最新的在前）
-      final fileStats = await Future.wait(
-        files.map((file) async {
-          try {
-            return (file: file, stat: await file.stat());
-          } catch (_) {
-            return null;
-          }
-        }),
-      );
+      // Resolve file metadata with bounded fan-out. Thousands of simultaneous
+      // stat futures create avoidable allocation spikes during gallery startup.
+      const statBatchSize = 32;
+      final validStats = <({File file, FileStat stat})>[];
+      for (var start = 0; start < files.length; start += statBatchSize) {
+        final end = min(start + statBatchSize, files.length);
+        final batchStats = await Future.wait(
+          files.sublist(start, end).map((file) async {
+            try {
+              return (file: file, stat: await file.stat());
+            } catch (_) {
+              return null;
+            }
+          }),
+        );
+        validStats.addAll(
+          batchStats.whereType<({File file, FileStat stat})>(),
+        );
+        await Future<void>.delayed(Duration.zero);
+      }
 
-      final validStats = fileStats
-          .whereType<({File file, FileStat stat})>()
-          .toList();
       validStats.sort((a, b) => b.stat.modified.compareTo(a.stat.modified));
 
       files = validStats.map((e) => e.file).toList();
@@ -626,9 +633,6 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   Future<List<LocalImageRecord>> _loadRecords(List<File> files) async {
     if (files.isEmpty) return [];
 
-    // 预加载元数据到缓存（后台）
-    _preloadMetadataBatch(files);
-
     // 获取文件状态信息
     final fileStats = <File, FileStat>{};
     for (final file in files) {
@@ -720,28 +724,6 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     }
 
     return records;
-  }
-
-  /// 批量预加载元数据
-  void _preloadMetadataBatch(List<File> files) {
-    final pngFiles = files
-        .where((f) => f.path.toLowerCase().endsWith('.png'))
-        .toList();
-    if (pngFiles.isEmpty) return;
-
-    Future.microtask(() {
-      try {
-        final images = pngFiles
-            .map((f) => GeneratedImageInfo(id: f.path, filePath: f.path))
-            .toList();
-        ImageMetadataService().preloadBatch(images);
-      } catch (e) {
-        AppLogger.w(
-          'Failed to preload metadata batch: $e',
-          'LocalGalleryService',
-        );
-      }
-    });
   }
 
   /// 从数据库记录构建元数据

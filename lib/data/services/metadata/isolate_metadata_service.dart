@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import '../../../core/utils/app_logger.dart';
 import '../../models/gallery/nai_image_metadata.dart';
@@ -25,11 +24,13 @@ class IsolateParseConfig {
   final Duration timeout;
   final bool useGradualRead;
   final bool useCache;
+  final bool textChunksOnly;
 
   const IsolateParseConfig({
     this.timeout = const Duration(seconds: 5),
     this.useGradualRead = true,
     this.useCache = true,
+    this.textChunksOnly = false,
   });
 }
 
@@ -115,8 +116,9 @@ class IsolateMetadataService {
 
   /// 是否已初始化
   bool _initialized = false;
-  bool _fallbackToInlineParsing = false;
   String? _workerStartupError;
+  int _restartingWorkers = 0;
+  int _lifecycleGeneration = 0;
 
   /// 统计信息
   int _totalTasks = 0;
@@ -135,7 +137,6 @@ class IsolateMetadataService {
       'IsolateMetadataService',
     );
 
-    _fallbackToInlineParsing = false;
     _workerStartupError = null;
 
     final initializedWorkers = <_ParseWorker>[];
@@ -167,11 +168,10 @@ class IsolateMetadataService {
       }
       _workers.clear();
       _taskQueue.clear();
-      _fallbackToInlineParsing = true;
       _workerStartupError = e.toString();
 
       AppLogger.e(
-        '[IsolateMetadata] Worker startup failed, falling back to inline parsing',
+        '[IsolateMetadata] Worker startup failed; parsing remains disabled',
         e,
         stackTrace,
         'IsolateMetadataService',
@@ -195,8 +195,13 @@ class IsolateMetadataService {
     final stopwatch = Stopwatch()..start();
     _totalTasks++;
 
-    if (_fallbackToInlineParsing || _workers.isEmpty) {
-      return _parseInline(filePath, config, stopwatch);
+    if (_workers.isEmpty && _restartingWorkers == 0) {
+      stopwatch.stop();
+      _failedTasks++;
+      return IsolateParseResult.error(
+        'Metadata worker unavailable: ${_workerStartupError ?? 'not initialized'}',
+        parseTime: stopwatch.elapsed,
+      );
     }
 
     final task = _ParseTask(
@@ -205,6 +210,11 @@ class IsolateMetadataService {
       config: config,
       startTime: DateTime.now(),
     );
+
+    if (_workers.isEmpty) {
+      _taskQueue.add(task);
+      return _waitForTask(task, stopwatch);
+    }
 
     // 寻找空闲工作线程
     _ParseWorker? worker;
@@ -361,8 +371,9 @@ class IsolateMetadataService {
     'activeWorkers': _workers.where((w) => w.isBusy).length,
     'queuedTasks': _taskQueue.length,
     'restartedWorkers': _restartedWorkers,
-    'fallbackToInlineParsing': _fallbackToInlineParsing,
+    'fallbackToInlineParsing': false,
     'workerStartupError': _workerStartupError,
+    'restartingWorkers': _restartingWorkers,
   };
 
   /// 重置统计
@@ -386,62 +397,13 @@ class IsolateMetadataService {
       worker.dispose();
     }
     _workers.clear();
+    _lifecycleGeneration++;
     _initialized = false;
-    _fallbackToInlineParsing = false;
     _workerStartupError = null;
+    _restartingWorkers = 0;
   }
 
   // ==================== 私有方法 ====================
-
-  Future<IsolateParseResult> _parseInline(
-    String filePath,
-    IsolateParseConfig config,
-    Stopwatch stopwatch,
-  ) async {
-    try {
-      final metadataResult = await Future<MetadataParseResult>.sync(
-        () => UnifiedMetadataParser.parseFromFile(
-          filePath,
-          useGradualRead: config.useGradualRead,
-          useCache: config.useCache,
-        ),
-      );
-
-      stopwatch.stop();
-
-      final result = metadataResult.success && metadataResult.metadata != null
-          ? IsolateParseResult.success(
-              metadataResult.metadata!,
-              parseTime: metadataResult.parseTime ?? stopwatch.elapsed,
-              bytesRead: metadataResult.bytesRead,
-            )
-          : IsolateParseResult.error(
-              metadataResult.errorMessage ?? 'Failed to parse metadata',
-              parseTime: metadataResult.parseTime ?? stopwatch.elapsed,
-            );
-
-      if (result.success) {
-        _successfulTasks++;
-      } else {
-        _failedTasks++;
-      }
-
-      return result;
-    } catch (e, stackTrace) {
-      stopwatch.stop();
-      _failedTasks++;
-      AppLogger.e(
-        '[IsolateMetadata] Inline parse error: $e',
-        e,
-        stackTrace,
-        'IsolateMetadataService',
-      );
-      return IsolateParseResult.error(
-        'Inline parse error: $e',
-        parseTime: stopwatch.elapsed,
-      );
-    }
-  }
 
   Future<IsolateParseResult> _executeTask(
     _ParseWorker worker,
@@ -453,7 +415,7 @@ class IsolateMetadataService {
           .execute(task)
           .timeout(
             task.config.timeout,
-            onTimeout: () async {
+            onTimeout: () {
               _timeoutTasks++;
               AppLogger.w(
                 '[IsolateMetadata] Task timeout: ${task.filePath}',
@@ -463,7 +425,7 @@ class IsolateMetadataService {
               // A synchronous parser cannot be interrupted inside an isolate.
               // Replace the worker so a pathological image cannot occupy a pool
               // slot forever and block every later gallery item.
-              await _restartWorker(worker);
+              _restartWorker(worker);
 
               return IsolateParseResult.error(
                 'Parse timeout after ${task.config.timeout.inSeconds}s',
@@ -512,20 +474,39 @@ class IsolateMetadataService {
     }
   }
 
-  Future<void> _restartWorker(_ParseWorker worker) async {
+  void _restartWorker(_ParseWorker worker) {
     final workerIndex = _workers.indexOf(worker);
     if (workerIndex < 0) return;
 
     _workers.removeAt(workerIndex);
     worker.dispose();
 
+    _restartingWorkers++;
+    unawaited(
+      _initializeReplacementWorker(
+        worker.id,
+        workerIndex,
+        _lifecycleGeneration,
+      ),
+    );
+  }
+
+  Future<void> _initializeReplacementWorker(
+    int workerId,
+    int workerIndex,
+    int generation,
+  ) async {
     final replacement = _ParseWorker(
-      id: worker.id,
+      id: workerId,
       onBecameIdle: _processQueue,
     );
 
     try {
       await replacement.initialize();
+      if (!_initialized || generation != _lifecycleGeneration) {
+        replacement.dispose();
+        return;
+      }
       final insertIndex = workerIndex <= _workers.length
           ? workerIndex
           : _workers.length;
@@ -535,13 +516,16 @@ class IsolateMetadataService {
       replacement.dispose();
       _workerStartupError = e.toString();
       AppLogger.e(
-        '[IsolateMetadata] Failed to restart worker ${worker.id}',
+        '[IsolateMetadata] Failed to restart worker $workerId',
         e,
         stackTrace,
         'IsolateMetadataService',
       );
     } finally {
-      _processQueue();
+      if (generation == _lifecycleGeneration) {
+        _restartingWorkers--;
+        _processQueue();
+      }
     }
   }
 
@@ -651,7 +635,8 @@ class _ParseWorker {
     _currentCompleter = Completer<IsolateParseResult>();
 
     try {
-      // 读取文件字节
+      // Keep file bytes and decoding work inside the worker isolate. The UI
+      // isolate sends only a path and a bounded parsing policy.
       final file = File(task.filePath);
       if (!await file.exists()) {
         AppLogger.w(
@@ -665,13 +650,10 @@ class _ParseWorker {
         );
       }
 
-      final bytes = await file.readAsBytes();
-
       // 发送任务到 Isolate
       _sendPort!.send(
         _ParseRequest(
           requestId: task.requestId,
-          bytes: bytes,
           filePath: task.filePath,
           config: task.config,
         ),
@@ -773,10 +755,13 @@ void _handleParseRequest(_ParseRequest request, SendPort sendPort) {
 
   try {
     // 在 Isolate 中执行解析
-    final result = UnifiedMetadataParser.parseFromPng(
-      request.bytes,
-      filePathForLog: request.filePath,
-    );
+    final result = request.config.textChunksOnly
+        ? UnifiedMetadataParser.parseTextChunksFromFile(request.filePath)
+        : UnifiedMetadataParser.parseFromFile(
+            request.filePath,
+            useGradualRead: request.config.useGradualRead,
+            useCache: request.config.useCache,
+          );
 
     stopwatch.stop();
 
@@ -786,7 +771,7 @@ void _handleParseRequest(_ParseRequest request, SendPort sendPort) {
           requestId: request.requestId,
           metadata: result.metadata,
           parseTime: stopwatch.elapsed,
-          bytesRead: request.bytes.length,
+          bytesRead: result.bytesRead,
           wasCancelled: false,
         ),
       );
@@ -824,13 +809,11 @@ class _WorkerInitMessage {
 /// 解析请求
 class _ParseRequest {
   final int requestId;
-  final Uint8List bytes;
   final String filePath;
   final IsolateParseConfig config;
 
   _ParseRequest({
     required this.requestId,
-    required this.bytes,
     required this.filePath,
     required this.config,
   });
