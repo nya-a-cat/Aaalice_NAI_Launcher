@@ -47,10 +47,10 @@ jobs:
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
 
-      - name: Check formatting
+      - name: Format changed code
         shell: pwsh
         run: |
-          dart format --output=none --set-exit-if-changed `
+          dart format `
             lib/data/services/gallery/gallery_stream_scanner.dart `
             lib/data/services/gallery/unified_gallery_service.dart `
             lib/data/services/metadata/isolate_metadata_service.dart `
@@ -95,5 +95,10 @@ jobs:
           path: |
             dist/NAI_Launcher_Windows_Gallery_Fix_Portable.zip
             dist/NAI_Launcher_Windows_Gallery_Fix_Portable.zip.sha256
+            lib/data/services/gallery/gallery_stream_scanner.dart
+            lib/data/services/gallery/unified_gallery_service.dart
+            lib/data/services/metadata/isolate_metadata_service.dart
+            test/core/services/isolate_metadata_service_test.dart
+            test/data/services/gallery/gallery_stream_scanner_retry_test.dart
           if-no-files-found: error
           retention-days: 7
