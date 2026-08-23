@@ -11,6 +11,10 @@ The three Windows build paths are restored and saved together. Flutter may skip
 native-asset generation when its AOT state is current, so caching only part of
 that state can produce an incomplete Windows bundle.
 
+Cache keys use the dependency lock plus a build-input fingerprint. Parallel
+jobs and reruns of the same source state therefore share one immutable cache;
+new source states can still restore the latest compatible cache incrementally.
+
 ## Usage
 
 ```yaml

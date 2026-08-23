@@ -42,7 +42,7 @@ runs:
           .dart_tool/build
           lib/**/*.g.dart
           lib/**/*.freezed.dart
-        key: ${{ inputs.cache-namespace }}-codegen-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock') }}-${{ github.run_id }}-${{ github.job }}
+        key: ${{ inputs.cache-namespace }}-codegen-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock') }}-${{ hashFiles('pubspec.yaml', 'build.yaml', 'lib/**') }}
         restore-keys: |
           ${{ inputs.cache-namespace }}-codegen-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock') }}-
 
@@ -54,7 +54,7 @@ runs:
           .dart_tool/flutter_build
           build/native_assets
           build/windows
-        key: ${{ inputs.cache-namespace }}-windows-build-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-${{ github.run_id }}-${{ github.job }}
+        key: ${{ inputs.cache-namespace }}-windows-build-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-${{ hashFiles('pubspec.yaml', 'l10n.yaml', 'lib/**', 'assets/**', 'fonts/**') }}
         restore-keys: |
           ${{ inputs.cache-namespace }}-windows-build-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-
 
