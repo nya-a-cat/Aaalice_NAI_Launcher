@@ -123,48 +123,11 @@ jobs:
         with:
           lfs: true
 
-      - name: Setup Flutter
-        id: flutter
-        uses: subosito/flutter-action@v2
+      - name: Prepare incremental Flutter build
+        uses: ./.github/actions/prepare-flutter-build
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          cache: true
-          pub-cache: true
-
-      - name: Restore generated-code cache
-        id: codegen-cache
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            .dart_tool/build
-            lib/**/*.g.dart
-            lib/**/*.freezed.dart
-          key: nai-codegen-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock') }}-${{ github.run_id }}
-          restore-keys: |
-            nai-codegen-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock') }}-
-
-      - name: Restore Windows incremental build cache
-        id: windows-build-cache
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            .dart_tool/flutter_build
-            build/windows
-          key: nai-windows-build-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-${{ github.run_id }}
-          restore-keys: |
-            nai-windows-build-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-
-
-      - name: Resolve dependencies from cache
-        if: steps.flutter.outputs.PUB-CACHE-HIT == 'true'
-        run: flutter pub get --offline
-
-      - name: Resolve dependencies from network
-        if: steps.flutter.outputs.PUB-CACHE-HIT != 'true'
-        run: flutter pub get
-
-      - name: Generate code incrementally
-        run: dart run build_runner build --delete-conflicting-outputs
+          cache-windows-build: "true"
 
       - name: Build Windows release incrementally
         run: flutter build windows --release --no-pub
@@ -178,20 +141,3 @@ jobs:
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
-
-      - name: Save generated-code cache
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            .dart_tool/build
-            lib/**/*.g.dart
-            lib/**/*.freezed.dart
-          key: ${{ steps.codegen-cache.outputs.cache-primary-key }}
-
-      - name: Save Windows incremental build cache
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            .dart_tool/flutter_build
-            build/windows
-          key: ${{ steps.windows-build-cache.outputs.cache-primary-key }}
