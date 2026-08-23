@@ -133,6 +133,26 @@ jobs:
           restore-keys: |
             nai-windows-build-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-
 
+      - name: Clear staged Windows bundle
+        shell: pwsh
+        run: |
+          $buildRoot = [IO.Path]::GetFullPath(
+            (Join-Path $env:GITHUB_WORKSPACE 'build\windows')
+          )
+          $stagedBundle = [IO.Path]::GetFullPath(
+            (Join-Path $buildRoot 'x64\runner\Release')
+          )
+          $expectedPrefix = $buildRoot.TrimEnd('\') + '\'
+          if (-not $stagedBundle.StartsWith(
+            $expectedPrefix,
+            [StringComparison]::OrdinalIgnoreCase
+          )) {
+            throw "Refusing to clear path outside Windows build root: $stagedBundle"
+          }
+          if (Test-Path -LiteralPath $stagedBundle) {
+            Remove-Item -LiteralPath $stagedBundle -Recurse -Force
+          }
+
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v4
         with:
