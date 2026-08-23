@@ -1,5 +1,5 @@
 name: Windows portable build
-run-name: Windows ${{ inputs.build-mode }} portable
+run-name: Windows ${{ inputs.build-mode || 'release' }} portable
 
 on:
   push:
@@ -20,17 +20,17 @@ permissions:
   contents: read
 
 concurrency:
-  group: windows-portable-${{ github.ref }}-${{ inputs.build-mode }}
+  group: windows-portable-${{ github.ref }}-${{ inputs.build-mode || 'release' }}
   cancel-in-progress: true
 
 env:
   FLUTTER_VERSION: "3.44.2"
-  BUILD_MODE: ${{ inputs.build-mode }}
-  BUNDLE_PATH: build/windows/x64/runner/${{ inputs.build-mode == 'release' && 'Release' || 'Debug' }}
+  BUILD_MODE: ${{ inputs.build-mode || 'release' }}
+  BUNDLE_PATH: build/windows/x64/runner/${{ inputs.build-mode == 'debug' && 'Debug' || 'Release' }}
 
 jobs:
   build-windows-portable:
-    name: Build Windows ${{ inputs.build-mode }} portable
+    name: Build Windows ${{ inputs.build-mode || 'release' }} portable
     # This maintainer-dispatched workflow may use a trusted prewarmed runner.
     runs-on: ${{ vars.WINDOWS_FLUTTER_RUNNER || 'windows-2022' }}
     timeout-minutes: 45
@@ -46,7 +46,7 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ${{ env.BUNDLE_PATH }}
-          key: nai-portable-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ inputs.build-mode }}-${{ github.sha }}
+          key: nai-portable-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ inputs.build-mode || 'release' }}-${{ github.sha }}
 
       - name: Prepare incremental Flutter build
         if: steps.portable-cache.outputs.cache-hit != 'true'
@@ -91,12 +91,12 @@ jobs:
         uses: actions/cache/save@v6
         with:
           path: ${{ env.BUNDLE_PATH }}
-          key: nai-portable-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ inputs.build-mode }}-${{ github.sha }}
+          key: nai-portable-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ inputs.build-mode || 'release' }}-${{ github.sha }}
 
       - name: Upload Windows portable artifact
         uses: actions/upload-artifact@v6
         with:
-          name: nai-launcher-windows-${{ inputs.build-mode }}-portable
+          name: nai-launcher-windows-${{ inputs.build-mode || 'release' }}-portable
           path: ${{ steps.bundle.outputs.bundle-path }}
           if-no-files-found: error
           retention-days: 7
