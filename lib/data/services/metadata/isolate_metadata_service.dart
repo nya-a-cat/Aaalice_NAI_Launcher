@@ -124,6 +124,7 @@ class IsolateMetadataService {
   int _failedTasks = 0;
   int _cancelledTasks = 0;
   int _timeoutTasks = 0;
+  int _restartedWorkers = 0;
 
   /// 初始化服务
   Future<void> initialize() async {
@@ -359,6 +360,7 @@ class IsolateMetadataService {
     'successRate': _totalTasks > 0 ? _successfulTasks / _totalTasks : 0.0,
     'activeWorkers': _workers.where((w) => w.isBusy).length,
     'queuedTasks': _taskQueue.length,
+    'restartedWorkers': _restartedWorkers,
     'fallbackToInlineParsing': _fallbackToInlineParsing,
     'workerStartupError': _workerStartupError,
   };
@@ -370,6 +372,7 @@ class IsolateMetadataService {
     _failedTasks = 0;
     _cancelledTasks = 0;
     _timeoutTasks = 0;
+    _restartedWorkers = 0;
   }
 
   /// 销毁服务
@@ -446,23 +449,27 @@ class IsolateMetadataService {
     Stopwatch stopwatch,
   ) async {
     try {
-      final result = await worker
-          .execute(task)
-          .timeout(
-            task.config.timeout,
-            onTimeout: () {
-              _timeoutTasks++;
-              AppLogger.w(
-                '[IsolateMetadata] Task timeout: ${task.filePath}',
-                'IsolateMetadataService',
-              );
-              return IsolateParseResult.error(
-                'Parse timeout after ${task.config.timeout.inSeconds}s',
-                parseTime: stopwatch.elapsed,
-                wasTimeout: true,
-              );
-            },
+      final result = await worker.execute(task).timeout(
+        task.config.timeout,
+        onTimeout: () async {
+          _timeoutTasks++;
+          AppLogger.w(
+            '[IsolateMetadata] Task timeout: ${task.filePath}',
+            'IsolateMetadataService',
           );
+
+          // A synchronous parser cannot be interrupted inside an isolate.
+          // Replace the worker so a pathological image cannot occupy a pool
+          // slot forever and block every later gallery item.
+          await _restartWorker(worker);
+
+          return IsolateParseResult.error(
+            'Parse timeout after ${task.config.timeout.inSeconds}s',
+            parseTime: stopwatch.elapsed,
+            wasTimeout: true,
+          );
+        },
+      );
 
       stopwatch.stop();
 
@@ -500,6 +507,39 @@ class IsolateMetadataService {
       _processQueue();
 
       return result;
+    }
+  }
+
+  Future<void> _restartWorker(_ParseWorker worker) async {
+    final workerIndex = _workers.indexOf(worker);
+    if (workerIndex < 0) return;
+
+    _workers.removeAt(workerIndex);
+    worker.dispose();
+
+    final replacement = _ParseWorker(
+      id: worker.id,
+      onBecameIdle: _processQueue,
+    );
+
+    try {
+      await replacement.initialize();
+      final insertIndex = workerIndex <= _workers.length
+          ? workerIndex
+          : _workers.length;
+      _workers.insert(insertIndex, replacement);
+      _restartedWorkers++;
+    } catch (e, stackTrace) {
+      replacement.dispose();
+      _workerStartupError = e.toString();
+      AppLogger.e(
+        '[IsolateMetadata] Failed to restart worker ${worker.id}',
+        e,
+        stackTrace,
+        'IsolateMetadataService',
+      );
+    } finally {
+      _processQueue();
     }
   }
 

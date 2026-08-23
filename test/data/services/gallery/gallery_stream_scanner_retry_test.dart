@@ -15,6 +15,7 @@ import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_stream_scanner.dart'
     show ExistingFileCacheEntry, GalleryStreamScanner, buildRetryPriorityPaths;
 import 'package:nai_launcher/data/services/image_metadata_service.dart';
+import 'package:nai_launcher/data/services/metadata/isolate_metadata_service.dart';
 import 'package:nai_launcher/data/services/metadata/unified_metadata_parser.dart';
 
 void main() {
@@ -46,11 +47,13 @@ void main() {
       dataSource = GalleryDataSource();
       await dataSource.initialize();
       await ImageMetadataService().initialize();
+      IsolateMetadataService.instance.dispose();
       GalleryStreamScanner.resetInstance();
     });
 
     tearDown(() async {
       GalleryStreamScanner.resetInstance();
+      IsolateMetadataService.instance.dispose();
       await Hive.close();
       await dataSource.dispose();
       await ConnectionPoolHolder.dispose();

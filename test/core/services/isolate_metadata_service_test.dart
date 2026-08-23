@@ -142,7 +142,7 @@ void main() {
         final first = service.parseMetadata(
           busyA.path,
           config: const IsolateParseConfig(
-            timeout: Duration(milliseconds: 10),
+            timeout: Duration.zero,
             useGradualRead: false,
             useCache: false,
           ),
@@ -150,13 +150,11 @@ void main() {
         final second = service.parseMetadata(
           busyB.path,
           config: const IsolateParseConfig(
-            timeout: Duration(milliseconds: 10),
+            timeout: Duration.zero,
             useGradualRead: false,
             useCache: false,
           ),
         );
-
-        await _waitForActiveWorkers(service, 2);
 
         final queued = service.parseMetadata(
           queuedFile.path,
@@ -168,10 +166,12 @@ void main() {
         );
 
         final queuedResult = await queued;
-        await Future.wait([first, second]);
+        final timedOutResults = await Future.wait([first, second]);
 
         expect(queuedResult.success, isTrue);
         expect(queuedResult.metadata?.prompt, 'queued-prompt');
+        expect(timedOutResults.every((result) => result.wasTimeout), isTrue);
+        expect(service.getStatistics()['restartedWorkers'], 2);
       },
     );
 
