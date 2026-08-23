@@ -30,9 +30,7 @@ void main() {
 
     tearDown(() async {
       service.dispose();
-      if (await tempDir.exists()) {
-        await tempDir.delete(recursive: true);
-      }
+      await _deleteTempDirectoryWhenWorkersReleaseFiles(tempDir);
     });
 
     test(
@@ -222,6 +220,23 @@ void main() {
 }
 
 String _largeText(String char) => ''.padRight(6 * 1024 * 1024, char);
+
+Future<void> _deleteTempDirectoryWhenWorkersReleaseFiles(
+  Directory directory,
+) async {
+  const attempts = 20;
+  for (var attempt = 1; attempt <= attempts; attempt++) {
+    if (!await directory.exists()) return;
+
+    try {
+      await directory.delete(recursive: true);
+      return;
+    } on FileSystemException {
+      if (attempt == attempts) rethrow;
+      await Future<void>.delayed(const Duration(milliseconds: 25));
+    }
+  }
+}
 
 Future<Uint8List> _pngWithNovelAiMetadata({
   required String prompt,
