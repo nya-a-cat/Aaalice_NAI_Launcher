@@ -34,8 +34,10 @@ set `PUB_HOSTED_URL` to the hosted source recorded in that lockfile, preventing
 source URL normalization from dirtying `pubspec.lock` during CI.
 
 The maintainer-dispatched portable workflow also caches the completed bundle by
-commit, Flutter version, and build mode. An exact hit skips Flutter setup and
-compilation, then uploads the verified bundle directly.
+build-input fingerprint, Flutter version, and build mode. Documentation,
+workflow, and test-only commits can therefore reuse an identical bundle. An
+exact hit skips Flutter setup and compilation, then uploads the verified bundle
+directly.
 
 ## Prewarmed runners
 

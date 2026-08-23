@@ -39,12 +39,18 @@ jobs:
         with:
           lfs: true
 
+      - name: Fingerprint portable build inputs
+        id: build-inputs
+        shell: pwsh
+        run: |
+          "fingerprint=${{ hashFiles('pubspec.lock', 'pubspec.yaml', 'l10n.yaml', 'lib/**', 'windows/**', 'assets/**', 'fonts/**') }}" >> $env:GITHUB_OUTPUT
+
       - name: Restore exact portable bundle
         id: portable-cache
         uses: actions/cache/restore@v6
         with:
           path: ${{ env.BUNDLE_PATH }}
-          key: nai-portable-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ inputs.build-mode || 'release' }}-${{ github.sha }}
+          key: nai-portable-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ inputs.build-mode || 'release' }}-${{ steps.build-inputs.outputs.fingerprint }}
 
       - name: Prepare incremental Flutter build
         if: steps.portable-cache.outputs.cache-hit != 'true'
@@ -89,7 +95,7 @@ jobs:
         uses: actions/cache/save@v6
         with:
           path: ${{ env.BUNDLE_PATH }}
-          key: nai-portable-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ inputs.build-mode || 'release' }}-${{ github.sha }}
+          key: nai-portable-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ inputs.build-mode || 'release' }}-${{ steps.build-inputs.outputs.fingerprint }}
 
       - name: Upload Windows portable artifact
         uses: actions/upload-artifact@v6
