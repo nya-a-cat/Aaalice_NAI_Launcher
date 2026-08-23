@@ -57,6 +57,19 @@ jobs:
             test/core/services/isolate_metadata_service_test.dart `
             test/data/services/gallery/gallery_stream_scanner_retry_test.dart
 
+      - name: Upload formatted gallery sources
+        uses: actions/upload-artifact@v4
+        with:
+          name: formatted-gallery-sources
+          path: |
+            lib/data/services/gallery/gallery_stream_scanner.dart
+            lib/data/services/gallery/unified_gallery_service.dart
+            lib/data/services/metadata/isolate_metadata_service.dart
+            test/core/services/isolate_metadata_service_test.dart
+            test/data/services/gallery/gallery_stream_scanner_retry_test.dart
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Analyze changed code
         run: >-
           flutter analyze
