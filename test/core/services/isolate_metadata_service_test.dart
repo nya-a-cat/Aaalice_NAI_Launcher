@@ -175,29 +175,26 @@ void main() {
       },
     );
 
-    test(
-      'bulk text-chunk mode skips image payload bytes',
-      () async {
-        final file = File('${tempDir.path}/large_payload.png');
-        await file.writeAsBytes(
-          _pngWithLargeSkippedPayload(prompt: 'bounded-memory-prompt'),
-        );
+    test('bulk text-chunk mode skips image payload bytes', () async {
+      final file = File('${tempDir.path}/large_payload.png');
+      await file.writeAsBytes(
+        _pngWithLargeSkippedPayload(prompt: 'bounded-memory-prompt'),
+      );
 
-        final result = await service.parseMetadata(
-          file.path,
-          config: const IsolateParseConfig(
-            timeout: Duration(seconds: 2),
-            useGradualRead: false,
-            useCache: false,
-            textChunksOnly: true,
-          ),
-        );
+      final result = await service.parseMetadata(
+        file.path,
+        config: const IsolateParseConfig(
+          timeout: Duration(seconds: 2),
+          useGradualRead: false,
+          useCache: false,
+          textChunksOnly: true,
+        ),
+      );
 
-        expect(result.success, isTrue);
-        expect(result.metadata?.prompt, 'bounded-memory-prompt');
-        expect(result.bytesRead, lessThan(32 * 1024));
-      },
-    );
+      expect(result.success, isTrue);
+      expect(result.metadata?.prompt, 'bounded-memory-prompt');
+      expect(result.bytesRead, lessThan(32 * 1024));
+    });
 
     test('keeps parsing disabled when worker startup fails', () async {
       final unavailableService = IsolateMetadataService.forTesting(

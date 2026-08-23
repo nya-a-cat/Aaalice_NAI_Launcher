@@ -496,10 +496,7 @@ class IsolateMetadataService {
     int workerIndex,
     int generation,
   ) async {
-    final replacement = _ParseWorker(
-      id: workerId,
-      onBecameIdle: _processQueue,
-    );
+    final replacement = _ParseWorker(id: workerId, onBecameIdle: _processQueue);
 
     try {
       await replacement.initialize();
