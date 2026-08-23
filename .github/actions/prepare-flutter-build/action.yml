@@ -1,0 +1,67 @@
+name: Prepare incremental Flutter build
+description: Restore Flutter build caches, resolve dependencies, and generate sources.
+
+inputs:
+  flutter-version:
+    description: Exact Flutter SDK version used by the repository.
+    required: true
+  cache-namespace:
+    description: Prefix used to isolate this repository's build caches.
+    required: false
+    default: nai
+  cache-windows-build:
+    description: Restore and save Flutter AOT plus native Windows build outputs.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Flutter
+      id: flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ inputs.flutter-version }}
+        channel: stable
+        cache: true
+        pub-cache: true
+
+    - name: Restore generated-code cache
+      uses: actions/cache@v5
+      with:
+        path: |
+          .dart_tool/build
+          lib/**/*.g.dart
+          lib/**/*.freezed.dart
+        key: ${{ inputs.cache-namespace }}-codegen-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock') }}-${{ github.run_id }}-${{ github.job }}
+        restore-keys: |
+          ${{ inputs.cache-namespace }}-codegen-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock') }}-
+
+    - name: Restore Flutter and native Windows build cache
+      if: inputs.cache-windows-build == 'true'
+      uses: actions/cache@v5
+      with:
+        path: |
+          .dart_tool/flutter_build
+          build/windows
+        key: ${{ inputs.cache-namespace }}-windows-build-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-${{ github.run_id }}-${{ github.job }}
+        restore-keys: |
+          ${{ inputs.cache-namespace }}-windows-build-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-
+
+    - name: Resolve dependencies from cache
+      if: steps.flutter.outputs.PUB-CACHE-HIT == 'true'
+      shell: pwsh
+      run: flutter pub get --offline
+
+    - name: Resolve dependencies from network
+      if: steps.flutter.outputs.PUB-CACHE-HIT != 'true'
+      shell: pwsh
+      run: flutter pub get
+
+    - name: Generate localizations
+      shell: pwsh
+      run: flutter gen-l10n
+
+    - name: Generate code incrementally
+      shell: pwsh
+      run: dart run build_runner build --delete-conflicting-outputs
