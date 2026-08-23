@@ -5,8 +5,10 @@ on:
     branches:
       - main
     paths:
+      - ".github/actions/prepare-flutter-build/action.yml"
       - ".github/workflows/pull-request-validation.yml"
       - ".github/workflows/release.yml"
+      - ".github/workflows/windows-portable.yml"
       - "analysis_options.yaml"
       - "assets/**"
       - "fonts/**"
@@ -31,6 +33,7 @@ concurrency:
 
 env:
   FLUTTER_VERSION: "3.44.2"
+  PUB_HOSTED_URL: "https://pub.flutter-io.cn"
 
 jobs:
   changes:
@@ -48,7 +51,10 @@ jobs:
         with:
           filters: |
             windows_build:
+              - '.github/actions/prepare-flutter-build/action.yml'
               - '.github/workflows/pull-request-validation.yml'
+              - '.github/workflows/release.yml'
+              - '.github/workflows/windows-portable.yml'
               - 'assets/**'
               - 'fonts/**'
               - 'l10n.yaml'
@@ -57,6 +63,10 @@ jobs:
               - 'pubspec.yaml'
               - 'windows/**'
             windows_package:
+              - '.github/actions/prepare-flutter-build/action.yml'
+              - '.github/workflows/pull-request-validation.yml'
+              - '.github/workflows/release.yml'
+              - '.github/workflows/windows-portable.yml'
               - 'installer/windows/**'
               - 'pubspec.lock'
               - 'pubspec.yaml'

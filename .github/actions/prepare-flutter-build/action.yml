@@ -33,6 +33,7 @@ runs:
         channel: stable
         cache: ${{ inputs.cache-flutter-sdk }}
         pub-cache: ${{ inputs.cache-pub-dependencies }}
+        pub-cache-key: "${{ inputs.cache-namespace }}-flutter-pub-:os:-:channel:-:version:-:arch:-:hash:"
 
     - name: Restore generated-code cache
       uses: actions/cache@v6
@@ -41,7 +42,7 @@ runs:
           .dart_tool/build
           lib/**/*.g.dart
           lib/**/*.freezed.dart
-        key: ${{ inputs.cache-namespace }}-codegen-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock') }}-${{ github.run_id }}-${{ github.job }}
+        key: ${{ inputs.cache-namespace }}-codegen-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock') }}-${{ hashFiles('pubspec.yaml', 'build.yaml', 'lib/**') }}
         restore-keys: |
           ${{ inputs.cache-namespace }}-codegen-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock') }}-
 
@@ -53,19 +54,19 @@ runs:
           .dart_tool/flutter_build
           build/native_assets
           build/windows
-        key: ${{ inputs.cache-namespace }}-windows-build-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-${{ github.run_id }}-${{ github.job }}
+        key: ${{ inputs.cache-namespace }}-windows-build-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-${{ hashFiles('pubspec.yaml', 'l10n.yaml', 'lib/**', 'assets/**', 'fonts/**') }}
         restore-keys: |
           ${{ inputs.cache-namespace }}-windows-build-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-
 
     - name: Resolve dependencies from cache
       if: steps.flutter.outputs.PUB-CACHE-HIT == 'true'
       shell: pwsh
-      run: flutter pub get --offline
+      run: flutter pub get --enforce-lockfile --offline
 
     - name: Resolve dependencies from network
       if: steps.flutter.outputs.PUB-CACHE-HIT != 'true'
       shell: pwsh
-      run: flutter pub get
+      run: flutter pub get --enforce-lockfile
 
     - name: Generate localizations
       shell: pwsh

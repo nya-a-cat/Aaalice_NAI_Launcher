@@ -16,6 +16,7 @@ permissions:
 
 env:
   FLUTTER_VERSION: "3.44.2"
+  PUB_HOSTED_URL: "https://pub.flutter-io.cn"
   RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
 
 jobs:
@@ -112,6 +113,7 @@ jobs:
           channel: stable
           cache: ${{ vars.WINDOWS_FLUTTER_SDK_CACHE || 'true' }}
           pub-cache: ${{ vars.WINDOWS_PUB_CACHE || 'true' }}
+          pub-cache-key: "nai-flutter-pub-:os:-:channel:-:version:-:arch:-:hash:"
 
       - name: Restore generated-code cache
         uses: actions/cache@v6
@@ -120,7 +122,7 @@ jobs:
             .dart_tool/build
             lib/**/*.g.dart
             lib/**/*.freezed.dart
-          key: nai-codegen-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock') }}-${{ github.run_id }}-${{ github.job }}
+          key: nai-codegen-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock') }}-${{ hashFiles('pubspec.yaml', 'build.yaml', 'lib/**') }}
           restore-keys: |
             nai-codegen-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock') }}-
 
@@ -131,7 +133,7 @@ jobs:
             .dart_tool/flutter_build
             build/native_assets
             build/windows
-          key: nai-windows-build-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-${{ github.run_id }}-${{ github.job }}
+          key: nai-windows-build-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-${{ hashFiles('pubspec.yaml', 'l10n.yaml', 'lib/**', 'assets/**', 'fonts/**') }}
           restore-keys: |
             nai-windows-build-${{ runner.os }}-${{ env.FLUTTER_VERSION }}-${{ hashFiles('pubspec.lock', 'windows/**') }}-
 
@@ -184,11 +186,11 @@ jobs:
 
       - name: Resolve dependencies from cache
         if: steps.flutter.outputs.PUB-CACHE-HIT == 'true'
-        run: flutter pub get --offline
+        run: flutter pub get --enforce-lockfile --offline
 
       - name: Resolve dependencies from network
         if: steps.flutter.outputs.PUB-CACHE-HIT != 'true'
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
 
       - name: Validate bundled autocomplete databases
         run: dart run tool/tag_catalog/verify_bundled_databases.dart

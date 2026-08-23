@@ -11,6 +11,10 @@ The three Windows build paths are restored and saved together. Flutter may skip
 native-asset generation when its AOT state is current, so caching only part of
 that state can produce an incomplete Windows bundle.
 
+Cache keys use the dependency lock plus a build-input fingerprint. Parallel
+jobs and reruns of the same source state therefore share one immutable cache;
+new source states can still restore the latest compatible cache incrementally.
+
 ## Usage
 
 ```yaml
@@ -25,9 +29,15 @@ that state can produce an incomplete Windows bundle.
 `cache-windows-build` should be enabled only on Windows build jobs. Analysis and
 test jobs still reuse the SDK, Pub, and generated-code layers.
 
+Dependency resolution enforces the committed lockfile. The repository workflows
+set `PUB_HOSTED_URL` to the hosted source recorded in that lockfile, preventing
+source URL normalization from dirtying `pubspec.lock` during CI.
+
 The maintainer-dispatched portable workflow also caches the completed bundle by
-commit, Flutter version, and build mode. An exact hit skips Flutter setup and
-compilation, then uploads the verified bundle directly.
+build-input fingerprint, Flutter version, and build mode. Documentation,
+workflow, and test-only commits can therefore reuse an identical bundle. An
+exact hit skips Flutter setup and compilation, then uploads the verified bundle
+directly.
 
 ## Prewarmed runners
 
