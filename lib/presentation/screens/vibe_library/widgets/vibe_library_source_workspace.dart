@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/utils/localization_extension.dart';
@@ -83,7 +84,7 @@ class _VibeLibrarySourceWorkspaceState
             .clamp(1, 8);
         final itemWidth =
             (availableWidth - spacing * (columns - 1)) / columns;
-        return Column(
+        final content = Column(
           children: [
             _LocalToolbar(
               state: state,
@@ -110,7 +111,37 @@ class _VibeLibrarySourceWorkspaceState
               ),
           ],
         );
+        return _withLocalPageShortcuts(state, child: content);
       },
+    );
+  }
+
+  Widget _withLocalPageShortcuts(
+    LocalGalleryVibeState state, {
+    required Widget child,
+  }) {
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+          if (state.currentPage > 0) {
+            unawaited(
+              ref
+                  .read(localGalleryVibeProvider.notifier)
+                  .loadPage(state.currentPage - 1),
+            );
+          }
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+          if (state.currentPage < state.totalPages - 1) {
+            unawaited(
+              ref
+                  .read(localGalleryVibeProvider.notifier)
+                  .loadPage(state.currentPage + 1),
+            );
+          }
+        },
+      },
+      child: Focus(autofocus: true, child: child),
     );
   }
 

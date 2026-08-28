@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 import '../../../core/constants/model_capabilities.dart';
@@ -108,9 +109,10 @@ class VibeLibraryWorkspace extends StatelessWidget {
               _ImportOverlay(progress: controller.importProgress),
           ],
         );
+        final keyboardContent = _withPageShortcuts(child: content);
 
         if (!PlatformCapabilities.current.supportsExternalFileDrop) {
-          return content;
+          return keyboardContent;
         }
         return DropRegion(
           formats: Formats.standardFormats,
@@ -127,9 +129,30 @@ class VibeLibraryWorkspace extends StatelessWidget {
             controller.setDragging(false);
             onCommand(PerformVibeDropCommand(event));
           },
-          child: content,
+          child: keyboardContent,
         );
       },
+    );
+  }
+
+  Widget _withPageShortcuts({required Widget child}) {
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+          if (libraryState.currentPage > 0) {
+            onCommand(const PreviousPageCommand());
+          }
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+          if (libraryState.currentPage < libraryState.totalPages - 1) {
+            onCommand(const NextPageCommand());
+          }
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        child: child,
+      ),
     );
   }
 }

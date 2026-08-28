@@ -96,11 +96,17 @@ void main() {
         );
         await tester.pump();
 
-        await tester.tap(find.text('本地图库 2'));
+        await tester.tap(find.text('本地图库 62'));
         await tester.pump();
 
         expect(find.text('2 张示例'), findsOneWidget);
         expect(tester.takeException(), isNull);
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(localNotifier.pageRequests, [1, 0]);
 
         await tester.tap(find.text('2 张示例'));
         await tester.pump();
@@ -126,6 +132,7 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
         await tester.pump();
         expect(find.text('0.55'), findsOneWidget);
+        expect(localNotifier.pageRequests, [1, 0]);
         expect(tester.takeException(), isNull);
       },
     );
@@ -139,12 +146,13 @@ class _TestLocalGalleryVibeNotifier extends LocalGalleryVibeNotifier {
   ) : super(GalleryDataSource()) {
     state = LocalGalleryVibeState(
       groups: [group],
-      totalGroups: 2,
+      totalGroups: 62,
       isInitialized: true,
     );
   }
 
   final List<LocalGalleryVibeExample> _examples;
+  final List<int> pageRequests = [];
 
   @override
   Future<void> initialize() async {}
@@ -156,6 +164,12 @@ class _TestLocalGalleryVibeNotifier extends LocalGalleryVibeNotifier {
     int offset = 0,
   }) async {
     return _examples.skip(offset).take(limit).toList(growable: false);
+  }
+
+  @override
+  Future<void> loadPage(int page) async {
+    pageRequests.add(page);
+    state = state.copyWith(currentPage: page);
   }
 }
 
