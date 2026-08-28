@@ -169,6 +169,8 @@ class GalleryDataSource extends EnhancedBaseDataSource {
   Future<Map<int, GalleryMetadataRecord?>> getMetadataByImageIds(
     List<int> imageIds,
   ) => _metadata.getMetadataByImageIds(imageIds);
+  Future<GalleryPromptCorpusSnapshot> queryPromptCorpus({int limit = 20000}) =>
+      _metadata.queryPromptCorpus(limit: limit);
 
   Future<GalleryVibeBackfillProgress> backfillLocalGalleryVibes({
     int batchSize = 24,

@@ -292,6 +292,31 @@ class TagLibraryPageNotifier extends _$TagLibraryPageNotifier {
     return entry;
   }
 
+  /// Adds a prepared batch with one state update and one persistence write.
+  Future<List<TagLibraryEntry>> addEntries(
+    List<TagLibraryEntry> entries, {
+    bool failOnPersistenceError = false,
+  }) async {
+    if (entries.isEmpty) return const [];
+    final previousEntries = state.entries;
+    final prepared = [
+      for (final indexed in entries.indexed)
+        indexed.$2.copyWith(sortOrder: previousEntries.length + indexed.$1),
+    ];
+    state = state.copyWith(entries: [...previousEntries, ...prepared]);
+    try {
+      await _saveEntries(rethrowError: failOnPersistenceError);
+    } catch (_) {
+      state = state.copyWith(entries: previousEntries);
+      rethrow;
+    }
+    AppLogger.d(
+      'Added ${prepared.length} entries in one batch',
+      'TagLibraryPageProvider',
+    );
+    return List.unmodifiable(prepared);
+  }
+
   /// 更新条目（带同步）
   /// 
   /// 【新增】自动同步更新关联的固定词（双向同步）
