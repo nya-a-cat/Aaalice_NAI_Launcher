@@ -11,7 +11,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_vibe_provider.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_category_provider.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
-import 'package:nai_launcher/presentation/screens/vibe_library/vibe_library_screen.dart';
+import 'package:nai_launcher/presentation/screens/vibe_library/widgets/vibe_library_source_workspace.dart';
 
 void main() {
   for (final width in [360.0, 840.0, 1180.0]) {
@@ -84,7 +84,12 @@ void main() {
               locale: Locale('zh'),
               supportedLocales: AppLocalizations.supportedLocales,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
-              home: VibeLibraryScreen(),
+              home: Scaffold(
+                body: VibeLibrarySourceWorkspace(
+                  savedCount: 0,
+                  savedWorkspace: SizedBox.shrink(),
+                ),
+              ),
             ),
           ),
         );
