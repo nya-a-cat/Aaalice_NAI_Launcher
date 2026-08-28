@@ -58,3 +58,6 @@ jobs:
 
       - name: Test gallery prompt pattern mining
         run: flutter test --no-pub --reporter expanded test/data/services/gallery_prompt_pattern_mining_service_test.dart
+
+      - name: Test gallery prompt analysis dialog
+        run: flutter test --no-pub --reporter expanded test/presentation/screens/tag_library_page/gallery_prompt_analysis_dialog_test.dart
