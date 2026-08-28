@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/database/datasources/gallery_data_source.dart';
@@ -108,6 +109,21 @@ void main() {
         expect(find.text('相同编码的精确分组'), findsOneWidget);
         expect(find.text('最早的本地示例'), findsWidgets);
         expect(find.text('2025-03-04'), findsOneWidget);
+        final selectedImage = tester.widget<Image>(
+          find.byWidgetPredicate(
+            (widget) => widget is Image && widget.fit == BoxFit.contain,
+          ),
+        );
+        expect(selectedImage.cacheWidth, isNull);
+        expect(selectedImage.cacheHeight, isNotNull);
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+        expect(find.text('0.80'), findsOneWidget);
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+        expect(find.text('0.55'), findsOneWidget);
         expect(tester.takeException(), isNull);
       },
     );

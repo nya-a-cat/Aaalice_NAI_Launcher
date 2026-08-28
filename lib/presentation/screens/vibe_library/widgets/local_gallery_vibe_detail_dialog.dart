@@ -36,6 +36,7 @@ class LocalGalleryVibeDetailDialog extends StatefulWidget {
 
 class _LocalGalleryVibeDetailDialogState
     extends State<LocalGalleryVibeDetailDialog> {
+  final ScrollController _exampleScrollController = ScrollController();
   late List<LocalGalleryVibeExample> _examples;
   LocalGalleryVibeExample? _selected;
   bool _loadingExamples = false;
@@ -49,6 +50,12 @@ class _LocalGalleryVibeDetailDialogState
     _selected = _examples.firstOrNull;
     _saved = widget.initiallySaved;
     unawaited(_loadMore(replace: true));
+  }
+
+  @override
+  void dispose() {
+    _exampleScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadMore({bool replace = false}) async {
@@ -70,29 +77,42 @@ class _LocalGalleryVibeDetailDialogState
   @override
   Widget build(BuildContext context) {
     final compactWindow = MediaQuery.sizeOf(context).width < 700;
-    return SafeArea(
-      child: Dialog(
-        insetPadding: compactWindow
-            ? const EdgeInsets.all(8)
-            : const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-        clipBehavior: Clip.antiAlias,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1180, maxHeight: 820),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final compactContent = constraints.maxWidth < 700;
-              return Column(
-                children: [
-                  _buildHeader(context),
-                  const Divider(height: 1),
-                  Expanded(
-                    child: compactContent
-                        ? _buildCompactBody(context)
-                        : _buildDesktopBody(context),
-                  ),
-                ],
-              );
-            },
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+          unawaited(_selectRelativeExample(-1));
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+          unawaited(_selectRelativeExample(1));
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        child: SafeArea(
+          child: Dialog(
+            insetPadding: compactWindow
+                ? const EdgeInsets.all(8)
+                : const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+            clipBehavior: Clip.antiAlias,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1180, maxHeight: 820),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compactContent = constraints.maxWidth < 700;
+                  return Column(
+                    children: [
+                      _buildHeader(context),
+                      const Divider(height: 1),
+                      Expanded(
+                        child: compactContent
+                            ? _buildCompactBody(context)
+                            : _buildDesktopBody(context),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),
@@ -175,7 +195,6 @@ class _LocalGalleryVibeDetailDialogState
                 return Image.file(
                   File(selected.filePath),
                   fit: BoxFit.contain,
-                  cacheWidth: _cacheDimension(constraints.maxWidth, ratio),
                   cacheHeight: _cacheDimension(constraints.maxHeight, ratio),
                   errorBuilder: (_, _, _) => const Center(
                     child: Icon(Icons.broken_image_outlined, size: 48),
@@ -196,6 +215,7 @@ class _LocalGalleryVibeDetailDialogState
     return SizedBox(
       height: 112,
       child: ListView.separated(
+        controller: _exampleScrollController,
         padding: const EdgeInsets.all(10),
         scrollDirection: Axis.horizontal,
         itemCount: _examples.length + (canLoadMore ? 1 : 0),
@@ -257,6 +277,39 @@ class _LocalGalleryVibeDetailDialogState
         ),
       ),
     );
+  }
+
+  Future<void> _selectRelativeExample(int delta) async {
+    if (_examples.isEmpty || delta == 0) return;
+
+    var currentIndex = _examples.indexWhere(
+      (example) => example.imageId == _selected?.imageId,
+    );
+    if (currentIndex < 0) currentIndex = 0;
+    var targetIndex = currentIndex + delta;
+
+    if (targetIndex >= _examples.length &&
+        _examples.length < widget.group.exampleCount) {
+      await _loadMore();
+      if (!mounted) return;
+      targetIndex = currentIndex + delta;
+    }
+
+    if (targetIndex < 0 || targetIndex >= _examples.length) return;
+    setState(() => _selected = _examples[targetIndex]);
+    _revealExample(targetIndex);
+  }
+
+  void _revealExample(int index) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_exampleScrollController.hasClients) return;
+      final position = _exampleScrollController.position;
+      final target = (index * 100.0).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      );
+      _exampleScrollController.jumpTo(target);
+    });
   }
 
   Widget _buildInfoPanel(BuildContext context) {
