@@ -1,4 +1,5 @@
 import '../../../data/models/gallery/gallery_dashboard_snapshot.dart';
+import '../../../data/models/gallery/local_gallery_vibe_group.dart';
 import '../../../data/models/gallery/local_image_record.dart'
     show MetadataStatus;
 import '../../../data/models/gallery/nai_image_metadata.dart';
@@ -13,6 +14,7 @@ import 'gallery_query.dart';
 import 'gallery_records.dart';
 import 'gallery_schema.dart';
 import 'gallery_store_context.dart';
+import 'gallery_vibe_repository.dart';
 
 export 'gallery_database_gateway.dart';
 export 'gallery_favorite_tag_repository.dart';
@@ -21,6 +23,7 @@ export 'gallery_metadata_repository.dart';
 export 'gallery_query.dart';
 export 'gallery_records.dart';
 export 'gallery_store_context.dart';
+export 'gallery_vibe_repository.dart';
 
 /// Backward-compatible gallery facade.
 ///
@@ -38,10 +41,15 @@ class GalleryDataSource extends EnhancedBaseDataSource {
       gateway: _gateway,
       context: _context,
     );
+    _vibes = SqliteGalleryVibeRepository(
+      gateway: _gateway,
+      context: _context,
+    );
     _metadata = SqliteGalleryMetadataRepository(
       gateway: _gateway,
       context: _context,
       images: _images,
+      vibes: _vibes,
     );
     _favoriteTags = SqliteGalleryFavoriteTagRepository(
       gateway: _gateway,
@@ -55,6 +63,7 @@ class GalleryDataSource extends EnhancedBaseDataSource {
   late final GallerySchema _schema;
   late final GalleryImageRepository _images;
   late final GalleryMetadataRepository _metadata;
+  late final GalleryVibeRepository _vibes;
   late final GalleryFavoriteTagRepository _favoriteTags;
   late final GalleryQuery _query;
 
@@ -160,6 +169,29 @@ class GalleryDataSource extends EnhancedBaseDataSource {
   Future<Map<int, GalleryMetadataRecord?>> getMetadataByImageIds(
     List<int> imageIds,
   ) => _metadata.getMetadataByImageIds(imageIds);
+
+  Future<GalleryVibeBackfillProgress> backfillLocalGalleryVibes({
+    int batchSize = 24,
+    void Function(GalleryVibeBackfillProgress progress)? onProgress,
+  }) => _vibes.backfill(batchSize: batchSize, onProgress: onProgress);
+  Future<int> countLocalGalleryVibeGroups({String searchQuery = ''}) =>
+      _vibes.countGroups(searchQuery: searchQuery);
+  Future<List<LocalGalleryVibeGroup>> queryLocalGalleryVibeGroups({
+    String searchQuery = '',
+    int limit = 50,
+    int offset = 0,
+    int examplesPerGroup = 12,
+  }) => _vibes.queryGroups(
+    searchQuery: searchQuery,
+    limit: limit,
+    offset: offset,
+    examplesPerGroup: examplesPerGroup,
+  );
+  Future<List<LocalGalleryVibeExample>> queryLocalGalleryVibeExamples(
+    String fingerprint, {
+    int limit = 100,
+    int offset = 0,
+  }) => _vibes.queryExamples(fingerprint, limit: limit, offset: offset);
 
   Future<bool> toggleFavorite(int imageId) =>
       _favoriteTags.toggleFavorite(imageId);

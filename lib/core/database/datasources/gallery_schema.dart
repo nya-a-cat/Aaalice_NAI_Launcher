@@ -16,6 +16,8 @@ class GallerySchema {
     return await gateway.execute('doInitialize', (db) async {
       await _createImagesTable(db);
       await _createMetadataTable(db);
+      await _migrateAddVibeColumns(db);
+      await _createImageVibesTable(db);
       await _createFavoritesTable(db);
       await _createTagsTable(db);
       await _createImageTagsTable(db);
@@ -179,6 +181,7 @@ class GallerySchema {
         vibe_info_extracted REAL,
         vibe_source_type TEXT,
         has_vibe INTEGER NOT NULL DEFAULT 0,
+        vibes_indexed INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (image_id) REFERENCES ${GalleryTables.images}(id) ON DELETE CASCADE
       )
     ''');
@@ -202,6 +205,53 @@ class GallerySchema {
     await db.execute('''
       CREATE INDEX IF NOT EXISTS idx_gallery_metadata_prompt
       ON ${GalleryTables.metadata}(prompt) WHERE prompt IS NOT NULL AND prompt != ''
+    ''');
+  }
+
+  Future<void> _migrateAddVibeColumns(Database db) async {
+    final columns = await db.rawQuery(
+      'PRAGMA table_info(${GalleryTables.metadata})',
+    );
+    final existing = columns.map((column) => column['name']).toSet();
+    const additions = <String, String>{
+      'vibe_encoding': 'TEXT',
+      'vibe_strength': 'REAL',
+      'vibe_info_extracted': 'REAL',
+      'vibe_source_type': 'TEXT',
+      'has_vibe': 'INTEGER NOT NULL DEFAULT 0',
+      'vibes_indexed': 'INTEGER NOT NULL DEFAULT 0',
+    };
+    for (final addition in additions.entries) {
+      if (existing.contains(addition.key)) continue;
+      await db.execute(
+        'ALTER TABLE ${GalleryTables.metadata} '
+        'ADD COLUMN ${addition.key} ${addition.value}',
+      );
+    }
+  }
+
+  Future<void> _createImageVibesTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ${GalleryTables.imageVibes} (
+        image_id INTEGER NOT NULL,
+        vibe_hash TEXT NOT NULL,
+        vibe_encoding TEXT NOT NULL,
+        ordinal INTEGER NOT NULL DEFAULT 0,
+        strength REAL NOT NULL DEFAULT 0.6,
+        info_extracted REAL NOT NULL DEFAULT 0.7,
+        encoding_model TEXT,
+        PRIMARY KEY (image_id, vibe_hash),
+        FOREIGN KEY (image_id) REFERENCES ${GalleryTables.images}(id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_gallery_image_vibes_hash
+      ON ${GalleryTables.imageVibes}(vibe_hash)
+    ''');
+    await db.execute('''
+      CREATE INDEX IF NOT EXISTS idx_gallery_image_vibes_image
+      ON ${GalleryTables.imageVibes}(image_id)
     ''');
   }
 
@@ -302,6 +352,7 @@ class GallerySchema {
       final tables = [
         GalleryTables.images,
         GalleryTables.metadata,
+        GalleryTables.imageVibes,
         GalleryTables.favorites,
         GalleryTables.tags,
         GalleryTables.imageTags,

@@ -1,6 +1,7 @@
 abstract final class GalleryTables {
   static const images = 'gallery_images';
   static const metadata = 'gallery_metadata';
+  static const imageVibes = 'gallery_image_vibes';
   static const favorites = 'gallery_favorites';
   static const tags = 'gallery_tags';
   static const imageTags = 'gallery_image_tags';
@@ -10,6 +11,7 @@ abstract final class GalleryTables {
   static const all = <String>{
     images,
     metadata,
+    imageVibes,
     favorites,
     tags,
     imageTags,

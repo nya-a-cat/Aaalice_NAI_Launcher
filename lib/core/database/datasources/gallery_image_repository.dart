@@ -789,6 +789,7 @@ class SqliteGalleryImageRepository implements GalleryImageRepository {
         (db) async {
           // 先删除关联的全文索引与元数据（外键约束）
           await db.delete(GalleryTables.ftsIndex);
+          await db.delete(GalleryTables.imageVibes);
           await db.delete(GalleryTables.metadata);
           // 删除收藏记录
           await db.delete(GalleryTables.favorites);

@@ -8,6 +8,7 @@ import 'package:nai_launcher/core/database/datasources/gallery_data_source.dart'
 import 'package:nai_launcher/core/utils/app_logger.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
+import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
 
 void main() {
@@ -148,6 +149,128 @@ void main() {
       final result = await dataSource.searchFullText('1girl,solo', limit: 10);
 
       expect(result, contains(imageId));
+    });
+
+    test('groups an exact Vibe encoding with all local example images', () async {
+      final firstSeen = DateTime(2026, 1, 2);
+      final later = DateTime(2026, 2, 3);
+      final firstId = await dataSource.upsertImage(
+        filePath: '/test/vibe_first.png',
+        fileName: 'vibe_first.png',
+        fileSize: 1024,
+        createdAt: firstSeen,
+        modifiedAt: firstSeen,
+        metadataStatus: MetadataStatus.success,
+      );
+      final laterId = await dataSource.upsertImage(
+        filePath: '/test/vibe_later.png',
+        fileName: 'vibe_later.png',
+        fileSize: 2048,
+        createdAt: later,
+        modifiedAt: later,
+        metadataStatus: MetadataStatus.success,
+      );
+
+      const sharedEncoding = '  c2hhcmVkLXZpYmU=\n';
+      await dataSource.upsertMetadata(
+        firstId,
+        const NaiImageMetadata(
+          prompt: 'same subject',
+          model: 'nai-diffusion-4-5-full',
+          vibeReferences: [
+            VibeReference(
+              displayName: 'first',
+              vibeEncoding: sharedEncoding,
+              strength: 0.4,
+              infoExtracted: 0.7,
+              sourceType: VibeSourceType.png,
+            ),
+          ],
+        ),
+      );
+      await dataSource.upsertMetadata(
+        laterId,
+        const NaiImageMetadata(
+          prompt: 'same subject',
+          model: 'nai-diffusion-4-5-full',
+          vibeReferences: [
+            VibeReference(
+              displayName: 'later',
+              vibeEncoding: 'c2hhcmVkLXZpYmU=',
+              strength: 0.8,
+              infoExtracted: 0.7,
+              sourceType: VibeSourceType.png,
+            ),
+          ],
+        ),
+      );
+
+      final groups = await dataSource.queryLocalGalleryVibeGroups();
+
+      expect(groups, hasLength(1));
+      expect(groups.single.vibeEncoding, 'c2hhcmVkLXZpYmU=');
+      expect(groups.single.exampleCount, 2);
+      expect(
+        groups.single.examples.map((example) => example.filePath),
+        ['/test/vibe_first.png', '/test/vibe_later.png'],
+      );
+      expect(groups.single.earliestExample?.strength, 0.4);
+      expect(groups.single.encodingModels, ['nai-diffusion-4-5-full']);
+    });
+
+    test('backfills legacy raw metadata in bounded background batches', () async {
+      final modifiedAt = DateTime(2025, 12, 1);
+      final imageId = await dataSource.upsertImage(
+        filePath: '/test/legacy_vibe.png',
+        fileName: 'legacy_vibe.png',
+        fileSize: 4096,
+        createdAt: modifiedAt,
+        modifiedAt: modifiedAt,
+        metadataStatus: MetadataStatus.success,
+      );
+      const rawJson = '''
+        {
+          "prompt": "legacy output",
+          "reference_image_multiple": ["bGVnYWN5LXZpYmU="],
+          "reference_strength_multiple": [0.55],
+          "reference_information_extracted_multiple": [0.75]
+        }
+      ''';
+      await dataSource.upsertMetadata(
+        imageId,
+        const NaiImageMetadata(
+          prompt: 'legacy output',
+          model: 'nai-diffusion-4-full',
+          rawJson: rawJson,
+        ),
+      );
+
+      final db = await ConnectionPoolHolder.instance.acquire();
+      try {
+        await db.update(
+          'gallery_metadata',
+          {'vibes_indexed': 0},
+          where: 'image_id = ?',
+          whereArgs: [imageId],
+        );
+      } finally {
+        await ConnectionPoolHolder.instance.release(db);
+      }
+
+      final updates = <int>[];
+      final progress = await dataSource.backfillLocalGalleryVibes(
+        batchSize: 1,
+        onProgress: (value) => updates.add(value.processed),
+      );
+      final groups = await dataSource.queryLocalGalleryVibeGroups();
+
+      expect(progress.processed, 1);
+      expect(progress.discoveredReferences, 1);
+      expect(updates, [0, 1]);
+      expect(groups, hasLength(1));
+      expect(groups.single.vibeEncoding, 'bGVnYWN5LXZpYmU=');
+      expect(groups.single.earliestExample?.strength, 0.55);
+      expect(groups.single.earliestExample?.infoExtracted, 0.75);
     });
 
     test(

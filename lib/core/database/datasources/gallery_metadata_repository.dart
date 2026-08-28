@@ -8,6 +8,7 @@ import 'gallery_image_repository.dart';
 import 'gallery_records.dart';
 import 'gallery_store_context.dart';
 import 'gallery_tables.dart';
+import 'gallery_vibe_repository.dart';
 
 abstract interface class GalleryMetadataRepository {
   Future<void> upsertMetadata(int imageId, NaiImageMetadata metadata);
@@ -27,20 +28,23 @@ class SqliteGalleryMetadataRepository implements GalleryMetadataRepository {
     required this.gateway,
     required this.context,
     required this.images,
+    required this.vibes,
   });
 
   final GalleryDatabaseGateway gateway;
   final GalleryStoreContext context;
   final GalleryImageRepository images;
+  final GalleryVibeRepository vibes;
   @override
   Future<void> upsertMetadata(int imageId, NaiImageMetadata metadata) async {
     try {
       final fullPromptText = _buildFullPromptText(metadata);
 
-      await gateway.execute(
+      await gateway.executeTransaction(
         'upsertMetadata',
-        (db) async {
-          await db.insert(GalleryTables.metadata, {
+        (transaction) async {
+          final firstVibe = metadata.vibeReferences.firstOrNull;
+          await transaction.insert(GalleryTables.metadata, {
             'image_id': imageId,
             'prompt': metadata.prompt,
             'negative_prompt': metadata.negativePrompt,
@@ -66,10 +70,16 @@ class SqliteGalleryMetadataRepository implements GalleryMetadataRepository {
             'raw_json': metadata.rawJson,
             'has_metadata': metadata.hasData ? 1 : 0,
             'full_prompt_text': fullPromptText,
+            'vibe_encoding': firstVibe?.vibeEncoding,
+            'vibe_strength': firstVibe?.strength,
+            'vibe_info_extracted': firstVibe?.infoExtracted,
+            'vibe_source_type': firstVibe?.sourceType.name,
+            'has_vibe': firstVibe == null ? 0 : 1,
+            'vibes_indexed': 1,
           }, conflictAlgorithm: ConflictAlgorithm.replace);
+          await vibes.replaceImageVibes(transaction, imageId, metadata);
         },
         timeout: const Duration(seconds: 30),
-        maxRetries: 3,
       );
 
       await _updateFtsIndex(imageId, fullPromptText);
@@ -162,6 +172,7 @@ class SqliteGalleryMetadataRepository implements GalleryMetadataRepository {
             final imageId = entry.key;
             final metadata = entry.value;
             final fullPromptText = _buildFullPromptText(metadata);
+            final firstVibe = metadata.vibeReferences.firstOrNull;
 
             await txn.insert(GalleryTables.metadata, {
               'image_id': imageId,
@@ -189,7 +200,14 @@ class SqliteGalleryMetadataRepository implements GalleryMetadataRepository {
               'raw_json': metadata.rawJson,
               'has_metadata': metadata.hasData ? 1 : 0,
               'full_prompt_text': fullPromptText,
+              'vibe_encoding': firstVibe?.vibeEncoding,
+              'vibe_strength': firstVibe?.strength,
+              'vibe_info_extracted': firstVibe?.infoExtracted,
+              'vibe_source_type': firstVibe?.sourceType.name,
+              'has_vibe': firstVibe == null ? 0 : 1,
+              'vibes_indexed': 1,
             }, conflictAlgorithm: ConflictAlgorithm.replace);
+            await vibes.replaceImageVibes(txn, imageId, metadata);
 
             ftsUpdates[imageId] = fullPromptText;
           }
@@ -345,6 +363,7 @@ class SqliteGalleryMetadataRepository implements GalleryMetadataRepository {
       await gateway.execute(
         'deleteAllMetadata',
         (db) async {
+          await vibes.clear(db);
           final count = await db.delete(GalleryTables.metadata);
           await db.delete(GalleryTables.ftsIndex);
           AppLogger.i('Deleted $count metadata records', 'GalleryDS');
