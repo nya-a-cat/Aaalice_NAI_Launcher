@@ -18,7 +18,7 @@ void main() {
     tester,
   ) async {
     final entries = List.generate(
-      3,
+      45,
       (index) => VibeLibraryEntry(
         id: 'vibe-$index',
         name: 'Vibe $index',
@@ -30,7 +30,7 @@ void main() {
     final state = VibeLibraryState(
       entries: entries,
       currentPage: 1,
-      pageSize: 1,
+      pageSize: 20,
     );
     final controller = VibeLibraryScreenController(onSearch: (_) async {});
     addTearDown(controller.dispose);
