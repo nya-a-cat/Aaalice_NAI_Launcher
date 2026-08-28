@@ -299,12 +299,18 @@ class _GalleryPromptAnalysisDialogState
                         for (final example in candidate.examplePaths.take(3))
                           Tooltip(
                             message: example,
-                            child: Chip(
-                              visualDensity: VisualDensity.compact,
-                              avatar: const Icon(Icons.image_outlined, size: 16),
-                              label: Text(
-                                path.basename(example),
-                                overflow: TextOverflow.ellipsis,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 220),
+                              child: Chip(
+                                visualDensity: VisualDensity.compact,
+                                avatar: const Icon(
+                                  Icons.image_outlined,
+                                  size: 16,
+                                ),
+                                label: Text(
+                                  path.basename(example),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
                           ),
@@ -342,50 +348,69 @@ class _GalleryPromptAnalysisDialogState
     final selected = allCandidates
         .where((candidate) => _selectedIds.contains(candidate.id))
         .toList(growable: false);
+    final selectAllButton = result != null && !result.isEmpty
+        ? TextButton(
+            onPressed: _saving
+                ? null
+                : () {
+                    setState(() {
+                      if (_selectedIds.length == allCandidates.length) {
+                        _selectedIds.clear();
+                      } else {
+                        _selectedIds
+                          ..clear()
+                          ..addAll(
+                            allCandidates.map((candidate) => candidate.id),
+                          );
+                      }
+                    });
+                  },
+            child: Text(context.l10n.tagLibrary_selectAll),
+          )
+        : const SizedBox.shrink();
+    final cancelButton = TextButton(
+      onPressed: _saving ? null : () => Navigator.of(context).pop(),
+      child: Text(context.l10n.common_cancel),
+    );
+    final saveButton = FilledButton.icon(
+      onPressed: selected.isEmpty || _saving ? null : () => _save(selected),
+      icon: _saving
+          ? const SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.library_add_outlined),
+      label: Text(
+        '${context.l10n.tagLibrary_saveSelected} (${selected.length})',
+      ),
+    );
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          if (result != null && !result.isEmpty)
-            TextButton(
-              onPressed: _saving
-                  ? null
-                  : () {
-                      setState(() {
-                        if (_selectedIds.length == allCandidates.length) {
-                          _selectedIds.clear();
-                        } else {
-                          _selectedIds
-                            ..clear()
-                            ..addAll(
-                              allCandidates.map((candidate) => candidate.id),
-                            );
-                        }
-                      });
-                    },
-              child: Text(context.l10n.tagLibrary_selectAll),
-            ),
-          const Spacer(),
-          TextButton(
-            onPressed: _saving ? null : () => Navigator.of(context).pop(),
-            child: Text(context.l10n.common_cancel),
-          ),
-          const SizedBox(width: 8),
-          FilledButton.icon(
-            onPressed: selected.isEmpty || _saving
-                ? null
-                : () => _save(selected),
-            icon: _saving
-                ? const SizedBox.square(
-                    dimension: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.library_add_outlined),
-            label: Text(
-              '${context.l10n.tagLibrary_saveSelected} (${selected.length})',
-            ),
-          ),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 520) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Align(alignment: Alignment.centerLeft, child: selectAllButton),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [cancelButton, const SizedBox(width: 8), saveButton],
+                ),
+              ],
+            );
+          }
+          return Row(
+            children: [
+              selectAllButton,
+              const Spacer(),
+              cancelButton,
+              const SizedBox(width: 8),
+              saveButton,
+            ],
+          );
+        },
       ),
     );
   }
