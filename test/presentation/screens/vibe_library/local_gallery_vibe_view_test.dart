@@ -114,8 +114,10 @@ void main() {
             (widget) => widget is Image && widget.fit == BoxFit.contain,
           ),
         );
-        expect(selectedImage.cacheWidth, isNull);
-        expect(selectedImage.cacheHeight, isNotNull);
+        expect(selectedImage.image, isA<ResizeImage>());
+        final resizedImage = selectedImage.image as ResizeImage;
+        expect(resizedImage.width, isNull);
+        expect(resizedImage.height, isNotNull);
 
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
         await tester.pump();
