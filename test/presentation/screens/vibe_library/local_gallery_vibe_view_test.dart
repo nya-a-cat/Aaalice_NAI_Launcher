@@ -1,10 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/database/datasources/gallery_data_source.dart';
 import 'package:nai_launcher/data/models/gallery/local_gallery_vibe_group.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -27,8 +26,9 @@ void main() {
         final imageFile = File(
           '${temporaryDirectory.path}${Platform.pathSeparator}example.png',
         );
-        final imageBytes = Uint8List.fromList(
-          img.encodePng(img.Image(width: 4, height: 4)),
+        final imageBytes = base64Decode(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk'
+          '+A8AAQUBAScY42YAAAAASUVORK5CYII=',
         );
         await imageFile.writeAsBytes(imageBytes);
 
