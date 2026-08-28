@@ -6587,6 +6587,52 @@ class AppLocalizationsJa extends AppLocalizations {
   String get tagLibrary_addEntry => 'エントリの追加';
 
   @override
+  String get tagLibrary_analyzeGalleryPrompts => 'ギャラリープロンプトを分析';
+
+  @override
+  String get tagLibrary_promptAnalysisTitle => 'ギャラリープロンプト分析';
+
+  @override
+  String get tagLibrary_promptAnalysisDescription =>
+      'インデックス済みの正のプロンプトから、繰り返し使われる絵師列と効果列を検出します。';
+
+  @override
+  String get tagLibrary_promptAnalysisLoading => 'インデックス済みプロンプトを分析しています...';
+
+  @override
+  String get tagLibrary_promptAnalysisEmpty => '繰り返し使われる絵師列または効果列は見つかりませんでした。';
+
+  @override
+  String get tagLibrary_artistPatterns => '絵師列';
+
+  @override
+  String get tagLibrary_effectPatterns => '効果列';
+
+  @override
+  String get tagLibrary_scannedImages => '分析した画像';
+
+  @override
+  String get tagLibrary_promptAnalysisLimited => '操作性を保つため、最近の画像の一部を分析しました。';
+
+  @override
+  String get tagLibrary_images => '枚の画像';
+
+  @override
+  String get tagLibrary_confidence => '信頼度';
+
+  @override
+  String get tagLibrary_selectAll => 'すべて選択';
+
+  @override
+  String get tagLibrary_saveSelected => '選択項目を保存';
+
+  @override
+  String get tagLibrary_promptAnalysisSaved => '保存したエントリ';
+
+  @override
+  String get tagLibrary_galleryAnalysisCategory => 'ギャラリー分析';
+
+  @override
   String get tagLibrary_editEntry => 'エントリーの編集';
 
   @override

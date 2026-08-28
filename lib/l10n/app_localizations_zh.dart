@@ -6472,6 +6472,52 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tagLibrary_addEntry => '添加条目';
 
   @override
+  String get tagLibrary_analyzeGalleryPrompts => '分析图库提示词';
+
+  @override
+  String get tagLibrary_promptAnalysisTitle => '图库提示词分析';
+
+  @override
+  String get tagLibrary_promptAnalysisDescription =>
+      '从已索引图片的正向提示词中发现重复出现的画师串和效果串。';
+
+  @override
+  String get tagLibrary_promptAnalysisLoading => '正在分析已索引提示词...';
+
+  @override
+  String get tagLibrary_promptAnalysisEmpty => '没有发现重复出现的画师串或效果串。';
+
+  @override
+  String get tagLibrary_artistPatterns => '画师串';
+
+  @override
+  String get tagLibrary_effectPatterns => '效果串';
+
+  @override
+  String get tagLibrary_scannedImages => '已分析图片';
+
+  @override
+  String get tagLibrary_promptAnalysisLimited => '为保持界面流畅，本次分析使用最近的一部分图片。';
+
+  @override
+  String get tagLibrary_images => '张图片';
+
+  @override
+  String get tagLibrary_confidence => '置信度';
+
+  @override
+  String get tagLibrary_selectAll => '全选';
+
+  @override
+  String get tagLibrary_saveSelected => '保存所选';
+
+  @override
+  String get tagLibrary_promptAnalysisSaved => '已保存条目';
+
+  @override
+  String get tagLibrary_galleryAnalysisCategory => '图库分析';
+
+  @override
   String get tagLibrary_editEntry => '编辑条目';
 
   @override
@@ -18774,6 +18820,52 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get tagLibrary_addEntry => '新增條目';
+
+  @override
+  String get tagLibrary_analyzeGalleryPrompts => '分析圖庫提示詞';
+
+  @override
+  String get tagLibrary_promptAnalysisTitle => '圖庫提示詞分析';
+
+  @override
+  String get tagLibrary_promptAnalysisDescription =>
+      '從已索引圖片的正向提示詞中找出重複出現的畫師串與效果串。';
+
+  @override
+  String get tagLibrary_promptAnalysisLoading => '正在分析已索引提示詞...';
+
+  @override
+  String get tagLibrary_promptAnalysisEmpty => '沒有找到重複出現的畫師串或效果串。';
+
+  @override
+  String get tagLibrary_artistPatterns => '畫師串';
+
+  @override
+  String get tagLibrary_effectPatterns => '效果串';
+
+  @override
+  String get tagLibrary_scannedImages => '已分析圖片';
+
+  @override
+  String get tagLibrary_promptAnalysisLimited => '為保持介面流暢，本次分析使用最近的一部分圖片。';
+
+  @override
+  String get tagLibrary_images => '張圖片';
+
+  @override
+  String get tagLibrary_confidence => '信賴度';
+
+  @override
+  String get tagLibrary_selectAll => '全選';
+
+  @override
+  String get tagLibrary_saveSelected => '儲存所選';
+
+  @override
+  String get tagLibrary_promptAnalysisSaved => '已儲存條目';
+
+  @override
+  String get tagLibrary_galleryAnalysisCategory => '圖庫分析';
 
   @override
   String get tagLibrary_editEntry => '編輯條目';
