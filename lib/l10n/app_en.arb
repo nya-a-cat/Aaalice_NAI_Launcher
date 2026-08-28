@@ -3866,6 +3866,47 @@
   },
 
   "vibeLibrary_title": "Vibe Library",
+  "vibeLibrary_savedView": "Saved",
+  "vibeLibrary_localGalleryView": "Local gallery",
+  "vibeLibrary_localGalleryDiscovery": "Vibes found in local gallery",
+  "vibeLibrary_localGallerySearchHint": "Search file name, model, or fingerprint...",
+  "vibeLibrary_rescanLocalGalleryVibes": "Refresh local Vibe index",
+  "vibeLibrary_indexingLocalGallery": "Indexing local metadata: {processed}/{total}",
+  "@vibeLibrary_indexingLocalGallery": {
+    "placeholders": {
+      "processed": {},
+      "total": {}
+    }
+  },
+  "vibeLibrary_localGalleryEmpty": "No Vibes found in local gallery",
+  "vibeLibrary_localGalleryEmptyHint": "Vibes embedded in indexed NovelAI images will appear here.",
+  "vibeLibrary_localGalleryVibeSemantics": "Vibe with {count} local examples",
+  "@vibeLibrary_localGalleryVibeSemantics": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "vibeLibrary_exampleCount": "{count} examples",
+  "@vibeLibrary_exampleCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "vibeLibrary_saved": "Saved",
+  "vibeLibrary_firstSeen": "First seen: {date}",
+  "@vibeLibrary_firstSeen": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "vibeLibrary_savedFromLocalGallery": "Saved from local gallery to Vibe Library",
+  "vibeLibrary_exactEncodingGroup": "Exact encoding group",
+  "vibeLibrary_loadMore": "Load more",
+  "vibeLibrary_earliestLocalExample": "Earliest local example",
+  "vibeLibrary_examples": "Examples",
+  "vibeLibrary_model": "Model",
+  "vibeLibrary_encodingFingerprint": "Encoding fingerprint",
+  "vibeLibrary_saveToLibrary": "Save to Vibe Library",
   "vibeLibrary_categories": "Categories",
   "vibeLibrary_createCategoryTitle": "New Category",
   "vibeLibrary_createSubCategoryTitle": "New Subcategory",

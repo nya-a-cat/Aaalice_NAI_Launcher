@@ -3774,6 +3774,47 @@
     }
   },
   "vibeLibrary_title": "Vibe 庫",
+  "vibeLibrary_savedView": "已儲存",
+  "vibeLibrary_localGalleryView": "本機圖庫",
+  "vibeLibrary_localGalleryDiscovery": "本機圖庫發現的 Vibe",
+  "vibeLibrary_localGallerySearchHint": "搜尋檔名、模型或指紋...",
+  "vibeLibrary_rescanLocalGalleryVibes": "重新整理本機 Vibe 索引",
+  "vibeLibrary_indexingLocalGallery": "正在索引本機中繼資料：{processed}/{total}",
+  "@vibeLibrary_indexingLocalGallery": {
+    "placeholders": {
+      "processed": {},
+      "total": {}
+    }
+  },
+  "vibeLibrary_localGalleryEmpty": "本機圖庫中沒有發現 Vibe",
+  "vibeLibrary_localGalleryEmptyHint": "已索引的 NovelAI 圖片中嵌入的 Vibe 會顯示在這裡。",
+  "vibeLibrary_localGalleryVibeSemantics": "包含 {count} 張本機範例圖的 Vibe",
+  "@vibeLibrary_localGalleryVibeSemantics": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "vibeLibrary_exampleCount": "{count} 張範例",
+  "@vibeLibrary_exampleCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "vibeLibrary_saved": "已儲存",
+  "vibeLibrary_firstSeen": "首次發現：{date}",
+  "@vibeLibrary_firstSeen": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "vibeLibrary_savedFromLocalGallery": "已從本機圖庫儲存到 Vibe 庫",
+  "vibeLibrary_exactEncodingGroup": "相同編碼的精確分組",
+  "vibeLibrary_loadMore": "載入更多",
+  "vibeLibrary_earliestLocalExample": "最早的本機範例",
+  "vibeLibrary_examples": "範例圖片",
+  "vibeLibrary_model": "模型",
+  "vibeLibrary_encodingFingerprint": "編碼指紋",
+  "vibeLibrary_saveToLibrary": "儲存到 Vibe 庫",
   "vibeLibrary_categories": "分類",
   "vibeLibrary_createCategoryTitle": "新建分類",
   "vibeLibrary_createSubCategoryTitle": "新建子分類",

@@ -8043,6 +8043,82 @@ class AppLocalizationsJa extends AppLocalizations {
   String get vibeLibrary_title => 'バイブライブラリ';
 
   @override
+  String get vibeLibrary_savedView => '保存済み';
+
+  @override
+  String get vibeLibrary_localGalleryView => 'ローカルギャラリー';
+
+  @override
+  String get vibeLibrary_localGalleryDiscovery =>
+      'ローカルギャラリーで見つかった Vibe';
+
+  @override
+  String get vibeLibrary_localGallerySearchHint =>
+      'ファイル名、モデル、フィンガープリントを検索...';
+
+  @override
+  String get vibeLibrary_rescanLocalGalleryVibes =>
+      'ローカル Vibe インデックスを更新';
+
+  @override
+  String vibeLibrary_indexingLocalGallery(Object processed, Object total) {
+    return 'ローカルメタデータを索引中: $processed/$total';
+  }
+
+  @override
+  String get vibeLibrary_localGalleryEmpty =>
+      'ローカルギャラリーに Vibe がありません';
+
+  @override
+  String get vibeLibrary_localGalleryEmptyHint =>
+      '索引済みの NovelAI 画像に埋め込まれた Vibe がここに表示されます。';
+
+  @override
+  String vibeLibrary_localGalleryVibeSemantics(Object count) {
+    return '$count 件のローカル例を持つ Vibe';
+  }
+
+  @override
+  String vibeLibrary_exampleCount(Object count) {
+    return '$count 件の例';
+  }
+
+  @override
+  String get vibeLibrary_saved => '保存済み';
+
+  @override
+  String vibeLibrary_firstSeen(Object date) {
+    return '最初の検出: $date';
+  }
+
+  @override
+  String get vibeLibrary_savedFromLocalGallery =>
+      'ローカルギャラリーから Vibe ライブラリに保存しました';
+
+  @override
+  String get vibeLibrary_exactEncodingGroup =>
+      '同一エンコードの完全一致グループ';
+
+  @override
+  String get vibeLibrary_loadMore => 'さらに読み込む';
+
+  @override
+  String get vibeLibrary_earliestLocalExample => '最古のローカル例';
+
+  @override
+  String get vibeLibrary_examples => '例';
+
+  @override
+  String get vibeLibrary_model => 'モデル';
+
+  @override
+  String get vibeLibrary_encodingFingerprint =>
+      'エンコードのフィンガープリント';
+
+  @override
+  String get vibeLibrary_saveToLibrary => 'Vibe ライブラリに保存';
+
+  @override
   String get vibeLibrary_categories => 'カテゴリ';
 
   @override

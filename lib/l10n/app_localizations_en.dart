@@ -8229,6 +8229,80 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vibeLibrary_title => 'Vibe Library';
 
   @override
+  String get vibeLibrary_savedView => 'Saved';
+
+  @override
+  String get vibeLibrary_localGalleryView => 'Local gallery';
+
+  @override
+  String get vibeLibrary_localGalleryDiscovery =>
+      'Vibes found in local gallery';
+
+  @override
+  String get vibeLibrary_localGallerySearchHint =>
+      'Search file name, model, or fingerprint...';
+
+  @override
+  String get vibeLibrary_rescanLocalGalleryVibes =>
+      'Refresh local Vibe index';
+
+  @override
+  String vibeLibrary_indexingLocalGallery(Object processed, Object total) {
+    return 'Indexing local metadata: $processed/$total';
+  }
+
+  @override
+  String get vibeLibrary_localGalleryEmpty =>
+      'No Vibes found in local gallery';
+
+  @override
+  String get vibeLibrary_localGalleryEmptyHint =>
+      'Vibes embedded in indexed NovelAI images will appear here.';
+
+  @override
+  String vibeLibrary_localGalleryVibeSemantics(Object count) {
+    return 'Vibe with $count local examples';
+  }
+
+  @override
+  String vibeLibrary_exampleCount(Object count) {
+    return '$count examples';
+  }
+
+  @override
+  String get vibeLibrary_saved => 'Saved';
+
+  @override
+  String vibeLibrary_firstSeen(Object date) {
+    return 'First seen: $date';
+  }
+
+  @override
+  String get vibeLibrary_savedFromLocalGallery =>
+      'Saved from local gallery to Vibe Library';
+
+  @override
+  String get vibeLibrary_exactEncodingGroup => 'Exact encoding group';
+
+  @override
+  String get vibeLibrary_loadMore => 'Load more';
+
+  @override
+  String get vibeLibrary_earliestLocalExample => 'Earliest local example';
+
+  @override
+  String get vibeLibrary_examples => 'Examples';
+
+  @override
+  String get vibeLibrary_model => 'Model';
+
+  @override
+  String get vibeLibrary_encodingFingerprint => 'Encoding fingerprint';
+
+  @override
+  String get vibeLibrary_saveToLibrary => 'Save to Vibe Library';
+
+  @override
   String get vibeLibrary_categories => 'Categories';
 
   @override

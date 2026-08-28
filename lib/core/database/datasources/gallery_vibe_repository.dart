@@ -406,7 +406,9 @@ List<_ParsedGalleryVibeRow> _parseGalleryVibeBackfillRows(
           );
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // Persist a deterministic no-Vibe result for malformed legacy metadata.
+    }
     return _ParsedGalleryVibeRow(
       imageId: (row['image_id'] as num).toInt(),
       vibes: vibes,

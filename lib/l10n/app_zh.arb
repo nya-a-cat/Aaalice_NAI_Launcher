@@ -3766,6 +3766,47 @@
   },
 
   "vibeLibrary_title": "Vibe 库",
+  "vibeLibrary_savedView": "已保存",
+  "vibeLibrary_localGalleryView": "本地图库",
+  "vibeLibrary_localGalleryDiscovery": "本地图库发现的 Vibe",
+  "vibeLibrary_localGallerySearchHint": "搜索文件名、模型或指纹...",
+  "vibeLibrary_rescanLocalGalleryVibes": "刷新本地 Vibe 索引",
+  "vibeLibrary_indexingLocalGallery": "正在索引本地元数据：{processed}/{total}",
+  "@vibeLibrary_indexingLocalGallery": {
+    "placeholders": {
+      "processed": {},
+      "total": {}
+    }
+  },
+  "vibeLibrary_localGalleryEmpty": "本地图库中没有发现 Vibe",
+  "vibeLibrary_localGalleryEmptyHint": "已索引的 NovelAI 图片中嵌入的 Vibe 会显示在这里。",
+  "vibeLibrary_localGalleryVibeSemantics": "包含 {count} 张本地示例图的 Vibe",
+  "@vibeLibrary_localGalleryVibeSemantics": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "vibeLibrary_exampleCount": "{count} 张示例",
+  "@vibeLibrary_exampleCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "vibeLibrary_saved": "已保存",
+  "vibeLibrary_firstSeen": "首次发现：{date}",
+  "@vibeLibrary_firstSeen": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "vibeLibrary_savedFromLocalGallery": "已从本地图库保存到 Vibe 库",
+  "vibeLibrary_exactEncodingGroup": "相同编码的精确分组",
+  "vibeLibrary_loadMore": "加载更多",
+  "vibeLibrary_earliestLocalExample": "最早的本地示例",
+  "vibeLibrary_examples": "示例图片",
+  "vibeLibrary_model": "模型",
+  "vibeLibrary_encodingFingerprint": "编码指纹",
+  "vibeLibrary_saveToLibrary": "保存到 Vibe 库",
   "vibeLibrary_categories": "分类",
   "vibeLibrary_createCategoryTitle": "新建分类",
   "vibeLibrary_createSubCategoryTitle": "新建子分类",

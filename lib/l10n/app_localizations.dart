@@ -14611,6 +14611,126 @@ abstract class AppLocalizations {
   /// **'Vibe Library'**
   String get vibeLibrary_title;
 
+  /// No description provided for @vibeLibrary_savedView.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get vibeLibrary_savedView;
+
+  /// No description provided for @vibeLibrary_localGalleryView.
+  ///
+  /// In en, this message translates to:
+  /// **'Local gallery'**
+  String get vibeLibrary_localGalleryView;
+
+  /// No description provided for @vibeLibrary_localGalleryDiscovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibes found in local gallery'**
+  String get vibeLibrary_localGalleryDiscovery;
+
+  /// No description provided for @vibeLibrary_localGallerySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search file name, model, or fingerprint...'**
+  String get vibeLibrary_localGallerySearchHint;
+
+  /// No description provided for @vibeLibrary_rescanLocalGalleryVibes.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh local Vibe index'**
+  String get vibeLibrary_rescanLocalGalleryVibes;
+
+  /// No description provided for @vibeLibrary_indexingLocalGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Indexing local metadata: {processed}/{total}'**
+  String vibeLibrary_indexingLocalGallery(Object processed, Object total);
+
+  /// No description provided for @vibeLibrary_localGalleryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No Vibes found in local gallery'**
+  String get vibeLibrary_localGalleryEmpty;
+
+  /// No description provided for @vibeLibrary_localGalleryEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibes embedded in indexed NovelAI images will appear here.'**
+  String get vibeLibrary_localGalleryEmptyHint;
+
+  /// No description provided for @vibeLibrary_localGalleryVibeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe with {count} local examples'**
+  String vibeLibrary_localGalleryVibeSemantics(Object count);
+
+  /// No description provided for @vibeLibrary_exampleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} examples'**
+  String vibeLibrary_exampleCount(Object count);
+
+  /// No description provided for @vibeLibrary_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get vibeLibrary_saved;
+
+  /// No description provided for @vibeLibrary_firstSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'First seen: {date}'**
+  String vibeLibrary_firstSeen(Object date);
+
+  /// No description provided for @vibeLibrary_savedFromLocalGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved from local gallery to Vibe Library'**
+  String get vibeLibrary_savedFromLocalGallery;
+
+  /// No description provided for @vibeLibrary_exactEncodingGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact encoding group'**
+  String get vibeLibrary_exactEncodingGroup;
+
+  /// No description provided for @vibeLibrary_loadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get vibeLibrary_loadMore;
+
+  /// No description provided for @vibeLibrary_earliestLocalExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Earliest local example'**
+  String get vibeLibrary_earliestLocalExample;
+
+  /// No description provided for @vibeLibrary_examples.
+  ///
+  /// In en, this message translates to:
+  /// **'Examples'**
+  String get vibeLibrary_examples;
+
+  /// No description provided for @vibeLibrary_model.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get vibeLibrary_model;
+
+  /// No description provided for @vibeLibrary_encodingFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoding fingerprint'**
+  String get vibeLibrary_encodingFingerprint;
+
+  /// No description provided for @vibeLibrary_saveToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Vibe Library'**
+  String get vibeLibrary_saveToLibrary;
+
   /// No description provided for @vibeLibrary_categories.
   ///
   /// In en, this message translates to:

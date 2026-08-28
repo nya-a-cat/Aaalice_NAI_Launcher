@@ -29,11 +29,11 @@ NAI Launcher 是一个使用 Flutter 构建的 NovelAI 第三方跨平台客户�
 | --- | --- |
 | 🎨 图像生成 | 支持 NovelAI Diffusion V1/V2/V3/V4/V4.5/V5、Furry 系列、常用采样器、尺寸预设、多角色参数和 Anlas 估算。 |
 | 🖼️ 图生图与编辑 | 支持图生图、局部重绘、Focused Inpaint、Outpaint、虚拟画布扩图、硬边蒙版和点击式区域填充。 |
-| 🌈 参考与风格 | 支持 Vibe Transfer、Precise Reference、多图参考、Vibe 整包导入导出、PNG 元数据嵌入导出。 |
+| 🌈 参考与风格 | 支持 Vibe Transfer、Precise Reference、多图参考、Vibe 整包导入导出、PNG 元数据嵌入导出，以及从本地图库发现 Vibe 并查看同一编码的多张示例图。 |
 | ✍️ Prompt 工具 | 内置完整离线 Danbooru/e621 合并标签与别名；本地 Danbooru 共现关系以可选数据包提供，默认进入主页后后台下载。支持 `Ctrl/⌘+Shift+Space` 查询光标前标签的相关词、固定来源标签后连续选词、Danbooru 在线相关标签补充、可选中文词库与 AI 缺失汉化，以及 NAI/SD 权重语法辅助、Token 统计、提示词框内搜索和固定词。 |
 | 🤖 智能代理 | 在生成页侧栏中使用已配置的第三方模型进行多轮对话，可查看和调整 Prompt、角色及生成参数，检索标签和生成历史，并按权限模式执行生成或读取图片等操作。可选联网工具支持 SearXNG、匿名 Exa MCP 或 Exa API 搜索，并按需读取单个公开网页；会话以 JSONL 保存在本机。 |
 | 🎲 随机词库 | 内置完整还原的 NovelAI 官网随机词库，并按当前模型使用 Legacy Anime、Furry V3 或 Character Prompts；自定义模式使用完整离线标签 catalog，混合模式同时结合两种来源。可调整 catalog 分类、词组、权重、排除与依赖规则，预览结果并导入导出自定义预设。 |
-| 📚 本地图库 | 支持递归扫描、SQLite 全文搜索、分类/收藏/集合、元数据解析、批量操作和大图预览。 |
+| 📚 本地图库 | 支持递归扫描、SQLite 全文搜索、分类/收藏/集合、元数据解析、非 NAI 图片筛选、批量操作和大图预览。 |
 | 🌐 在线图库 | 支持 Danbooru / Safebooru / Gelbooru / AI TAG / 法典图鉴搜索、真实排行榜、多图详情、元数据复用和批量下载。 |
 | 📦 生成队列 | 支持任务排序、批量生成、暂停/继续、失败策略、进度统计和队列导入导出。 |
 | 🔌 外部联动 | 桌面端支持 Krita 与 ComfyUI 本地工作流；同时提供系统代理、图片复制、原生分享、文件导入导出和文件定位等平台能力。 |

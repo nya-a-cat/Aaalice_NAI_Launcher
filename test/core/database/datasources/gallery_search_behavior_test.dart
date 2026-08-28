@@ -159,7 +159,7 @@ void main() {
         fileName: 'vibe_first.png',
         fileSize: 1024,
         createdAt: firstSeen,
-        modifiedAt: firstSeen,
+        modifiedAt: later.add(const Duration(days: 1)),
         metadataStatus: MetadataStatus.success,
       );
       final laterId = await dataSource.upsertImage(
@@ -210,12 +210,68 @@ void main() {
       expect(groups, hasLength(1));
       expect(groups.single.vibeEncoding, 'c2hhcmVkLXZpYmU=');
       expect(groups.single.exampleCount, 2);
+      expect(groups.single.firstSeenAt, firstSeen);
       expect(
         groups.single.examples.map((example) => example.filePath),
         ['/test/vibe_first.png', '/test/vibe_later.png'],
       );
       expect(groups.single.earliestExample?.strength, 0.4);
       expect(groups.single.encodingModels, ['nai-diffusion-4-5-full']);
+    });
+
+    test('keeps different Vibes on the same subject in separate groups', () async {
+      final now = DateTime(2026, 4, 5);
+      final firstId = await dataSource.upsertImage(
+        filePath: '/test/same_subject_a.png',
+        fileName: 'same_subject_a.png',
+        fileSize: 1024,
+        createdAt: now,
+        modifiedAt: now,
+        metadataStatus: MetadataStatus.success,
+      );
+      final secondId = await dataSource.upsertImage(
+        filePath: '/test/same_subject_b.png',
+        fileName: 'same_subject_b.png',
+        fileSize: 1024,
+        createdAt: now.add(const Duration(minutes: 1)),
+        modifiedAt: now.add(const Duration(minutes: 1)),
+        metadataStatus: MetadataStatus.success,
+      );
+      await dataSource.upsertMetadata(
+        firstId,
+        const NaiImageMetadata(
+          prompt: 'same subject',
+          vibeReferences: [
+            VibeReference(
+              displayName: 'style-a',
+              vibeEncoding: 'c3R5bGUtYQ==',
+            ),
+            VibeReference(
+              displayName: 'style-b',
+              vibeEncoding: 'c3R5bGUtYg==',
+            ),
+          ],
+        ),
+      );
+      await dataSource.upsertMetadata(
+        secondId,
+        const NaiImageMetadata(
+          prompt: 'same subject',
+          vibeReferences: [
+            VibeReference(
+              displayName: 'style-a',
+              vibeEncoding: 'c3R5bGUtYQ==',
+            ),
+          ],
+        ),
+      );
+
+      final groups = await dataSource.queryLocalGalleryVibeGroups();
+      final counts = {
+        for (final group in groups) group.vibeEncoding: group.exampleCount,
+      };
+
+      expect(counts, {'c3R5bGUtYQ==': 2, 'c3R5bGUtYg==': 1});
     });
 
     test('backfills legacy raw metadata in bounded background batches', () async {

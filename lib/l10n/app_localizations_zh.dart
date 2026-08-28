@@ -7919,6 +7919,75 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vibeLibrary_title => 'Vibe 库';
 
   @override
+  String get vibeLibrary_savedView => '已保存';
+
+  @override
+  String get vibeLibrary_localGalleryView => '本地图库';
+
+  @override
+  String get vibeLibrary_localGalleryDiscovery => '本地图库发现的 Vibe';
+
+  @override
+  String get vibeLibrary_localGallerySearchHint => '搜索文件名、模型或指纹...';
+
+  @override
+  String get vibeLibrary_rescanLocalGalleryVibes => '刷新本地 Vibe 索引';
+
+  @override
+  String vibeLibrary_indexingLocalGallery(Object processed, Object total) {
+    return '正在索引本地元数据：$processed/$total';
+  }
+
+  @override
+  String get vibeLibrary_localGalleryEmpty => '本地图库中没有发现 Vibe';
+
+  @override
+  String get vibeLibrary_localGalleryEmptyHint =>
+      '已索引的 NovelAI 图片中嵌入的 Vibe 会显示在这里。';
+
+  @override
+  String vibeLibrary_localGalleryVibeSemantics(Object count) {
+    return '包含 $count 张本地示例图的 Vibe';
+  }
+
+  @override
+  String vibeLibrary_exampleCount(Object count) {
+    return '$count 张示例';
+  }
+
+  @override
+  String get vibeLibrary_saved => '已保存';
+
+  @override
+  String vibeLibrary_firstSeen(Object date) {
+    return '首次发现：$date';
+  }
+
+  @override
+  String get vibeLibrary_savedFromLocalGallery => '已从本地图库保存到 Vibe 库';
+
+  @override
+  String get vibeLibrary_exactEncodingGroup => '相同编码的精确分组';
+
+  @override
+  String get vibeLibrary_loadMore => '加载更多';
+
+  @override
+  String get vibeLibrary_earliestLocalExample => '最早的本地示例';
+
+  @override
+  String get vibeLibrary_examples => '示例图片';
+
+  @override
+  String get vibeLibrary_model => '模型';
+
+  @override
+  String get vibeLibrary_encodingFingerprint => '编码指纹';
+
+  @override
+  String get vibeLibrary_saveToLibrary => '保存到 Vibe 库';
+
+  @override
   String get vibeLibrary_categories => '分类';
 
   @override
@@ -20152,6 +20221,75 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get vibeLibrary_title => 'Vibe 庫';
+
+  @override
+  String get vibeLibrary_savedView => '已儲存';
+
+  @override
+  String get vibeLibrary_localGalleryView => '本機圖庫';
+
+  @override
+  String get vibeLibrary_localGalleryDiscovery => '本機圖庫發現的 Vibe';
+
+  @override
+  String get vibeLibrary_localGallerySearchHint => '搜尋檔名、模型或指紋...';
+
+  @override
+  String get vibeLibrary_rescanLocalGalleryVibes => '重新整理本機 Vibe 索引';
+
+  @override
+  String vibeLibrary_indexingLocalGallery(Object processed, Object total) {
+    return '正在索引本機中繼資料：$processed/$total';
+  }
+
+  @override
+  String get vibeLibrary_localGalleryEmpty => '本機圖庫中沒有發現 Vibe';
+
+  @override
+  String get vibeLibrary_localGalleryEmptyHint =>
+      '已索引的 NovelAI 圖片中嵌入的 Vibe 會顯示在這裡。';
+
+  @override
+  String vibeLibrary_localGalleryVibeSemantics(Object count) {
+    return '包含 $count 張本機範例圖的 Vibe';
+  }
+
+  @override
+  String vibeLibrary_exampleCount(Object count) {
+    return '$count 張範例';
+  }
+
+  @override
+  String get vibeLibrary_saved => '已儲存';
+
+  @override
+  String vibeLibrary_firstSeen(Object date) {
+    return '首次發現：$date';
+  }
+
+  @override
+  String get vibeLibrary_savedFromLocalGallery => '已從本機圖庫儲存到 Vibe 庫';
+
+  @override
+  String get vibeLibrary_exactEncodingGroup => '相同編碼的精確分組';
+
+  @override
+  String get vibeLibrary_loadMore => '載入更多';
+
+  @override
+  String get vibeLibrary_earliestLocalExample => '最早的本機範例';
+
+  @override
+  String get vibeLibrary_examples => '範例圖片';
+
+  @override
+  String get vibeLibrary_model => '模型';
+
+  @override
+  String get vibeLibrary_encodingFingerprint => '編碼指紋';
+
+  @override
+  String get vibeLibrary_saveToLibrary => '儲存到 Vibe 庫';
 
   @override
   String get vibeLibrary_categories => '分類';

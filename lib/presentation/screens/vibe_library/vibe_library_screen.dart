@@ -32,6 +32,7 @@ import 'vibe_library_workspace.dart';
 import 'widgets/category/vibe_category_tree_view.dart';
 import 'widgets/menus/vibe_import_menu.dart';
 import 'widgets/vibe_export_dialog_advanced.dart';
+import 'widgets/vibe_library_source_workspace.dart';
 
 class VibeLibraryScreen extends ConsumerStatefulWidget {
   const VibeLibraryScreen({super.key, this.pickImportFiles});
@@ -124,13 +125,16 @@ class _VibeLibraryScreenState extends ConsumerState<VibeLibraryScreen> {
                 },
               ),
             },
-            child: VibeLibraryWorkspace(
-              libraryState: library,
-              categoryState: categories,
-              selectionState: selection,
-              currentModel: model,
-              controller: _controller,
-              onCommand: _handleCommand,
+            child: VibeLibrarySourceWorkspace(
+              savedCount: library.totalCount,
+              savedWorkspace: VibeLibraryWorkspace(
+                libraryState: library,
+                categoryState: categories,
+                selectionState: selection,
+                currentModel: model,
+                controller: _controller,
+                onCommand: _handleCommand,
+              ),
             ),
           ),
         ),

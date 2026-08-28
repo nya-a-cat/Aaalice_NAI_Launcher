@@ -3804,6 +3804,47 @@
     }
   },
   "vibeLibrary_title": "バイブライブラリ",
+  "vibeLibrary_savedView": "保存済み",
+  "vibeLibrary_localGalleryView": "ローカルギャラリー",
+  "vibeLibrary_localGalleryDiscovery": "ローカルギャラリーで見つかった Vibe",
+  "vibeLibrary_localGallerySearchHint": "ファイル名、モデル、フィンガープリントを検索...",
+  "vibeLibrary_rescanLocalGalleryVibes": "ローカル Vibe インデックスを更新",
+  "vibeLibrary_indexingLocalGallery": "ローカルメタデータを索引中: {processed}/{total}",
+  "@vibeLibrary_indexingLocalGallery": {
+    "placeholders": {
+      "processed": {},
+      "total": {}
+    }
+  },
+  "vibeLibrary_localGalleryEmpty": "ローカルギャラリーに Vibe がありません",
+  "vibeLibrary_localGalleryEmptyHint": "索引済みの NovelAI 画像に埋め込まれた Vibe がここに表示されます。",
+  "vibeLibrary_localGalleryVibeSemantics": "{count} 件のローカル例を持つ Vibe",
+  "@vibeLibrary_localGalleryVibeSemantics": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "vibeLibrary_exampleCount": "{count} 件の例",
+  "@vibeLibrary_exampleCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "vibeLibrary_saved": "保存済み",
+  "vibeLibrary_firstSeen": "最初の検出: {date}",
+  "@vibeLibrary_firstSeen": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "vibeLibrary_savedFromLocalGallery": "ローカルギャラリーから Vibe ライブラリに保存しました",
+  "vibeLibrary_exactEncodingGroup": "同一エンコードの完全一致グループ",
+  "vibeLibrary_loadMore": "さらに読み込む",
+  "vibeLibrary_earliestLocalExample": "最古のローカル例",
+  "vibeLibrary_examples": "例",
+  "vibeLibrary_model": "モデル",
+  "vibeLibrary_encodingFingerprint": "エンコードのフィンガープリント",
+  "vibeLibrary_saveToLibrary": "Vibe ライブラリに保存",
   "vibeLibrary_categories": "カテゴリ",
   "vibeLibrary_createCategoryTitle": "新しいカテゴリ",
   "vibeLibrary_createSubCategoryTitle": "新しいサブカテゴリ",
