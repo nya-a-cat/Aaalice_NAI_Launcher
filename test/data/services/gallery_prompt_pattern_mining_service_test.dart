@@ -55,7 +55,12 @@ void main() {
                 'prompt',
                 'artist:alpha, artist:beta',
               )
-              .having((candidate) => candidate.imageCount, 'imageCount', 2),
+              .having((candidate) => candidate.imageCount, 'imageCount', 2)
+              .having(
+                (candidate) => candidate.promptVariantCount,
+                'promptVariantCount',
+                2,
+              ),
         ),
       );
       expect(
@@ -67,7 +72,12 @@ void main() {
                 'prompt',
                 'masterpiece, best quality, cinematic lighting',
               )
-              .having((candidate) => candidate.imageCount, 'imageCount', 3),
+              .having((candidate) => candidate.imageCount, 'imageCount', 3)
+              .having(
+                (candidate) => candidate.promptVariantCount,
+                'promptVariantCount',
+                3,
+              ),
         ),
       );
       expect(
@@ -92,6 +102,111 @@ void main() {
           'best_quality',
           'cinematic_lighting',
         }),
+      );
+    });
+
+    test('flattens weighted artist groups without damaging artist names', () {
+      const corpus = [
+        GalleryPromptCorpusEntry(
+          imageId: 1,
+          filePath: 'weighted-artists.png',
+          prompt:
+              '{{2::fte_(fifteen_199)::, rei_(sanbonzakura)}}, 1girl',
+        ),
+      ];
+
+      expect(
+        GalleryPromptPatternAnalyzer.collectLookupTerms(corpus),
+        containsAll(<String>{
+          'fte_(fifteen_199)',
+          'rei_(sanbonzakura)',
+        }),
+      );
+    });
+
+    test('mines joint effects across lines and neutral prompt sections', () {
+      const snapshot = GalleryPromptCorpusSnapshot(
+        totalCount: 2,
+        entries: [
+          GalleryPromptCorpusEntry(
+            imageId: 1,
+            filePath: 'one.png',
+            prompt:
+                'masterpiece\n1girl, solo\ncinematic lighting\nsoft shading',
+          ),
+          GalleryPromptCorpusEntry(
+            imageId: 2,
+            filePath: 'two.png',
+            prompt:
+                'masterpiece\n1boy, portrait\ncinematic lighting\nsoft shading',
+          ),
+        ],
+      );
+
+      final result = GalleryPromptPatternAnalyzer.analyze(snapshot, const {
+        'masterpiece': TagCategory.meta,
+        '1girl': TagCategory.character,
+        '1boy': TagCategory.character,
+      });
+
+      expect(
+        result.effectPatterns,
+        contains(
+          isA<GalleryPromptPatternCandidate>()
+              .having(
+                (candidate) => candidate.prompt,
+                'prompt',
+                'masterpiece\ncinematic lighting\nsoft shading',
+              )
+              .having((candidate) => candidate.imageCount, 'imageCount', 2)
+              .having(
+                (candidate) => candidate.promptVariantCount,
+                'promptVariantCount',
+                2,
+              ),
+        ),
+      );
+    });
+
+    test('joins artists separated by weighted groups and neutral tags', () {
+      const snapshot = GalleryPromptCorpusSnapshot(
+        totalCount: 2,
+        entries: [
+          GalleryPromptCorpusEntry(
+            imageId: 1,
+            filePath: 'one.png',
+            prompt:
+                '{{fte_(fifteen_199), rei_(sanbonzakura)}}, 1girl, masterpiece',
+          ),
+          GalleryPromptCorpusEntry(
+            imageId: 2,
+            filePath: 'two.png',
+            prompt:
+                'fte_(fifteen_199), blue_archive, rei_(sanbonzakura), 1boy',
+          ),
+        ],
+      );
+
+      final result = GalleryPromptPatternAnalyzer.analyze(snapshot, const {
+        'fte_(fifteen_199)': TagCategory.artist,
+        'rei_(sanbonzakura)': TagCategory.artist,
+        'blue_archive': TagCategory.copyright,
+        '1girl': TagCategory.character,
+        '1boy': TagCategory.character,
+        'masterpiece': TagCategory.meta,
+      });
+
+      expect(
+        result.artistPatterns,
+        contains(
+          isA<GalleryPromptPatternCandidate>()
+              .having(
+                (candidate) => candidate.tags,
+                'tags',
+                ['fte_(fifteen_199)', 'rei_(sanbonzakura)'],
+              )
+              .having((candidate) => candidate.imageCount, 'imageCount', 2),
+        ),
       );
     });
   });
