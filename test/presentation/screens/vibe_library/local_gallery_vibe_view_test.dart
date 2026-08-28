@@ -84,7 +84,7 @@ void main() {
               locale: Locale('zh'),
               supportedLocales: AppLocalizations.supportedLocales,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
-              home: const VibeLibraryScreen(),
+              home: VibeLibraryScreen(),
             ),
           ),
         );
