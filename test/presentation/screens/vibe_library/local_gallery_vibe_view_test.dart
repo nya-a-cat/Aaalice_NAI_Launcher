@@ -17,11 +17,11 @@ void main() {
     testWidgets(
       'local gallery Vibe groups remain usable at ${width.toInt()}px',
       (tester) async {
-        final temporaryDirectory = await Directory.systemTemp.createTemp(
+        final temporaryDirectory = Directory.systemTemp.createTempSync(
           'local_gallery_vibe_view_test_',
         );
         addTearDown(
-          () => temporaryDirectory.delete(recursive: true),
+          () => temporaryDirectory.deleteSync(recursive: true),
         );
         final imageFile = File(
           '${temporaryDirectory.path}${Platform.pathSeparator}example.png',
@@ -30,7 +30,7 @@ void main() {
           'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk'
           '+A8AAQUBAScY42YAAAAASUVORK5CYII=',
         );
-        await imageFile.writeAsBytes(imageBytes);
+        imageFile.writeAsBytesSync(imageBytes);
 
         final firstSeen = DateTime(2025, 3, 4);
         final examples = [
