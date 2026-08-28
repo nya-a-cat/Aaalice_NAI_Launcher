@@ -31,6 +31,13 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache-namespace: nai-hosted
 
+      - name: Upload generated localizations
+        uses: actions/upload-artifact@v6
+        with:
+          name: generated-localizations
+          path: lib/l10n/app_localizations*.dart
+          retention-days: 1
+
       - name: Verify generated files
         run: git diff --exit-code
 
@@ -45,3 +52,9 @@ jobs:
 
       - name: Test local gallery Vibe library
         run: flutter test --no-pub --reporter expanded test/presentation/screens/vibe_library/local_gallery_vibe_view_test.dart
+
+      - name: Test Vibe keyboard pagination
+        run: flutter test --no-pub --reporter expanded test/presentation/screens/vibe_library/vibe_library_keyboard_pagination_test.dart
+
+      - name: Test gallery prompt pattern mining
+        run: flutter test --no-pub --reporter expanded test/data/services/gallery_prompt_pattern_mining_service_test.dart
