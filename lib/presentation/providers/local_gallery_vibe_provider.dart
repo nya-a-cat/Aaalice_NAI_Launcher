@@ -29,7 +29,7 @@ class LocalGalleryVibeState {
   final bool isLoading;
   final bool isBackfilling;
   final GalleryVibeBackfillProgress? backfillProgress;
-  final Object? error;
+  final String? error;
 
   int get totalPages => totalGroups == 0 ? 0 : (totalGroups / pageSize).ceil();
 
@@ -44,7 +44,7 @@ class LocalGalleryVibeState {
     bool? isBackfilling,
     GalleryVibeBackfillProgress? backfillProgress,
     bool clearBackfillProgress = false,
-    Object? error,
+    String? error,
     bool clearError = false,
   }) {
     return LocalGalleryVibeState(
@@ -167,7 +167,7 @@ class LocalGalleryVibeNotifier extends StateNotifier<LocalGalleryVibeState> {
         isInitialized: true,
         isLoading: false,
         isBackfilling: false,
-        error: error,
+        error: '$error',
       );
     }
   }
@@ -207,7 +207,7 @@ class LocalGalleryVibeNotifier extends StateNotifier<LocalGalleryVibeState> {
       state = state.copyWith(
         isInitialized: markInitialized || state.isInitialized,
         isLoading: false,
-        error: error,
+        error: '$error',
       );
     }
   }
