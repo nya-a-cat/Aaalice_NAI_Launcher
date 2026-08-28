@@ -375,6 +375,37 @@ void main() {
       },
     );
 
+    test('prompt corpus only includes active images with positive prompts', () async {
+      final now = DateTime.now();
+      final records = [
+        for (var index = 0; index < 4; index++)
+          GalleryImageRecord(
+            filePath: '/test/prompt_corpus_$index.png',
+            fileName: 'prompt_corpus_$index.png',
+            fileSize: 1024,
+            createdAt: now.add(Duration(seconds: index)),
+            modifiedAt: now,
+            indexedAt: now,
+            dateYmd: 20260421,
+          ),
+      ];
+      final ids = await dataSource.batchUpsertImages(records);
+      await dataSource.batchUpsertMetadata([
+        MapEntry(ids[0], const NaiImageMetadata(prompt: 'artist:alpha')),
+        MapEntry(ids[1], const NaiImageMetadata(prompt: 'best quality')),
+        MapEntry(ids[2], const NaiImageMetadata(prompt: 'deleted prompt')),
+        MapEntry(ids[3], const NaiImageMetadata(seed: 42)),
+      ]);
+      await dataSource.markAsDeleted(records[2].filePath);
+
+      final snapshot = await dataSource.queryPromptCorpus(limit: 1);
+
+      expect(snapshot.totalCount, 2);
+      expect(snapshot.entries, hasLength(1));
+      expect(snapshot.entries.single.prompt, 'best quality');
+      expect(snapshot.entries.single.filePath, records[1].filePath);
+    });
+
     test('batch upsert persists last scanned timestamp', () async {
       final now = DateTime.now();
       final lastScannedAt = DateTime.fromMillisecondsSinceEpoch(1712345678000);

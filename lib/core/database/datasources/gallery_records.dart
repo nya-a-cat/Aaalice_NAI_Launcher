@@ -292,6 +292,37 @@ class GalleryMetadataRecord {
   }
 }
 
+/// Lightweight positive-prompt row used by local gallery analysis.
+class GalleryPromptCorpusEntry {
+  const GalleryPromptCorpusEntry({
+    required this.imageId,
+    required this.filePath,
+    required this.prompt,
+  });
+
+  final int imageId;
+  final String filePath;
+  final String prompt;
+
+  factory GalleryPromptCorpusEntry.fromMap(Map<String, Object?> map) {
+    return GalleryPromptCorpusEntry(
+      imageId: (map['image_id'] as num).toInt(),
+      filePath: map['file_path'] as String? ?? '',
+      prompt: map['prompt'] as String? ?? '',
+    );
+  }
+}
+
+class GalleryPromptCorpusSnapshot {
+  const GalleryPromptCorpusSnapshot({
+    required this.totalCount,
+    required this.entries,
+  });
+
+  final int totalCount;
+  final List<GalleryPromptCorpusEntry> entries;
+}
+
 /// 画廊标签记录
 class GalleryTagRecord {
   final String id;

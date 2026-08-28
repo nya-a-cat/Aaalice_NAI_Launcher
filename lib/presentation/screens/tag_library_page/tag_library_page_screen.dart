@@ -8,7 +8,9 @@ import '../../../core/utils/character_prompt_block_parser.dart';
 import '../../../core/utils/comfyui_prompt_parser/pipe_parser.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/sd_to_nai_converter.dart';
+import '../../../data/models/tag_library/gallery_prompt_pattern.dart';
 import '../../../data/models/tag_library/tag_library_entry.dart';
+import '../../../data/services/gallery_prompt_pattern_mining_service.dart';
 import '../../adaptive/adaptive_presenter.dart';
 import '../../providers/fixed_tags_provider.dart';
 import '../../providers/pending_prompt_provider.dart';
@@ -29,6 +31,7 @@ import 'widgets/bulk_move_category_dialog.dart';
 import 'widgets/export_dialog.dart';
 import 'widgets/import_dialog.dart';
 import 'widgets/grouped_view/grouped_entries_view.dart';
+import 'widgets/gallery_prompt_analysis_dialog.dart';
 
 /// 词库页面
 class TagLibraryPageScreen extends ConsumerStatefulWidget {
@@ -156,6 +159,8 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
                           onImport: _handleImport,
                           onExport: _handleExport,
                           onAddEntry: _showAddEntryDialog,
+                          onAnalyzeGalleryPrompts:
+                              _showGalleryPromptAnalysis,
                         ),
                         Expanded(child: _buildContent(theme, state)),
                       ],
@@ -667,6 +672,107 @@ class _TagLibraryPageScreenState extends ConsumerState<TagLibraryPageScreen> {
           ExportDialog(entries: state.entries, categories: state.categories),
     );
   }
+
+  Future<void> _showGalleryPromptAnalysis() async {
+    final saved = await showDialog<int>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => GalleryPromptAnalysisDialog(
+        load: ref.read(galleryPromptPatternMiningServiceProvider).mine,
+        save: _saveGalleryPromptPatterns,
+      ),
+    );
+    if (!mounted || saved == null) return;
+    AppToast.success(
+      context,
+      '${context.l10n.tagLibrary_promptAnalysisSaved}: $saved',
+    );
+  }
+
+  Future<int> _saveGalleryPromptPatterns(
+    List<GalleryPromptPatternCandidate> candidates,
+  ) async {
+    if (candidates.isEmpty) return 0;
+    final notifier = ref.read(tagLibraryPageNotifierProvider.notifier);
+    final l10n = context.l10n;
+
+    Future<String?> ensureCategory(String name, {String? parentId}) async {
+      final current = ref.read(tagLibraryPageNotifierProvider).categories;
+      for (final category in current) {
+        if (category.parentId == parentId &&
+            category.name.toLowerCase() == name.toLowerCase()) {
+          return category.id;
+        }
+      }
+      final added = await notifier.addCategory(name: name, parentId: parentId);
+      if (added != null) return added.id;
+      final refreshed = ref.read(tagLibraryPageNotifierProvider).categories;
+      for (final category in refreshed) {
+        if (category.name.toLowerCase() == name.toLowerCase()) {
+          return category.id;
+        }
+      }
+      return null;
+    }
+
+    final rootId = await ensureCategory(
+      l10n.tagLibrary_galleryAnalysisCategory,
+    );
+    final artistCategoryId = await ensureCategory(
+      l10n.tagLibrary_artistPatterns,
+      parentId: rootId,
+    );
+    final effectCategoryId = await ensureCategory(
+      l10n.tagLibrary_effectPatterns,
+      parentId: rootId,
+    );
+
+    final existingContent = ref
+        .read(tagLibraryPageNotifierProvider)
+        .entries
+        .map((entry) => _normalizePatternContent(entry.content))
+        .toSet();
+    final pendingContent = <String>{};
+    final entries = <TagLibraryEntry>[];
+    for (final candidate in candidates) {
+      final normalized = _normalizePatternContent(candidate.prompt);
+      if (normalized.isEmpty ||
+          existingContent.contains(normalized) ||
+          !pendingContent.add(normalized)) {
+        continue;
+      }
+      final isArtist = candidate.type == GalleryPromptPatternType.artist;
+      final typeName = isArtist
+          ? l10n.tagLibrary_artistPatterns
+          : l10n.tagLibrary_effectPatterns;
+      final tagSummary = candidate.tags.take(2).join(' + ');
+      final rawName = '$typeName · $tagSummary';
+      final name = rawName.length <= 80
+          ? rawName
+          : '${rawName.substring(0, 77)}...';
+      entries.add(
+        TagLibraryEntry.create(
+          name: name,
+          content: candidate.prompt,
+          thumbnail: candidate.examplePaths.isEmpty
+              ? null
+              : candidate.examplePaths.first,
+          tags: [l10n.tagLibrary_galleryAnalysisCategory, typeName],
+          categoryId: isArtist ? artistCategoryId : effectCategoryId,
+        ),
+      );
+    }
+    final saved = await notifier.addEntries(
+      entries,
+      failOnPersistenceError: true,
+    );
+    return saved.length;
+  }
+
+  static String _normalizePatternContent(String value) => value
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r'\s+'), ' ');
 
   // ==================== 对话框方法 ====================
 

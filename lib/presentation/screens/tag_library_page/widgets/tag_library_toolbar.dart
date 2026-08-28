@@ -40,6 +40,9 @@ class TagLibraryToolbar extends ConsumerStatefulWidget {
   /// 添加条目回调
   final VoidCallback? onAddEntry;
 
+  /// 从本地画廊提示词中发现可复用词串。
+  final VoidCallback? onAnalyzeGalleryPrompts;
+
   /// 窄屏分类抽屉入口
   final VoidCallback? onOpenCategories;
 
@@ -54,6 +57,7 @@ class TagLibraryToolbar extends ConsumerStatefulWidget {
     this.onImport,
     this.onExport,
     this.onAddEntry,
+    this.onAnalyzeGalleryPrompts,
     this.onOpenCategories,
   });
 
@@ -211,6 +215,14 @@ class _TagLibraryToolbarState extends ConsumerState<TagLibraryToolbar> {
                   icon: Icons.checklist,
                   label: context.l10n.common_multiSelect,
                   onPressed: widget.onEnterSelectionMode,
+                ),
+                const SizedBox(width: 6),
+
+                _CompactIconButton(
+                  key: const Key('tag-library-analyze-gallery-prompts'),
+                  icon: Icons.query_stats_rounded,
+                  label: context.l10n.tagLibrary_analyzeGalleryPrompts,
+                  onPressed: widget.onAnalyzeGalleryPrompts,
                 ),
                 const SizedBox(width: 6),
 

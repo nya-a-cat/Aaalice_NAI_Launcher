@@ -20,6 +20,7 @@ abstract interface class GalleryMetadataRepository {
   Future<Map<int, GalleryMetadataRecord?>> getMetadataByImageIds(
     List<int> imageIds,
   );
+  Future<GalleryPromptCorpusSnapshot> queryPromptCorpus({int limit = 20000});
   Future<void> deleteAllMetadata();
 }
 
@@ -354,6 +355,49 @@ class SqliteGalleryMetadataRepository implements GalleryMetadataRepository {
 
       return results;
     }, details: '${imageIds.length} IDs');
+  }
+
+  @override
+  Future<GalleryPromptCorpusSnapshot> queryPromptCorpus({
+    int limit = 20000,
+  }) {
+    final safeLimit = limit.clamp(1, 100000).toInt();
+    return gateway.execute(
+      'queryPromptCorpus',
+      (db) async {
+        final countRows = await db.rawQuery(
+          '''
+          SELECT COUNT(*) AS count
+          FROM ${GalleryTables.metadata} m
+          JOIN ${GalleryTables.images} i ON i.id = m.image_id
+          WHERE i.is_deleted = 0
+            AND m.has_metadata = 1
+            AND TRIM(m.prompt) != ''
+          ''',
+        );
+        final rows = await db.rawQuery(
+          '''
+          SELECT m.image_id, i.file_path, m.prompt
+          FROM ${GalleryTables.metadata} m
+          JOIN ${GalleryTables.images} i ON i.id = m.image_id
+          WHERE i.is_deleted = 0
+            AND m.has_metadata = 1
+            AND TRIM(m.prompt) != ''
+          ORDER BY i.created_at DESC, m.image_id DESC
+          LIMIT ?
+          ''',
+          [safeLimit],
+        );
+        return GalleryPromptCorpusSnapshot(
+          totalCount: (countRows.first['count'] as num?)?.toInt() ?? 0,
+          entries: rows
+              .map(GalleryPromptCorpusEntry.fromMap)
+              .toList(growable: false),
+        );
+      },
+      timeout: const Duration(seconds: 30),
+      maxRetries: 2,
+    );
   }
 
   /// 删除所有元数据记录
