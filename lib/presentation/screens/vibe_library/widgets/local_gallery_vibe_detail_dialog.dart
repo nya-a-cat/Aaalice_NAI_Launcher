@@ -69,25 +69,30 @@ class _LocalGalleryVibeDetailDialogState
 
   @override
   Widget build(BuildContext context) {
-    final compact = MediaQuery.sizeOf(context).width < 700;
+    final compactWindow = MediaQuery.sizeOf(context).width < 700;
     return SafeArea(
       child: Dialog(
-        insetPadding: compact
+        insetPadding: compactWindow
             ? const EdgeInsets.all(8)
             : const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
         clipBehavior: Clip.antiAlias,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1180, maxHeight: 820),
-          child: Column(
-            children: [
-              _buildHeader(context),
-              const Divider(height: 1),
-              Expanded(
-                child: compact
-                    ? _buildCompactBody(context)
-                    : _buildDesktopBody(context),
-              ),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final compactContent = constraints.maxWidth < 700;
+              return Column(
+                children: [
+                  _buildHeader(context),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: compactContent
+                        ? _buildCompactBody(context)
+                        : _buildDesktopBody(context),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -170,12 +175,8 @@ class _LocalGalleryVibeDetailDialogState
                 return Image.file(
                   File(selected.filePath),
                   fit: BoxFit.contain,
-                  cacheWidth: constraints.maxWidth.isFinite
-                      ? (constraints.maxWidth * ratio).round()
-                      : null,
-                  cacheHeight: constraints.maxHeight.isFinite
-                      ? (constraints.maxHeight * ratio).round()
-                      : null,
+                  cacheWidth: _cacheDimension(constraints.maxWidth, ratio),
+                  cacheHeight: _cacheDimension(constraints.maxHeight, ratio),
                   errorBuilder: (_, _, _) => const Center(
                     child: Icon(Icons.broken_image_outlined, size: 48),
                   ),
@@ -183,6 +184,11 @@ class _LocalGalleryVibeDetailDialogState
               },
             ),
     );
+  }
+
+  int? _cacheDimension(double extent, double ratio) {
+    if (!extent.isFinite || extent <= 0) return null;
+    return (extent * ratio).round().clamp(1, 8192).toInt();
   }
 
   Widget _buildExampleStrip(BuildContext context) {
