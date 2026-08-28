@@ -1,0 +1,47 @@
+name: Local Gallery Vibe Targeted Validation
+
+on:
+  push:
+    branches:
+      - ci/local-gallery-vibe-build
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: "3.44.2"
+  PUB_HOSTED_URL: "https://pub.flutter-io.cn"
+
+jobs:
+  targeted:
+    name: Analyze and run local gallery Vibe tests
+    runs-on: windows-2022
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+
+      - name: Prepare incremental Flutter build
+        uses: ./.github/actions/prepare-flutter-build
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache-namespace: nai-hosted
+
+      - name: Verify generated files
+        run: git diff --exit-code
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test gallery metadata queries
+        run: flutter test --no-pub --reporter expanded test/core/database/datasources/gallery_search_behavior_test.dart
+
+      - name: Test gallery filters
+        run: flutter test --no-pub --reporter expanded test/presentation/widgets/gallery_filter_panel_test.dart
+
+      - name: Test local gallery Vibe library
+        run: flutter test --no-pub --reporter expanded test/presentation/screens/vibe_library/local_gallery_vibe_view_test.dart
