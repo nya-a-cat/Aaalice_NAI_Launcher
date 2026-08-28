@@ -11999,6 +11999,96 @@ abstract class AppLocalizations {
   /// **'Add Entry'**
   String get tagLibrary_addEntry;
 
+  /// No description provided for @tagLibrary_analyzeGalleryPrompts.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze Gallery Prompts'**
+  String get tagLibrary_analyzeGalleryPrompts;
+
+  /// No description provided for @tagLibrary_promptAnalysisTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery Prompt Analysis'**
+  String get tagLibrary_promptAnalysisTitle;
+
+  /// No description provided for @tagLibrary_promptAnalysisDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Find recurring artist and visual-effect sequences in indexed positive prompts.'**
+  String get tagLibrary_promptAnalysisDescription;
+
+  /// No description provided for @tagLibrary_promptAnalysisLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing indexed prompts...'**
+  String get tagLibrary_promptAnalysisLoading;
+
+  /// No description provided for @tagLibrary_promptAnalysisEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recurring artist or effect sequences were found.'**
+  String get tagLibrary_promptAnalysisEmpty;
+
+  /// No description provided for @tagLibrary_artistPatterns.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist Sequences'**
+  String get tagLibrary_artistPatterns;
+
+  /// No description provided for @tagLibrary_effectPatterns.
+  ///
+  /// In en, this message translates to:
+  /// **'Effect Sequences'**
+  String get tagLibrary_effectPatterns;
+
+  /// No description provided for @tagLibrary_scannedImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned images'**
+  String get tagLibrary_scannedImages;
+
+  /// No description provided for @tagLibrary_promptAnalysisLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'A recent subset was analyzed to keep the app responsive.'**
+  String get tagLibrary_promptAnalysisLimited;
+
+  /// No description provided for @tagLibrary_images.
+  ///
+  /// In en, this message translates to:
+  /// **'images'**
+  String get tagLibrary_images;
+
+  /// No description provided for @tagLibrary_confidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidence'**
+  String get tagLibrary_confidence;
+
+  /// No description provided for @tagLibrary_selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get tagLibrary_selectAll;
+
+  /// No description provided for @tagLibrary_saveSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Save selected'**
+  String get tagLibrary_saveSelected;
+
+  /// No description provided for @tagLibrary_promptAnalysisSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved entries'**
+  String get tagLibrary_promptAnalysisSaved;
+
+  /// No description provided for @tagLibrary_galleryAnalysisCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery Analysis'**
+  String get tagLibrary_galleryAnalysisCategory;
+
   /// No description provided for @tagLibrary_editEntry.
   ///
   /// In en, this message translates to:

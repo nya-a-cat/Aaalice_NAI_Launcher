@@ -6745,6 +6745,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tagLibrary_addEntry => 'Add Entry';
 
   @override
+  String get tagLibrary_analyzeGalleryPrompts => 'Analyze Gallery Prompts';
+
+  @override
+  String get tagLibrary_promptAnalysisTitle => 'Gallery Prompt Analysis';
+
+  @override
+  String get tagLibrary_promptAnalysisDescription =>
+      'Find recurring artist and visual-effect sequences in indexed positive prompts.';
+
+  @override
+  String get tagLibrary_promptAnalysisLoading => 'Analyzing indexed prompts...';
+
+  @override
+  String get tagLibrary_promptAnalysisEmpty =>
+      'No recurring artist or effect sequences were found.';
+
+  @override
+  String get tagLibrary_artistPatterns => 'Artist Sequences';
+
+  @override
+  String get tagLibrary_effectPatterns => 'Effect Sequences';
+
+  @override
+  String get tagLibrary_scannedImages => 'Scanned images';
+
+  @override
+  String get tagLibrary_promptAnalysisLimited =>
+      'A recent subset was analyzed to keep the app responsive.';
+
+  @override
+  String get tagLibrary_images => 'images';
+
+  @override
+  String get tagLibrary_confidence => 'Confidence';
+
+  @override
+  String get tagLibrary_selectAll => 'Select all';
+
+  @override
+  String get tagLibrary_saveSelected => 'Save selected';
+
+  @override
+  String get tagLibrary_promptAnalysisSaved => 'Saved entries';
+
+  @override
+  String get tagLibrary_galleryAnalysisCategory => 'Gallery Analysis';
+
+  @override
   String get tagLibrary_editEntry => 'Edit Entry';
 
   @override
