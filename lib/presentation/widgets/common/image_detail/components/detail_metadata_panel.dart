@@ -63,8 +63,9 @@ class DetailMetadataPanel extends ConsumerStatefulWidget {
 
 class _DetailMetadataPanelState extends ConsumerState<DetailMetadataPanel> {
   late bool _isExpanded;
-  Future<NaiImageMetadata?>? _metadataFuture;
   NaiImageMetadata? _loadedMetadata;
+  Object? _metadataLoadError;
+  bool _isMetadataLoading = false;
   (int, int)? _actualImageSize;
 
   @override
@@ -95,6 +96,9 @@ class _DetailMetadataPanelState extends ConsumerState<DetailMetadataPanel> {
   /// - [GeneratedImageDetailData]: 从内存字节解析（未保存的图像）
   void _startMetadataLoading() {
     final image = widget.currentImage;
+    _loadedMetadata = null;
+    _metadataLoadError = null;
+    _isMetadataLoading = false;
     if (image == null) {
       _actualImageSize = null;
       AppLogger.w(
@@ -125,7 +129,6 @@ class _DetailMetadataPanelState extends ConsumerState<DetailMetadataPanel> {
         'DetailMetadataPanel',
       );
       _loadedMetadata = syncMetadata;
-      _metadataFuture = null;
       return;
     }
 
@@ -161,29 +164,42 @@ class _DetailMetadataPanelState extends ConsumerState<DetailMetadataPanel> {
     }
 
     if (future != null) {
-      _metadataFuture = future
-          .then((metadata) {
-            AppLogger.i(
-              '[MetadataFlow] Async load completed: hasData=${metadata?.hasData}, prompt length=${metadata?.fullPrompt.length ?? 0}',
-              'DetailMetadataPanel',
-            );
-            if (mounted) {
-              setState(() => _loadedMetadata = metadata);
-            }
-            return metadata;
-          })
-          .catchError((e, stack) {
-            AppLogger.e(
-              '[MetadataFlow] Async load failed',
-              e,
-              stack,
-              'DetailMetadataPanel',
-            );
-            throw e;
-          });
-    } else {
-      _metadataFuture = null;
-      _loadedMetadata = null;
+      final identifier = image.identifier;
+      _isMetadataLoading = true;
+      unawaited(
+        future
+            .then((metadata) {
+              AppLogger.i(
+                '[MetadataFlow] Async load completed: hasData=${metadata?.hasData}, prompt length=${metadata?.fullPrompt.length ?? 0}',
+                'DetailMetadataPanel',
+              );
+              if (mounted &&
+                  widget.currentImage?.identifier == identifier) {
+                setState(() {
+                  _loadedMetadata = metadata;
+                  _metadataLoadError = null;
+                  _isMetadataLoading = false;
+                });
+              }
+              return metadata;
+            })
+            .catchError((e, stack) {
+              AppLogger.e(
+                '[MetadataFlow] Async load failed',
+                e,
+                stack,
+                'DetailMetadataPanel',
+              );
+              if (mounted &&
+                  widget.currentImage?.identifier == identifier) {
+                setState(() {
+                  _metadataLoadError = e;
+                  _isMetadataLoading = false;
+                });
+              }
+              return null;
+            }),
+      );
     }
   }
 
@@ -279,7 +295,6 @@ class _DetailMetadataPanelState extends ConsumerState<DetailMetadataPanel> {
     final l10n = context.l10n;
     final metadata = _currentMetadata;
     final fixedTagsState = ref.watch(fixedTagsNotifierProvider);
-    final isLoading = _metadataFuture != null && _loadedMetadata == null;
     final colorScheme = theme.colorScheme;
 
     return Column(
@@ -296,8 +311,10 @@ class _DetailMetadataPanelState extends ConsumerState<DetailMetadataPanel> {
                     style: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                 )
-              : isLoading
+              : _isMetadataLoading
               ? _buildLoadingState(theme)
+              : _metadataLoadError != null
+              ? _buildMetadataErrorState(theme)
               : metadata != null && metadata.hasData
               ? SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
@@ -321,6 +338,35 @@ class _DetailMetadataPanelState extends ConsumerState<DetailMetadataPanel> {
             ],
           ),
       ],
+    );
+  }
+
+  Widget _buildMetadataErrorState(ThemeData theme) {
+    final colorScheme = theme.colorScheme;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: colorScheme.error),
+            const SizedBox(height: 16),
+            Text(
+              context.l10n.localGallery_loadFailed(
+                _metadataLoadError.toString(),
+              ),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.tonalIcon(
+              onPressed: () => setState(_startMetadataLoading),
+              icon: const Icon(Icons.refresh),
+              label: Text(context.l10n.common_retry),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

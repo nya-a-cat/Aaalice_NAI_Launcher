@@ -5564,6 +5564,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_filterByResolution => 'Filter by Resolution';
 
   @override
+  String get localGallery_filterBySource => 'Filter by Image Source';
+
+  @override
+  String get localGallery_nonNaiImages => 'Non-NAI images';
+
+  @override
+  String get localGallery_nonNaiImagesDescription =>
+      'Show images whose completed scan found no NovelAI metadata';
+
+  @override
   String get localGallery_filterSubtitle =>
       'Precisely filter your image collection';
 

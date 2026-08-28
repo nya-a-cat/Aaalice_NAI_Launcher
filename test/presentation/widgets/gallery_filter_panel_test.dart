@@ -58,6 +58,26 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('高级筛选显示非 NAI 图片开关', (tester) async {
+    tester.view.physicalSize = const Size(800, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await _pumpFilterPanel(tester);
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -500),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('非 NAI 图片'), findsOneWidget);
+    expect(find.byType(SwitchListTile), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('手机键盘打开时筛选面板约束在可见区域内', (tester) async {
     tester.view.physicalSize = const Size(393, 800);
     tester.view.devicePixelRatio = 1;

@@ -15,6 +15,8 @@ export 'gallery_filter_service.dart' show FilterCriteria;
 /// 过滤条件
 @immutable
 class FilterCriteria {
+  static const String nonNaiMetadataStatus = 'failed';
+
   final String searchQuery;
   final DateTime? dateStart;
   final DateTime? dateEnd;
@@ -182,6 +184,9 @@ class FilterCriteria {
       minFileSize != null ||
       maxFileSize != null ||
       metadataStatuses.isNotEmpty;
+
+  bool get showsNonNaiImages =>
+      metadataStatuses.contains(nonNaiMetadataStatus);
 
   /// 生成缓存键
   String get cacheKey {
@@ -455,6 +460,16 @@ class GalleryFilterService {
       'GalleryFilterService',
     );
 
+    if (criteria.metadataStatuses.isNotEmpty) {
+      filtered = await _filterByMetadataStatus(
+        filtered,
+        criteria.metadataStatuses,
+        cancelToken,
+      );
+    }
+
+    if (cancelToken.isCancelled) return [];
+
     // 标签过滤（需要数据库查询）
     if (criteria.selectedTags.isNotEmpty) {
       filtered = await _filterByTags(
@@ -510,6 +525,32 @@ class GalleryFilterService {
       'GalleryFilterService',
     );
     return filtered;
+  }
+
+  Future<List<File>> _filterByMetadataStatus(
+    List<File> files,
+    List<String> metadataStatuses,
+    CancelToken cancelToken,
+  ) async {
+    try {
+      final imageIds = await _dataSource.advancedSearch(
+        metadataStatuses: metadataStatuses,
+        limit: max(1, files.length),
+      );
+      if (cancelToken.isCancelled) return [];
+
+      final images = await _dataSource.getImagesByIds(imageIds);
+      final matchingPaths = images.map((image) => image.filePath).toSet();
+      return files
+          .where((file) => matchingPaths.contains(file.path))
+          .toList();
+    } catch (e) {
+      AppLogger.w(
+        'Failed to filter by metadata status: $e',
+        'GalleryFilterService',
+      );
+      return [];
+    }
   }
 
   /// 应用数据库文本搜索之后仍需叠加的本地过滤。

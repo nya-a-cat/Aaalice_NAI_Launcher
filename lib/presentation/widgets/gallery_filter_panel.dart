@@ -28,6 +28,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
   final TextEditingController _minCfgController = TextEditingController();
   final TextEditingController _maxCfgController = TextEditingController();
   final TextEditingController _resolutionController = TextEditingController();
+  bool _showNonNaiImages = false;
 
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
@@ -92,6 +93,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
     _maxCfgController.text =
         state.filterCriteria.filterMaxCfg?.toString() ?? '';
     _resolutionController.text = state.filterCriteria.filterResolution ?? '';
+    _showNonNaiImages = state.filterCriteria.showsNonNaiImages;
   }
 
   @override
@@ -140,6 +142,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
     notifier.setFilterSteps(minSteps, maxSteps);
     notifier.setFilterCfg(minCfg, maxCfg);
     notifier.setFilterResolution(resolution);
+    notifier.setShowNonNaiImages(_showNonNaiImages);
 
     // Close the panel with animation
     _animController.reverse().then((_) {
@@ -156,6 +159,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
     notifier.setFilterSteps(null, null);
     notifier.setFilterCfg(null, null);
     notifier.setFilterResolution(null);
+    notifier.setShowNonNaiImages(false);
 
     // Clear text fields with animation
     setState(() {
@@ -166,6 +170,7 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
       _minCfgController.clear();
       _maxCfgController.clear();
       _resolutionController.clear();
+      _showNonNaiImages = false;
     });
   }
 
@@ -177,7 +182,8 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
         _maxStepsController.text.isNotEmpty ||
         _minCfgController.text.isNotEmpty ||
         _maxCfgController.text.isNotEmpty ||
-        _resolutionController.text.isNotEmpty;
+        _resolutionController.text.isNotEmpty ||
+        _showNonNaiImages;
   }
 
   @override
@@ -370,6 +376,26 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
                               colorScheme: colorScheme,
                             ),
                           ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildFilterCard(
+                        theme: theme,
+                        isDark: isDark,
+                        colorScheme: colorScheme,
+                        icon: Icons.image_not_supported_outlined,
+                        iconColor: Colors.amber,
+                        title: l10n.localGallery_filterBySource,
+                        child: SwitchListTile.adaptive(
+                          contentPadding: EdgeInsets.zero,
+                          value: _showNonNaiImages,
+                          title: Text(l10n.localGallery_nonNaiImages),
+                          subtitle: Text(
+                            l10n.localGallery_nonNaiImagesDescription,
+                          ),
+                          onChanged: (value) {
+                            setState(() => _showNonNaiImages = value);
+                          },
                         ),
                       ),
                     ],

@@ -5335,6 +5335,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_filterByResolution => '按分辨率筛选';
 
   @override
+  String get localGallery_filterBySource => '按图片来源筛选';
+
+  @override
+  String get localGallery_nonNaiImages => '非 NAI 图片';
+
+  @override
+  String get localGallery_nonNaiImagesDescription =>
+      '显示已完成扫描且未发现 NovelAI 元数据的图片';
+
+  @override
   String get localGallery_filterSubtitle => '精确筛选您的图片集合';
 
   @override
@@ -17558,6 +17568,16 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get localGallery_filterByResolution => '按解析度篩選';
+
+  @override
+  String get localGallery_filterBySource => '按圖片來源篩選';
+
+  @override
+  String get localGallery_nonNaiImages => '非 NAI 圖片';
+
+  @override
+  String get localGallery_nonNaiImagesDescription =>
+      '顯示已完成掃描且未發現 NovelAI 後設資料的圖片';
 
   @override
   String get localGallery_filterSubtitle => '精確篩選您的圖片集合';

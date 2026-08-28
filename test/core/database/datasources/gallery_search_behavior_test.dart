@@ -7,6 +7,7 @@ import 'package:nai_launcher/core/database/connection_pool_holder.dart';
 import 'package:nai_launcher/core/database/datasources/gallery_data_source.dart';
 import 'package:nai_launcher/core/utils/app_logger.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
+import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
 
 void main() {
@@ -88,6 +89,42 @@ void main() {
         expect(result, contains(imageId));
       },
     );
+
+    test('should filter deterministic metadata-free images as non-NAI', () async {
+      final now = DateTime.now();
+      final nonNaiFile = File('/test/plain_photo.png');
+      final naiFile = File('/test/novelai_output.png');
+
+      await dataSource.upsertImage(
+        filePath: nonNaiFile.path,
+        fileName: 'plain_photo.png',
+        fileSize: 1024,
+        createdAt: now,
+        modifiedAt: now,
+        metadataStatus: MetadataStatus.failed,
+      );
+      final naiId = await dataSource.upsertImage(
+        filePath: naiFile.path,
+        fileName: 'novelai_output.png',
+        fileSize: 2048,
+        createdAt: now,
+        modifiedAt: now,
+        metadataStatus: MetadataStatus.success,
+      );
+      await dataSource.upsertMetadata(
+        naiId,
+        const NaiImageMetadata(prompt: '1girl', seed: 1),
+      );
+
+      final result = await GalleryFilterService(dataSource).applyFilters(
+        [nonNaiFile, naiFile],
+        const FilterCriteria(
+          metadataStatuses: [FilterCriteria.nonNaiMetadataStatus],
+        ),
+      );
+
+      expect(result.files.map((file) => file.path), [nonNaiFile.path]);
+    });
 
     test('should support prompt queries that use comma separators', () async {
       final now = DateTime.now();

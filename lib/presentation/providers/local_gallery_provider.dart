@@ -749,6 +749,23 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     await _applyFilters();
   }
 
+  Future<void> setShowNonNaiImages(bool value) async {
+    final metadataStatuses = value
+        ? const [FilterCriteria.nonNaiMetadataStatus]
+        : const <String>[];
+    if (state.filterCriteria.showsNonNaiImages == value) return;
+
+    _setState(
+      state.copyWith(
+        filterCriteria: state.filterCriteria.copyWith(
+          metadataStatuses: metadataStatuses,
+        ),
+        currentPage: 0,
+      ),
+    );
+    await _applyFilters();
+  }
+
   /// 设置选中的分类
   ///
   /// [categoryId] 分类ID（null表示全部）

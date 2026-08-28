@@ -9931,6 +9931,15 @@ abstract class AppLocalizations {
   /// **'Filter by Resolution'**
   String get localGallery_filterByResolution;
 
+  /// No description provided for @localGallery_filterBySource.
+  String get localGallery_filterBySource;
+
+  /// No description provided for @localGallery_nonNaiImages.
+  String get localGallery_nonNaiImages;
+
+  /// No description provided for @localGallery_nonNaiImagesDescription.
+  String get localGallery_nonNaiImagesDescription;
+
   /// No description provided for @localGallery_filterSubtitle.
   ///
   /// In en, this message translates to:

@@ -5433,6 +5433,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_filterByResolution => '解像度によるフィルター';
 
   @override
+  String get localGallery_filterBySource => '画像ソースでフィルター';
+
+  @override
+  String get localGallery_nonNaiImages => 'NAI 以外の画像';
+
+  @override
+  String get localGallery_nonNaiImagesDescription =>
+      'スキャンが完了し、NovelAI メタデータが見つからなかった画像を表示します';
+
+  @override
   String get localGallery_filterSubtitle => '画像コレクションを正確にフィルタリングします';
 
   @override

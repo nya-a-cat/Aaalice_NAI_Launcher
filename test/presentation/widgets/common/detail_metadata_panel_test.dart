@@ -16,6 +16,35 @@ import 'package:nai_launcher/presentation/widgets/common/image_detail/image_deta
 import 'package:nai_launcher/presentation/widgets/shortcuts/shortcuts.dart';
 
 void main() {
+  testWidgets('plain image resolves to no metadata instead of loading forever', (
+    tester,
+  ) async {
+    final image = img.Image(width: 2, height: 2);
+    final detail = GeneratedImageDetailData(
+      imageBytes: Uint8List.fromList(img.encodePng(image)),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          locale: const Locale('zh'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: DetailMetadataPanel(
+              currentImage: detail,
+              expandedWidth: 600,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('此图片无元数据'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
   testWidgets(
     'resolution uses encoded image size instead of request metadata',
     (tester) async {
