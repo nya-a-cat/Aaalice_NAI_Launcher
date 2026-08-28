@@ -6,6 +6,7 @@ class GalleryPromptPatternCandidate {
     required this.prompt,
     required this.tags,
     required this.imageCount,
+    this.promptVariantCount = 1,
     required this.confidence,
     required this.cohesion,
     required this.examplePaths,
@@ -15,6 +16,7 @@ class GalleryPromptPatternCandidate {
   final String prompt;
   final List<String> tags;
   final int imageCount;
+  final int promptVariantCount;
   final double confidence;
   final double cohesion;
   final List<String> examplePaths;
