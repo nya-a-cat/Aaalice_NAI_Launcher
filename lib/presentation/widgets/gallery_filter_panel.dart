@@ -386,16 +386,19 @@ class _GalleryFilterPanelState extends ConsumerState<GalleryFilterPanel>
                         icon: Icons.image_not_supported_outlined,
                         iconColor: Colors.amber,
                         title: l10n.localGallery_filterBySource,
-                        child: SwitchListTile.adaptive(
-                          contentPadding: EdgeInsets.zero,
-                          value: _showNonNaiImages,
-                          title: Text(l10n.localGallery_nonNaiImages),
-                          subtitle: Text(
-                            l10n.localGallery_nonNaiImagesDescription,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: SwitchListTile.adaptive(
+                            contentPadding: EdgeInsets.zero,
+                            value: _showNonNaiImages,
+                            title: Text(l10n.localGallery_nonNaiImages),
+                            subtitle: Text(
+                              l10n.localGallery_nonNaiImagesDescription,
+                            ),
+                            onChanged: (value) {
+                              setState(() => _showNonNaiImages = value);
+                            },
                           ),
-                          onChanged: (value) {
-                            setState(() => _showNonNaiImages = value);
-                          },
                         ),
                       ),
                     ],

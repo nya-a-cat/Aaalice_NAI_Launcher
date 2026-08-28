@@ -8049,16 +8049,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get vibeLibrary_localGalleryView => 'ローカルギャラリー';
 
   @override
-  String get vibeLibrary_localGalleryDiscovery =>
-      'ローカルギャラリーで見つかった Vibe';
+  String get vibeLibrary_localGalleryDiscovery => 'ローカルギャラリーで見つかった Vibe';
 
   @override
-  String get vibeLibrary_localGallerySearchHint =>
-      'ファイル名、モデル、フィンガープリントを検索...';
+  String get vibeLibrary_localGallerySearchHint => 'ファイル名、モデル、フィンガープリントを検索...';
 
   @override
-  String get vibeLibrary_rescanLocalGalleryVibes =>
-      'ローカル Vibe インデックスを更新';
+  String get vibeLibrary_rescanLocalGalleryVibes => 'ローカル Vibe インデックスを更新';
 
   @override
   String vibeLibrary_indexingLocalGallery(Object processed, Object total) {
@@ -8066,8 +8063,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get vibeLibrary_localGalleryEmpty =>
-      'ローカルギャラリーに Vibe がありません';
+  String get vibeLibrary_localGalleryEmpty => 'ローカルギャラリーに Vibe がありません';
 
   @override
   String get vibeLibrary_localGalleryEmptyHint =>
@@ -8096,8 +8092,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'ローカルギャラリーから Vibe ライブラリに保存しました';
 
   @override
-  String get vibeLibrary_exactEncodingGroup =>
-      '同一エンコードの完全一致グループ';
+  String get vibeLibrary_exactEncodingGroup => '同一エンコードの完全一致グループ';
 
   @override
   String get vibeLibrary_loadMore => 'さらに読み込む';
@@ -8112,8 +8107,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get vibeLibrary_model => 'モデル';
 
   @override
-  String get vibeLibrary_encodingFingerprint =>
-      'エンコードのフィンガープリント';
+  String get vibeLibrary_encodingFingerprint => 'エンコードのフィンガープリント';
 
   @override
   String get vibeLibrary_saveToLibrary => 'Vibe ライブラリに保存';

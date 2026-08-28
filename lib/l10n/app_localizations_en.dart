@@ -8243,8 +8243,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Search file name, model, or fingerprint...';
 
   @override
-  String get vibeLibrary_rescanLocalGalleryVibes =>
-      'Refresh local Vibe index';
+  String get vibeLibrary_rescanLocalGalleryVibes => 'Refresh local Vibe index';
 
   @override
   String vibeLibrary_indexingLocalGallery(Object processed, Object total) {
@@ -8252,8 +8251,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get vibeLibrary_localGalleryEmpty =>
-      'No Vibes found in local gallery';
+  String get vibeLibrary_localGalleryEmpty => 'No Vibes found in local gallery';
 
   @override
   String get vibeLibrary_localGalleryEmptyHint =>

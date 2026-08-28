@@ -9932,12 +9932,21 @@ abstract class AppLocalizations {
   String get localGallery_filterByResolution;
 
   /// No description provided for @localGallery_filterBySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Image Source'**
   String get localGallery_filterBySource;
 
   /// No description provided for @localGallery_nonNaiImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-NAI images'**
   String get localGallery_nonNaiImages;
 
   /// No description provided for @localGallery_nonNaiImagesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Show images whose completed scan found no NovelAI metadata'**
   String get localGallery_nonNaiImagesDescription;
 
   /// No description provided for @localGallery_filterSubtitle.
