@@ -68,7 +68,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(effect.prompt), findsOneWidget);
 
-    await tester.tap(find.text(effect.prompt));
+    await tester.tap(find.byType(Checkbox));
     await tester.pump();
     await tester.tap(find.text('保存所选 (1)'));
     await tester.pumpAndSettle();
