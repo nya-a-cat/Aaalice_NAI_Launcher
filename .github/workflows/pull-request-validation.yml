@@ -36,7 +36,7 @@ concurrency:
 
 env:
   FLUTTER_VERSION: "3.44.2"
-  PUB_HOSTED_URL: "https://pub.dev"
+  PUB_HOSTED_URL: "https://pub.flutter-io.cn"
 
 jobs:
   changes:
@@ -109,7 +109,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          lfs: true
+          lfs: false
 
       - name: Test Windows portable package verifier
         shell: pwsh
@@ -177,7 +177,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          lfs: true
+          lfs: false
 
       - name: Prepare incremental Flutter build
         uses: ./.github/actions/prepare-flutter-build
