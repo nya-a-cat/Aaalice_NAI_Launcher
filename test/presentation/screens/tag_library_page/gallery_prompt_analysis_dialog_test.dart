@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/tag_library/gallery_prompt_pattern.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -14,15 +15,17 @@ void main() {
       prompt: 'artist:alpha, artist:beta',
       tags: ['artist:alpha', 'artist:beta'],
       imageCount: 12,
+      promptVariantCount: 4,
       confidence: 0.91,
       cohesion: 0.88,
-      examplePaths: [r'C:\gallery\artist-example.png'],
+      examplePaths: ['assets/images/1.png', 'assets/images/2.png'],
     );
     const effect = GalleryPromptPatternCandidate(
       type: GalleryPromptPatternType.effect,
       prompt: 'masterpiece, best quality, cinematic lighting',
       tags: ['masterpiece', 'best quality', 'cinematic lighting'],
       imageCount: 28,
+      promptVariantCount: 7,
       confidence: 0.86,
       cohesion: 0.81,
       examplePaths: [r'C:\gallery\effect-example.png'],
@@ -63,6 +66,23 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
     expect(find.text(artist.prompt), findsOneWidget);
+
+    await tester.tap(
+      find.byKey(const ValueKey('gallery-prompt-example-0')),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('gallery-prompt-example-full-0')),
+      findsOneWidget,
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('gallery-prompt-example-full-1')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byIcon(Icons.close).last);
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('效果串 (1)'));
     await tester.pumpAndSettle();

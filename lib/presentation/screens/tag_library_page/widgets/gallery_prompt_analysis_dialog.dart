@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/tag_library/gallery_prompt_pattern.dart';
+import 'gallery_prompt_example_preview.dart';
 
 typedef GalleryPromptAnalysisLoader = Future<GalleryPromptMiningResult>
     Function();
@@ -292,30 +292,23 @@ class _GalleryPromptAnalysisDialogState
                           '${context.l10n.tagLibrary_images}',
                         ),
                         _metricChip(
+                          Icons.account_tree_outlined,
+                          '${candidate.promptVariantCount} '
+                          '${context.l10n.tagLibrary_entriesLabel}',
+                        ),
+                        _metricChip(
                           Icons.verified_outlined,
                           '${context.l10n.tagLibrary_confidence} '
                           '${(candidate.confidence * 100).round()}%',
                         ),
-                        for (final example in candidate.examplePaths.take(3))
-                          Tooltip(
-                            message: example,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 220),
-                              child: Chip(
-                                visualDensity: VisualDensity.compact,
-                                avatar: const Icon(
-                                  Icons.image_outlined,
-                                  size: 16,
-                                ),
-                                label: Text(
-                                  path.basename(example),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                          ),
                       ],
                     ),
+                    if (candidate.examplePaths.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      GalleryPromptExampleStrip(
+                        examplePaths: candidate.examplePaths,
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     LinearProgressIndicator(
                       value: candidate.confidence,
