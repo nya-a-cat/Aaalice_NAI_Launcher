@@ -138,7 +138,7 @@ void main() {
             imageId: 2,
             filePath: 'two.png',
             prompt:
-                'masterpiece\n1boy, portrait\ncinematic lighting\nsoft shading',
+                'masterpiece\n1boy, solo\ncinematic lighting\nsoft shading',
           ),
         ],
       );
