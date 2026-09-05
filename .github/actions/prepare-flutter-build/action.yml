@@ -75,3 +75,27 @@ runs:
     - name: Generate code incrementally
       shell: pwsh
       run: dart run build_runner build --delete-conflicting-outputs
+
+    # Preserve successfully prepared tooling even when a later lint/build fails.
+    - name: Save prepared Flutter SDK
+      if: inputs.cache-flutter-sdk == 'true' && steps.flutter.outputs.CACHE-HIT != 'true'
+      uses: actions/cache/save@v6
+      with:
+        path: ${{ steps.flutter.outputs.CACHE-PATH }}
+        key: ${{ steps.flutter.outputs.CACHE-KEY }}
+
+    - name: Save resolved Pub dependencies
+      if: inputs.cache-pub-dependencies == 'true' && steps.flutter.outputs.PUB-CACHE-HIT != 'true'
+      uses: actions/cache/save@v6
+      with:
+        path: ${{ steps.flutter.outputs.PUB-CACHE-PATH }}
+        key: ${{ steps.flutter.outputs.PUB-CACHE-KEY }}-${{ hashFiles('**/pubspec.lock') }}
+
+    - name: Save prepared generated sources
+      uses: actions/cache/save@v6
+      with:
+        path: |
+          .dart_tool/build
+          lib/**/*.g.dart
+          lib/**/*.freezed.dart
+        key: ${{ inputs.cache-namespace }}-codegen-${{ runner.os }}-${{ inputs.flutter-version }}-${{ hashFiles('pubspec.lock') }}-${{ hashFiles('pubspec.yaml', 'build.yaml', 'lib/**') }}
