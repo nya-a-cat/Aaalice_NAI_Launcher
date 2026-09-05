@@ -12570,4 +12570,140 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get vibeDetail_choosePreviewImage => '画像ボタンからプレビューを選択してください';
+
+  @override
+  String get vibeFamily_title => 'スタイルグループ';
+
+  @override
+  String get vibeFamily_suggestions => '候補';
+
+  @override
+  String get vibeFamily_allCodes => 'すべてのコード';
+
+  @override
+  String get vibeFamily_confirmed => 'グループ済み';
+
+  @override
+  String get vibeFamily_separated => '分離済み';
+
+  @override
+  String get vibeFamily_analyze => '既存画像を分析';
+
+  @override
+  String get vibeFamily_cancel => 'キャンセル';
+
+  @override
+  String get vibeFamily_merge => 'グループ化';
+
+  @override
+  String get vibeFamily_keepSeparate => '別々に保持';
+
+  @override
+  String get vibeFamily_hint =>
+      '類似度は比較用の指標です。確認後にグループを保存します。オフラインで分析し、元画像は読み取り専用です。';
+
+  @override
+  String get vibeFamily_controlled => '複数の設定で比較済み・確認してください';
+
+  @override
+  String get vibeFamily_visualOnly => '見た目が近い・比較条件が不足';
+
+  @override
+  String vibeFamily_evidence(int recipes, int seeds) {
+    return '独立プロンプト $recipes 組、同一シード $seeds 組';
+  }
+
+  @override
+  String vibeFamily_dimensions(
+    String color,
+    String texture,
+    String edges,
+    String layout,
+  ) {
+    return '比較値（0–1）：色 $color・質感 $texture・線 $edges・構図 $layout';
+  }
+
+  @override
+  String get vibeFamily_previousPair => '前の比較';
+
+  @override
+  String get vibeFamily_nextPair => '次の比較';
+
+  @override
+  String get vibeFamily_previousPage => '前のページ';
+
+  @override
+  String get vibeFamily_nextPage => '次のページ';
+
+  @override
+  String get vibeFamily_noSeparations => '分離したコードはありません。';
+
+  @override
+  String get vibeFamily_restore => 'グループ化を再許可';
+
+  @override
+  String get vibeFamily_noFamilies => '候補を確認するか、すべてのコードから選択してグループ化してください。';
+
+  @override
+  String vibeFamily_memberCount(int count) {
+    return '$count 個のコード';
+  }
+
+  @override
+  String get vibeFamily_rename => 'グループ名を変更';
+
+  @override
+  String get vibeFamily_split => '分離して保持';
+
+  @override
+  String get vibeFamily_conflict =>
+      '別々に保持したコードが含まれています。分離済みタブで対応するペアを復元してください。';
+
+  @override
+  String get vibeFamily_error => '操作を完了できませんでした。再試行してください。既存グループは保持されています。';
+
+  @override
+  String get vibeFamily_retry => '再試行';
+
+  @override
+  String vibeFamily_progress(int done, int total) {
+    return '画像を分析中 $done / $total';
+  }
+
+  @override
+  String get vibeFamily_ranking => '異なるコードの作例を比較中…';
+
+  @override
+  String get vibeFamily_preparing => 'ギャラリーから比較情報を読み込み中…';
+
+  @override
+  String get vibeFamily_cancelled => '分析を中止しました。計算済み特徴は次回再利用できます。';
+
+  @override
+  String vibeFamily_result(int done, int skipped, int selected, int available) {
+    return '$done 枚を分析、$skipped 枚をスキップ。読み込んだ $available 枚から $selected 枚を選択。';
+  }
+
+  @override
+  String get vibeFamily_startHint =>
+      '既存画像を分析して類似コードを探すか、手動でグループ化できます。1 回に最大 1,600 枚・300 コードを分析し、いつでも中止できます。';
+
+  @override
+  String get vibeFamily_noMatches =>
+      '候補はありません。すべてのコードから手動で選択できます。他の Vibe の組合せ、ファイル欠損、比較画像の不足により比較が制限されます。';
+
+  @override
+  String get vibeFamily_ungrouped => '未分類';
+
+  @override
+  String get vibeFamily_missing => 'このコードのローカル作例がありません。';
+
+  @override
+  String get vibeFamily_name => 'グループ名';
+
+  @override
+  String get vibeFamily_defaultName => 'マイ Vibe グループ';
+
+  @override
+  String get vibeFamily_confirm => '確認';
 }

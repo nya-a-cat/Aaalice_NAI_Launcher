@@ -20,8 +20,14 @@ class VibeStyleAnalysisService {
   bool _cancelled = false;
   bool _running = false;
 
-  void cancel() { _cancelled = true; _worker.cancel(); }
-  void _check() { if (_cancelled) throw VibeStyleCancelled(); }
+  void cancel() {
+    _cancelled = true;
+    _worker.cancel();
+  }
+
+  void _check() {
+    if (_cancelled) throw VibeStyleCancelled();
+  }
 
   Future<VibeStyleAnalysis> analyze({
     required void Function(VibeStyleProgress progress) onProgress,
@@ -35,7 +41,10 @@ class VibeStyleAnalysisService {
       const corpusLimit = 12000;
       while (available < corpusLimit) {
         _check();
-        final rows = await repository.corpusPage(afterId, limit: math.min(128, corpusLimit - available));
+        final rows = await repository.corpusPage(
+          afterId,
+          limit: math.min(128, corpusLimit - available),
+        );
         _check();
         if (rows.isEmpty) break;
         afterId = (rows.last['id']! as num).toInt();
@@ -45,10 +54,14 @@ class VibeStyleAnalysisService {
       }
       _check();
       final selected = await _worker.run<List<VibeStyleSample>>('select', all);
-      final unique = <String,VibeStyleSample>{for (final s in selected) s.cacheKey: s};
-      final cached = await repository.cachedFeatures(VibeStyleFeatures.version,
-        unique.values.map((s) => s.imageId).toList());
-      final features = <String,List<List<double>>>{};
+      final unique = <String, VibeStyleSample>{
+        for (final s in selected) s.cacheKey: s,
+      };
+      final cached = await repository.cachedFeatures(
+        VibeStyleFeatures.version,
+        unique.values.map((s) => s.imageId).toList(),
+      );
+      final features = <String, List<List<double>>>{};
       var completed = 0;
       for (final sample in unique.values) {
         _check();
@@ -56,13 +69,23 @@ class VibeStyleAnalysisService {
         if (value != null) {
           try {
             if (!VibeStyleFeatures.isValid(value) ||
-                !VibeStyleFeatures.matches(await File(sample.path).stat(), sample)) value = null;
-          } catch (_) { value = null; }
+                !VibeStyleFeatures.matches(
+                  await File(sample.path).stat(),
+                  sample,
+                )) {
+              value = null;
+            }
+          } catch (_) {
+            value = null;
+          }
         }
         if (value == null) {
           try {
-            value = await _worker.run<List<List<double>>?>('features', sample,
-              timeout: const Duration(seconds: 10));
+            value = await _worker.run<List<List<double>>?>(
+              'features',
+              sample,
+              timeout: const Duration(seconds: 10),
+            );
           } on VibeStyleCancelled {
             rethrow;
           } catch (_) {
@@ -70,7 +93,11 @@ class VibeStyleAnalysisService {
           }
           _check();
           if (value != null) {
-            await repository.saveFeatures(sample, VibeStyleFeatures.version, value);
+            await repository.saveFeatures(
+              sample,
+              VibeStyleFeatures.version,
+              value,
+            );
           }
         }
         if (value != null) features[sample.cacheKey] = value;
@@ -79,10 +106,18 @@ class VibeStyleAnalysisService {
       }
       _check();
       onProgress(VibeStyleProgress('rank', completed, unique.length));
-      final matches = await _worker.run<List<VibeStyleMatch>>('rank', [selected, features]);
+      final matches = await _worker.run<List<VibeStyleMatch>>('rank', [
+        selected,
+        features,
+      ]);
       _check();
-      return VibeStyleAnalysis(matches: matches, scanned: features.length,
-        skipped: unique.length - features.length, available: available, selected: unique.length);
+      return VibeStyleAnalysis(
+        matches: matches,
+        scanned: features.length,
+        skipped: unique.length - features.length,
+        available: available,
+        selected: unique.length,
+      );
     } finally {
       _running = false;
     }

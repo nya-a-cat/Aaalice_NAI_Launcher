@@ -22435,6 +22435,245 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use the image button to choose a preview'**
   String get vibeDetail_choosePreviewImage;
+
+  /// No description provided for @vibeFamily_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Style groups'**
+  String get vibeFamily_title;
+
+  /// No description provided for @vibeFamily_suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions'**
+  String get vibeFamily_suggestions;
+
+  /// No description provided for @vibeFamily_allCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'All encodings'**
+  String get vibeFamily_allCodes;
+
+  /// No description provided for @vibeFamily_confirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Grouped'**
+  String get vibeFamily_confirmed;
+
+  /// No description provided for @vibeFamily_separated.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept separate'**
+  String get vibeFamily_separated;
+
+  /// No description provided for @vibeFamily_analyze.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze existing images'**
+  String get vibeFamily_analyze;
+
+  /// No description provided for @vibeFamily_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get vibeFamily_cancel;
+
+  /// No description provided for @vibeFamily_merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Group together'**
+  String get vibeFamily_merge;
+
+  /// No description provided for @vibeFamily_keepSeparate.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep separate'**
+  String get vibeFamily_keepSeparate;
+
+  /// No description provided for @vibeFamily_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Similarity is a comparison score. Groups are saved after confirmation. Analysis is offline and source images are read-only.'**
+  String get vibeFamily_hint;
+
+  /// No description provided for @vibeFamily_controlled.
+  ///
+  /// In en, this message translates to:
+  /// **'Several recipe controls · please review'**
+  String get vibeFamily_controlled;
+
+  /// No description provided for @vibeFamily_visualOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Similar appearance · limited controls'**
+  String get vibeFamily_visualOnly;
+
+  /// No description provided for @vibeFamily_evidence.
+  ///
+  /// In en, this message translates to:
+  /// **'{recipes} independent prompt controls, {seeds} with matching seeds'**
+  String vibeFamily_evidence(int recipes, int seeds);
+
+  /// No description provided for @vibeFamily_dimensions.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparison scores (0–1): color {color} · texture {texture} · edges {edges} · layout {layout}'**
+  String vibeFamily_dimensions(
+    String color,
+    String texture,
+    String edges,
+    String layout,
+  );
+
+  /// No description provided for @vibeFamily_previousPair.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous comparison'**
+  String get vibeFamily_previousPair;
+
+  /// No description provided for @vibeFamily_nextPair.
+  ///
+  /// In en, this message translates to:
+  /// **'Next comparison'**
+  String get vibeFamily_nextPair;
+
+  /// No description provided for @vibeFamily_previousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get vibeFamily_previousPage;
+
+  /// No description provided for @vibeFamily_nextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get vibeFamily_nextPage;
+
+  /// No description provided for @vibeFamily_noSeparations.
+  ///
+  /// In en, this message translates to:
+  /// **'No encodings have been kept separate.'**
+  String get vibeFamily_noSeparations;
+
+  /// No description provided for @vibeFamily_restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow grouping again'**
+  String get vibeFamily_restore;
+
+  /// No description provided for @vibeFamily_noFamilies.
+  ///
+  /// In en, this message translates to:
+  /// **'Review a suggestion or select encodings under All encodings to group them.'**
+  String get vibeFamily_noFamilies;
+
+  /// No description provided for @vibeFamily_memberCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} encodings'**
+  String vibeFamily_memberCount(int count);
+
+  /// No description provided for @vibeFamily_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename group'**
+  String get vibeFamily_rename;
+
+  /// No description provided for @vibeFamily_split.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove and keep separate'**
+  String get vibeFamily_split;
+
+  /// No description provided for @vibeFamily_conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'These groups contain encodings you kept separate. Restore that pair under Kept separate first.'**
+  String get vibeFamily_conflict;
+
+  /// No description provided for @vibeFamily_error.
+  ///
+  /// In en, this message translates to:
+  /// **'The operation could not finish. Please retry. Existing groups are retained.'**
+  String get vibeFamily_error;
+
+  /// No description provided for @vibeFamily_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get vibeFamily_retry;
+
+  /// No description provided for @vibeFamily_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing images {done} / {total}'**
+  String vibeFamily_progress(int done, int total);
+
+  /// No description provided for @vibeFamily_ranking.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparing examples across encodings…'**
+  String get vibeFamily_ranking;
+
+  /// No description provided for @vibeFamily_preparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading comparison data from the gallery…'**
+  String get vibeFamily_preparing;
+
+  /// No description provided for @vibeFamily_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Analysis cancelled. Completed features can be reused next time.'**
+  String get vibeFamily_cancelled;
+
+  /// No description provided for @vibeFamily_result.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzed {done}, skipped {skipped}; selected {selected} from {available} indexed images.'**
+  String vibeFamily_result(int done, int skipped, int selected, int available);
+
+  /// No description provided for @vibeFamily_startHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze existing images to find similar encodings, or group them manually. Each run samples at most 1,600 images and 300 encodings and can be cancelled.'**
+  String get vibeFamily_startHint;
+
+  /// No description provided for @vibeFamily_noMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No grouping suggestions. You can select encodings manually. Other Vibe combinations, missing files, or limited controls can restrict comparisons.'**
+  String get vibeFamily_noMatches;
+
+  /// No description provided for @vibeFamily_ungrouped.
+  ///
+  /// In en, this message translates to:
+  /// **'Ungrouped'**
+  String get vibeFamily_ungrouped;
+
+  /// No description provided for @vibeFamily_missing.
+  ///
+  /// In en, this message translates to:
+  /// **'This encoding has no available local examples.'**
+  String get vibeFamily_missing;
+
+  /// No description provided for @vibeFamily_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Group name'**
+  String get vibeFamily_name;
+
+  /// No description provided for @vibeFamily_defaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'My Vibe group'**
+  String get vibeFamily_defaultName;
+
+  /// No description provided for @vibeFamily_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get vibeFamily_confirm;
 }
 
 class _AppLocalizationsDelegate

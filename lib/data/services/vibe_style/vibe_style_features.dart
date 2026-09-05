@@ -25,11 +25,18 @@ class VibeStyleFeatures {
     } finally {
       await handle.close();
     }
-    if (bytes.length != before.size || !matches(await file.stat(), sample)) return null;
+    if (bytes.length != before.size || !matches(await file.stat(), sample)) {
+      return null;
+    }
     final decoder = img.findDecoderForData(bytes);
     final info = decoder?.startDecode(bytes);
-    if (info == null || info.width < 1 || info.height < 1 ||
-        info.width * info.height > maximumPixels || info.numFrames != 1) return null;
+    if (info == null ||
+        info.width < 1 ||
+        info.height < 1 ||
+        info.width * info.height > maximumPixels ||
+        info.numFrames != 1) {
+      return null;
+    }
     final decoded = decoder!.decodeFrame(0);
     if (decoded == null) return null;
     final result = extract(img.bakeOrientation(decoded));
@@ -37,24 +44,34 @@ class VibeStyleFeatures {
   }
 
   static bool matches(FileStat stat, VibeStyleSample s) =>
-      stat.type == FileSystemEntityType.file && stat.size == s.size &&
+      stat.type == FileSystemEntityType.file &&
+      stat.size == s.size &&
       stat.modified.millisecondsSinceEpoch == s.modifiedAt;
 
   static bool isValid(List<List<double>> features) {
-    const dimensions = [40,18,10,27];
-    return features.length == 4 && List.generate(4, (i) =>
-      features[i].length == dimensions[i] &&
-      features[i].every((v) => v.isFinite && v >= 0 && v <= 1)).every((v) => v);
+    const dimensions = [40, 18, 10, 27];
+    return features.length == 4 &&
+        List.generate(
+          4,
+          (i) =>
+              features[i].length == dimensions[i] &&
+              features[i].every((v) => v.isFinite && v >= 0 && v <= 1),
+        ).every((v) => v);
   }
 
   /// All resize and color operations target new in-memory images only.
   static List<List<double>> extract(img.Image source) {
     const longest = 256;
-    final scale = math.min(1.0, longest / math.max(source.width, source.height));
-    final image = img.copyResize(source,
+    final scale = math.min(
+      1.0,
+      longest / math.max(source.width, source.height),
+    );
+    final image = img.copyResize(
+      source,
       width: math.max(1, (source.width * scale).round()),
       height: math.max(1, (source.height * scale).round()),
-      interpolation: img.Interpolation.average);
+      interpolation: img.Interpolation.average,
+    );
     final w = image.width, h = image.height, n = w * h;
     final luminance = Float64List(n);
     final color = List<double>.filled(40, 0);
@@ -73,8 +90,11 @@ class VibeStyleFeatures {
         final sat = high == 0 ? 0.0 : delta / high;
         var hue = 0.0;
         if (delta > 0) {
-          hue = high == r ? ((g - b) / delta) % 6 :
-            high == g ? (b - r) / delta + 2 : (r - g) / delta + 4;
+          hue = high == r
+              ? ((g - b) / delta) % 6
+              : high == g
+              ? (b - r) / delta + 2
+              : (r - g) / delta + 4;
           hue = (hue / 6) % 1;
         }
         color[(hue * 24).floor().clamp(0, 23)] += sat;
@@ -82,7 +102,7 @@ class VibeStyleFeatures {
         color[32 + (high * 8).floor().clamp(0, 7)]++;
         final lum = (0.2126 * r + 0.7152 * g + 0.0722 * b).toDouble();
         luminance[y * w + x] = lum;
-        final cell = math.min(2, y * 3 ~/ h) * 3 + math.min(2, x * 3 ~/ w);
+        final cell = math.min<int>(2, y * 3 ~/ h) * 3 + math.min<int>(2, x * 3 ~/ w);
         cells[cell]++;
         spatial[cell * 3] += lum;
         spatial[cell * 3 + 1] += sat;
@@ -93,7 +113,16 @@ class VibeStyleFeatures {
     _normalize(color, 32, 40);
     final edges = List<double>.filled(10, 0);
     final texture = List<double>.filled(10, 0);
-    const offsets = [(-1,-1),(0,-1),(1,-1),(1,0),(1,1),(0,1),(-1,1),(-1,0)];
+    const offsets = [
+      (-1, -1),
+      (0, -1),
+      (1, -1),
+      (1, 0),
+      (1, 1),
+      (0, 1),
+      (-1, 1),
+      (-1, 0),
+    ];
     var interiors = 0;
     for (var y = 1; y < h - 1; y++) {
       for (var x = 1; x < w - 1; x++) {
@@ -104,18 +133,20 @@ class VibeStyleFeatures {
         final dy = luminance[i + w] - luminance[i - w];
         final magnitude = math.sqrt(dx * dx + dy * dy) / math.sqrt2;
         final direction = ((math.atan2(dy, dx) + math.pi) / (2 * math.pi) * 8)
-            .floor().clamp(0, 7);
+            .floor()
+            .clamp(0, 7);
         edges[direction] += magnitude;
         edges[8] += magnitude;
         if (magnitude > 0.12) edges[9]++;
-        final bits = offsets.map((o) =>
-          luminance[(y + o.$2) * w + x + o.$1] >= center ? 1 : 0).toList();
+        final bits = offsets
+            .map((o) => luminance[(y + o.$2) * w + x + o.$1] >= center ? 1 : 0)
+            .toList();
         var transitions = 0;
         for (var j = 0; j < 8; j++) {
           if (bits[j] != bits[(j + 1) % 8]) transitions++;
         }
-        texture[transitions <= 2 ? bits.fold<int>(0, (a,b) => a+b) : 9]++;
-        final cell = math.min(2, y * 3 ~/ h) * 3 + math.min(2, x * 3 ~/ w);
+        texture[transitions <= 2 ? bits.fold<int>(0, (a, b) => a + b) : 9]++;
+        final cell = math.min<int>(2, y * 3 ~/ h) * 3 + math.min<int>(2, x * 3 ~/ w);
         spatial[cell * 3 + 2] += magnitude;
       }
     }
@@ -123,17 +154,23 @@ class VibeStyleFeatures {
     edges[8] /= math.max(1, interiors);
     edges[9] /= math.max(1, interiors);
     _normalize(texture, 0, 10);
-    texture.addAll(VibeStyleTexture.describe(luminance,w,h));
-    for (var i = 0; i < 27; i++) { spatial[i] /= math.max(1, cells[i ~/ 3]); }
+    texture.addAll(VibeStyleTexture.describe(luminance, w, h));
+    for (var i = 0; i < 27; i++) {
+      spatial[i] /= math.max(1, cells[i ~/ 3]);
+    }
     // Layout deliberately receives a low weight: it is content-sensitive.
     return [color, texture, edges, spatial];
   }
 
   static void _normalize(List<double> x, int start, int end) {
     var sum = 0.0;
-    for (var i = start; i < end; i++) { sum += x[i]; }
+    for (var i = start; i < end; i++) {
+      sum += x[i];
+    }
     if (sum > 0) {
-      for (var i = start; i < end; i++) { x[i] /= sum; }
+      for (var i = start; i < end; i++) {
+        x[i] /= sum;
+      }
     }
   }
 }

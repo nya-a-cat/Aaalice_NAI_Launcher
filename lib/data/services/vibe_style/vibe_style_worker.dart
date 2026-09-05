@@ -11,8 +11,11 @@ class VibeStyleCancelled implements Exception {}
 class VibeStyleWorker {
   _Job? _active;
 
-  Future<T> run<T>(String operation, Object argument,
-      {Duration timeout = const Duration(seconds: 30)}) async {
+  Future<T> run<T>(
+    String operation,
+    Object argument, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
     if (_active != null) throw StateError('worker already busy');
     final job = _Job();
     _active = job;
@@ -30,17 +33,28 @@ class VibeStyleWorker {
     });
     job.timer = Timer(timeout, () {
       job.isolate?.kill(priority: Isolate.immediate);
-      if (!job.result.isCompleted) job.result.completeError(TimeoutException(operation));
+      if (!job.result.isCompleted) {
+        job.result.completeError(TimeoutException(operation));
+      }
     });
     // Start listening to the completion before spawn can finish or cancellation occurs.
     final result = job.result.future;
-    unawaited(Isolate.spawn<List<Object?>>(_entry, [job.port.sendPort, operation, argument],
-      onExit: job.port.sendPort, onError: job.port.sendPort).then((isolate) {
-        job.isolate = isolate;
-        if (job.result.isCompleted) isolate.kill(priority: Isolate.immediate);
-      }, onError: (Object error, StackTrace stack) {
-        if (!job.result.isCompleted) job.result.completeError(error, stack);
-      }));
+    unawaited(
+      Isolate.spawn<List<Object?>>(
+        _entry,
+        [job.port.sendPort, operation, argument],
+        onExit: job.port.sendPort,
+        onError: job.port.sendPort,
+      ).then(
+        (isolate) {
+          job.isolate = isolate;
+          if (job.result.isCompleted) isolate.kill(priority: Isolate.immediate);
+        },
+        onError: (Object error, StackTrace stack) {
+          if (!job.result.isCompleted) job.result.completeError(error, stack);
+        },
+      ),
+    );
     try {
       return await result as T;
     } finally {
@@ -67,15 +81,17 @@ class VibeStyleWorker {
       final Object? result;
       switch (request[1]) {
         case 'parse':
-          result = VibeStyleCorpus.parse(data! as List<Map<String,Object?>>);
+          result = VibeStyleCorpus.parse(data! as List<Map<String, Object?>>);
         case 'select':
           result = VibeStyleCorpus.select(data! as List<VibeStyleSample>);
         case 'features':
           result = await VibeStyleFeatures.read(data! as VibeStyleSample);
         case 'rank':
           final args = data! as List;
-          result = VibeStyleMatcher.rank(args[0] as List<VibeStyleSample>,
-            args[1] as Map<String,List<List<double>>>);
+          result = VibeStyleMatcher.rank(
+            args[0] as List<VibeStyleSample>,
+            args[1] as Map<String, List<List<double>>>,
+          );
         default:
           throw ArgumentError('Unknown Vibe analysis operation');
       }
