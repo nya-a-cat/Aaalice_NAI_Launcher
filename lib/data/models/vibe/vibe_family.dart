@@ -1,7 +1,11 @@
 import 'dart:convert';
 
 class VibeFamily {
-  const VibeFamily({required this.id, required this.name, required this.members});
+  const VibeFamily({
+    required this.id,
+    required this.name,
+    required this.members,
+  });
   final String id;
   final String name;
   final Set<String> members;
@@ -9,7 +13,10 @@ class VibeFamily {
 
 /// Explicit user decisions. Analysis never modifies membership or separations.
 class VibeFamilyState {
-  const VibeFamilyState({this.families = const [], this.separations = const {}});
+  const VibeFamilyState({
+    this.families = const [],
+    this.separations = const {},
+  });
   final List<VibeFamily> families;
   final Set<String> separations;
 
@@ -29,13 +36,17 @@ class VibeFamilyState {
     final left = familyOf(a)?.members ?? {a};
     final right = familyOf(b)?.members ?? {b};
     if (left.contains(b)) return true;
-    return left.any((x) => right.any((y) => separations.contains(pairKey(x, y))));
+    return left.any(
+      (x) => right.any((y) => separations.contains(pairKey(x, y))),
+    );
   }
 }
 
 class VibeFamilySummary {
   const VibeFamilySummary({
-    required this.hash, required this.exampleCount, required this.previewPath,
+    required this.hash,
+    required this.exampleCount,
+    required this.previewPath,
   });
   final String hash;
   final int exampleCount;
@@ -45,30 +56,43 @@ class VibeFamilySummary {
 
 class VibeStyleSample {
   const VibeStyleSample({
-    required this.imageId, required this.path, required this.size,
-    required this.modifiedAt, required this.hash, required this.recipe,
-    required this.promptKey, required this.seed,
+    required this.imageId,
+    required this.path,
+    required this.size,
+    required this.modifiedAt,
+    required this.hash,
+    required this.recipe,
+    required this.promptKey,
+    required this.seed,
   });
   final int imageId;
   final String path;
   final int size;
   final int modifiedAt;
   final String hash;
+
   /// All observed generation controls, including OTHER Vibes and target strength.
   final String recipe;
   final String promptKey;
   final int? seed;
-  String get cacheKey => jsonEncode([imageId,path,size,modifiedAt]);
+  String get cacheKey => jsonEncode([imageId, path, size, modifiedAt]);
 }
 
 class VibeStyleMatch {
   const VibeStyleMatch({
-    required this.left, required this.right, required this.similarity,
-    required this.dimensions, required this.recipeCount, required this.sameSeedCount,
-    required this.stability, required this.examples, this.mutual = false,
+    required this.left,
+    required this.right,
+    required this.similarity,
+    required this.dimensions,
+    required this.recipeCount,
+    required this.sameSeedCount,
+    required this.stability,
+    required this.examples,
+    this.mutual = false,
   });
   final String left;
   final String right;
+
   /// Relative visual similarity, never a probability of shared source identity.
   final double similarity;
   final List<double> dimensions;
@@ -82,8 +106,11 @@ class VibeStyleMatch {
 
 class VibeStyleAnalysis {
   const VibeStyleAnalysis({
-    required this.matches, required this.scanned, required this.skipped,
-    required this.available, required this.selected,
+    required this.matches,
+    required this.scanned,
+    required this.skipped,
+    required this.available,
+    required this.selected,
   });
   final List<VibeStyleMatch> matches;
   final int scanned;

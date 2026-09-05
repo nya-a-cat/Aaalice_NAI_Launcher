@@ -87,8 +87,7 @@ class LocalGalleryVibeContentView extends ConsumerWidget {
             .loadExamples(group.fingerprint, limit: limit, offset: offset),
         onSend: (example) =>
             _sendToGeneration(dialogContext, ref, group, example),
-        onSave: (example) =>
-            _saveToLibrary(dialogContext, ref, group, example),
+        onSave: (example) => _saveToLibrary(dialogContext, ref, group, example),
       ),
     );
   }
@@ -104,12 +103,9 @@ class LocalGalleryVibeContentView extends ConsumerWidget {
       AppToast.warning(context, context.l10n.vibeLibrary_maxVibesReached);
       return;
     }
-    ref
-        .read(generationParamsNotifierProvider.notifier)
-        .addVibeReferences(
-          [group.toVibeReference(example: example)],
-          recordUsage: false,
-        );
+    ref.read(generationParamsNotifierProvider.notifier).addVibeReferences([
+      group.toVibeReference(example: example),
+    ], recordUsage: false);
     AppToast.success(
       context,
       context.l10n.toast_sentVibeToGeneration(group.displayName),
@@ -126,9 +122,9 @@ class LocalGalleryVibeContentView extends ConsumerWidget {
     try {
       final sourceBytes = await File(example.filePath).readAsBytes();
       final thumbnail = await DisplayThumbnailUtils.normalize(sourceBytes);
-      final reference = group.toVibeReference(example: example).copyWith(
-        thumbnail: thumbnail,
-      );
+      final reference = group
+          .toVibeReference(example: example)
+          .copyWith(thumbnail: thumbnail);
       final entry = VibeLibraryEntry.fromVibeReference(
         name: p.basenameWithoutExtension(example.filePath),
         vibeData: reference,

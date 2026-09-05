@@ -12352,6 +12352,140 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vibeDetail_choosePreviewImage => '点击图片按钮选择预览图';
+
+  @override
+  String get vibeFamily_title => '风格分组';
+
+  @override
+  String get vibeFamily_suggestions => '分组建议';
+
+  @override
+  String get vibeFamily_allCodes => '全部编码';
+
+  @override
+  String get vibeFamily_confirmed => '已分组';
+
+  @override
+  String get vibeFamily_separated => '已分开';
+
+  @override
+  String get vibeFamily_analyze => '分析已有图片';
+
+  @override
+  String get vibeFamily_cancel => '取消';
+
+  @override
+  String get vibeFamily_merge => '合并为风格组';
+
+  @override
+  String get vibeFamily_keepSeparate => '保持分开';
+
+  @override
+  String get vibeFamily_hint => '相似度只用于比较；确认后保存分组。分析全程离线，原图片只读。';
+
+  @override
+  String get vibeFamily_controlled => '多组配方对照支持 · 请确认';
+
+  @override
+  String get vibeFamily_visualOnly => '视觉相近 · 对照证据不足';
+
+  @override
+  String vibeFamily_evidence(int recipes, int seeds) {
+    return '独立提示词对照 $recipes 组，其中 $seeds 组种子一致';
+  }
+
+  @override
+  String vibeFamily_dimensions(
+    String color,
+    String texture,
+    String edges,
+    String layout,
+  ) {
+    return '比较分数（0–1）：色彩 $color · 纹理 $texture · 线条 $edges · 构图 $layout';
+  }
+
+  @override
+  String get vibeFamily_previousPair => '上一组对照';
+
+  @override
+  String get vibeFamily_nextPair => '下一组对照';
+
+  @override
+  String get vibeFamily_previousPage => '上一页';
+
+  @override
+  String get vibeFamily_nextPage => '下一页';
+
+  @override
+  String get vibeFamily_noSeparations => '还没有标记为保持分开的编码';
+
+  @override
+  String get vibeFamily_restore => '恢复为可分组候选';
+
+  @override
+  String get vibeFamily_noFamilies => '在分组建议中确认，或在全部编码中勾选后合并。';
+
+  @override
+  String vibeFamily_memberCount(int count) {
+    return '$count 个编码';
+  }
+
+  @override
+  String get vibeFamily_rename => '修改分组名称';
+
+  @override
+  String get vibeFamily_split => '移出并保持分开';
+
+  @override
+  String get vibeFamily_conflict => '选中的分组中含有你标记为“保持分开”的编码。请先在“已分开”中恢复对应关系。';
+
+  @override
+  String get vibeFamily_error => '操作未完成，请重试。已有分组仍保留。';
+
+  @override
+  String get vibeFamily_retry => '重试';
+
+  @override
+  String vibeFamily_progress(int done, int total) {
+    return '分析图片 $done / $total';
+  }
+
+  @override
+  String get vibeFamily_ranking => '正在比较不同编码的示例…';
+
+  @override
+  String get vibeFamily_preparing => '正在读取图库中的对照信息…';
+
+  @override
+  String get vibeFamily_cancelled => '分析已取消，已完成的特征可在下次复用。';
+
+  @override
+  String vibeFamily_result(int done, int skipped, int selected, int available) {
+    return '已分析 $done 张，跳过 $skipped 张；从读取的 $available 张中选取 $selected 张。';
+  }
+
+  @override
+  String get vibeFamily_startHint =>
+      '点击“分析已有图片”查找相似编码。也可以直接手动分组。每轮最多分析 1600 张、300 个编码；可随时取消。';
+
+  @override
+  String get vibeFamily_noMatches =>
+      '暂无可建议的分组。可在“全部编码”中手动选择；其他 Vibe 组合、缺失文件或缺少对照图片会限制自动比较。';
+
+  @override
+  String get vibeFamily_ungrouped => '未分组';
+
+  @override
+  String get vibeFamily_missing => '该编码已没有可用的本地示例';
+
+  @override
+  String get vibeFamily_name => '分组名称';
+
+  @override
+  String get vibeFamily_defaultName => '我的 Vibe 分组';
+
+  @override
+  String get vibeFamily_confirm => '确认';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -24703,4 +24837,138 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get vibeDetail_choosePreviewImage => '點選圖片按鈕選擇預覽圖';
+
+  @override
+  String get vibeFamily_title => '風格分組';
+
+  @override
+  String get vibeFamily_suggestions => '分組建議';
+
+  @override
+  String get vibeFamily_allCodes => '全部編碼';
+
+  @override
+  String get vibeFamily_confirmed => '已分組';
+
+  @override
+  String get vibeFamily_separated => '已分開';
+
+  @override
+  String get vibeFamily_analyze => '分析現有圖片';
+
+  @override
+  String get vibeFamily_cancel => '取消';
+
+  @override
+  String get vibeFamily_merge => '合併為風格組';
+
+  @override
+  String get vibeFamily_keepSeparate => '保持分開';
+
+  @override
+  String get vibeFamily_hint => '相似度僅供比較；確認後儲存分組。分析全程離線，原圖片唯讀。';
+
+  @override
+  String get vibeFamily_controlled => '多組配方對照支持 · 請確認';
+
+  @override
+  String get vibeFamily_visualOnly => '視覺相近 · 對照證據不足';
+
+  @override
+  String vibeFamily_evidence(int recipes, int seeds) {
+    return '獨立提示詞對照 $recipes 組，其中 $seeds 組種子一致';
+  }
+
+  @override
+  String vibeFamily_dimensions(
+    String color,
+    String texture,
+    String edges,
+    String layout,
+  ) {
+    return '比較分數（0–1）：色彩 $color · 紋理 $texture · 線條 $edges · 構圖 $layout';
+  }
+
+  @override
+  String get vibeFamily_previousPair => '上一組對照';
+
+  @override
+  String get vibeFamily_nextPair => '下一組對照';
+
+  @override
+  String get vibeFamily_previousPage => '上一頁';
+
+  @override
+  String get vibeFamily_nextPage => '下一頁';
+
+  @override
+  String get vibeFamily_noSeparations => '尚未標記保持分開的編碼';
+
+  @override
+  String get vibeFamily_restore => '恢復為可分組候選';
+
+  @override
+  String get vibeFamily_noFamilies => '確認分組建議，或在全部編碼中勾選後合併。';
+
+  @override
+  String vibeFamily_memberCount(int count) {
+    return '$count 個編碼';
+  }
+
+  @override
+  String get vibeFamily_rename => '修改分組名稱';
+
+  @override
+  String get vibeFamily_split => '移出並保持分開';
+
+  @override
+  String get vibeFamily_conflict => '所選分組含有已標記「保持分開」的編碼，請先在「已分開」中恢復對應關係。';
+
+  @override
+  String get vibeFamily_error => '操作未完成，請重試。既有分組仍保留。';
+
+  @override
+  String get vibeFamily_retry => '重試';
+
+  @override
+  String vibeFamily_progress(int done, int total) {
+    return '分析圖片 $done / $total';
+  }
+
+  @override
+  String get vibeFamily_ranking => '正在比較不同編碼的示例…';
+
+  @override
+  String get vibeFamily_preparing => '正在讀取圖庫中的對照資訊…';
+
+  @override
+  String get vibeFamily_cancelled => '分析已取消，下次可重用已完成的特徵。';
+
+  @override
+  String vibeFamily_result(int done, int skipped, int selected, int available) {
+    return '已分析 $done 張，跳過 $skipped 張；從讀取的 $available 張中選取 $selected 張。';
+  }
+
+  @override
+  String get vibeFamily_startHint =>
+      '點擊「分析現有圖片」尋找相似編碼，或直接手動分組。每輪最多分析 1600 張、300 個編碼；可隨時取消。';
+
+  @override
+  String get vibeFamily_noMatches =>
+      '暫無分組建議。可在「全部編碼」中手動選擇；其他 Vibe 組合、缺失檔案或缺乏對照圖片會限制自動比較。';
+
+  @override
+  String get vibeFamily_ungrouped => '未分組';
+
+  @override
+  String get vibeFamily_missing => '此編碼已無可用本機示例';
+
+  @override
+  String get vibeFamily_name => '分組名稱';
+
+  @override
+  String get vibeFamily_defaultName => '我的 Vibe 分組';
+
+  @override
+  String get vibeFamily_confirm => '確認';
 }

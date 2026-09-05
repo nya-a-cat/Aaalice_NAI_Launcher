@@ -12899,4 +12899,146 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vibeDetail_choosePreviewImage =>
       'Use the image button to choose a preview';
+
+  @override
+  String get vibeFamily_title => 'Style groups';
+
+  @override
+  String get vibeFamily_suggestions => 'Suggestions';
+
+  @override
+  String get vibeFamily_allCodes => 'All encodings';
+
+  @override
+  String get vibeFamily_confirmed => 'Grouped';
+
+  @override
+  String get vibeFamily_separated => 'Kept separate';
+
+  @override
+  String get vibeFamily_analyze => 'Analyze existing images';
+
+  @override
+  String get vibeFamily_cancel => 'Cancel';
+
+  @override
+  String get vibeFamily_merge => 'Group together';
+
+  @override
+  String get vibeFamily_keepSeparate => 'Keep separate';
+
+  @override
+  String get vibeFamily_hint =>
+      'Similarity is a comparison score. Groups are saved after confirmation. Analysis is offline and source images are read-only.';
+
+  @override
+  String get vibeFamily_controlled => 'Several recipe controls · please review';
+
+  @override
+  String get vibeFamily_visualOnly => 'Similar appearance · limited controls';
+
+  @override
+  String vibeFamily_evidence(int recipes, int seeds) {
+    return '$recipes independent prompt controls, $seeds with matching seeds';
+  }
+
+  @override
+  String vibeFamily_dimensions(
+    String color,
+    String texture,
+    String edges,
+    String layout,
+  ) {
+    return 'Comparison scores (0–1): color $color · texture $texture · edges $edges · layout $layout';
+  }
+
+  @override
+  String get vibeFamily_previousPair => 'Previous comparison';
+
+  @override
+  String get vibeFamily_nextPair => 'Next comparison';
+
+  @override
+  String get vibeFamily_previousPage => 'Previous page';
+
+  @override
+  String get vibeFamily_nextPage => 'Next page';
+
+  @override
+  String get vibeFamily_noSeparations =>
+      'No encodings have been kept separate.';
+
+  @override
+  String get vibeFamily_restore => 'Allow grouping again';
+
+  @override
+  String get vibeFamily_noFamilies =>
+      'Review a suggestion or select encodings under All encodings to group them.';
+
+  @override
+  String vibeFamily_memberCount(int count) {
+    return '$count encodings';
+  }
+
+  @override
+  String get vibeFamily_rename => 'Rename group';
+
+  @override
+  String get vibeFamily_split => 'Remove and keep separate';
+
+  @override
+  String get vibeFamily_conflict =>
+      'These groups contain encodings you kept separate. Restore that pair under Kept separate first.';
+
+  @override
+  String get vibeFamily_error =>
+      'The operation could not finish. Please retry. Existing groups are retained.';
+
+  @override
+  String get vibeFamily_retry => 'Retry';
+
+  @override
+  String vibeFamily_progress(int done, int total) {
+    return 'Analyzing images $done / $total';
+  }
+
+  @override
+  String get vibeFamily_ranking => 'Comparing examples across encodings…';
+
+  @override
+  String get vibeFamily_preparing =>
+      'Reading comparison data from the gallery…';
+
+  @override
+  String get vibeFamily_cancelled =>
+      'Analysis cancelled. Completed features can be reused next time.';
+
+  @override
+  String vibeFamily_result(int done, int skipped, int selected, int available) {
+    return 'Analyzed $done, skipped $skipped; selected $selected from $available indexed images.';
+  }
+
+  @override
+  String get vibeFamily_startHint =>
+      'Analyze existing images to find similar encodings, or group them manually. Each run samples at most 1,600 images and 300 encodings and can be cancelled.';
+
+  @override
+  String get vibeFamily_noMatches =>
+      'No grouping suggestions. You can select encodings manually. Other Vibe combinations, missing files, or limited controls can restrict comparisons.';
+
+  @override
+  String get vibeFamily_ungrouped => 'Ungrouped';
+
+  @override
+  String get vibeFamily_missing =>
+      'This encoding has no available local examples.';
+
+  @override
+  String get vibeFamily_name => 'Group name';
+
+  @override
+  String get vibeFamily_defaultName => 'My Vibe group';
+
+  @override
+  String get vibeFamily_confirm => 'Confirm';
 }

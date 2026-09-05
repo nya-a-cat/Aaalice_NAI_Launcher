@@ -56,7 +56,9 @@ class _VibeLibrarySourceWorkspaceState
         Expanded(
           child: switch (_view) {
             VibeLibrarySourceView.saved => widget.savedWorkspace,
-            VibeLibrarySourceView.localGallery => _buildLocalWorkspace(localState),
+            VibeLibrarySourceView.localGallery => _buildLocalWorkspace(
+              localState,
+            ),
             VibeLibrarySourceView.families => const VibeFamilyWorkspace(),
           },
         ),
@@ -85,8 +87,7 @@ class _VibeLibrarySourceWorkspaceState
         final columns = ((availableWidth + spacing) / (180 + spacing))
             .floor()
             .clamp(1, 8);
-        final itemWidth =
-            (availableWidth - spacing * (columns - 1)) / columns;
+        final itemWidth = (availableWidth - spacing * (columns - 1)) / columns;
         final content = Column(
           children: [
             _LocalToolbar(
@@ -105,9 +106,8 @@ class _VibeLibrarySourceWorkspaceState
               _LocalPaginationBar(
                 state: state,
                 compact: constraints.maxWidth < 620,
-                onPage: (page) => ref
-                    .read(localGalleryVibeProvider.notifier)
-                    .loadPage(page),
+                onPage: (page) =>
+                    ref.read(localGalleryVibeProvider.notifier).loadPage(page),
                 onPageSize: (size) => ref
                     .read(localGalleryVibeProvider.notifier)
                     .setPageSize(size),
@@ -164,10 +164,7 @@ class _VibeLibrarySourceWorkspaceState
     if (!state.isInitialized && state.groups.isEmpty) {
       return const GalleryLoadingView();
     }
-    return LocalGalleryVibeContentView(
-      columns: columns,
-      itemWidth: itemWidth,
-    );
+    return LocalGalleryVibeContentView(columns: columns, itemWidth: itemWidth);
   }
 
   void _searchChanged(String value) {
@@ -192,9 +189,7 @@ class _VibeLibrarySourceWorkspaceState
     _searchDebounce?.cancel();
     _searchController.clear();
     setState(() {});
-    unawaited(
-      ref.read(localGalleryVibeProvider.notifier).setSearchQuery(''),
-    );
+    unawaited(ref.read(localGalleryVibeProvider.notifier).setSearchQuery(''));
   }
 }
 
@@ -321,7 +316,12 @@ class _LocalToolbar extends StatelessWidget {
             child: compact
                 ? Column(
                     children: [
-                      Row(children: [Expanded(child: title), refresh]),
+                      Row(
+                        children: [
+                          Expanded(child: title),
+                          refresh,
+                        ],
+                      ),
                       const SizedBox(height: 8),
                       search,
                     ],
@@ -406,9 +406,7 @@ class _LocalPaginationBar extends StatelessWidget {
         },
       ),
       if (!compact)
-        Text(
-          context.l10n.vibeLibrary_totalCount(state.totalGroups.toString()),
-        ),
+        Text(context.l10n.vibeLibrary_totalCount(state.totalGroups.toString())),
     ];
     return DecoratedBox(
       decoration: BoxDecoration(
