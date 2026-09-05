@@ -158,12 +158,14 @@ class GalleryVibeFamilyRepository {
 
   /// Bounded keyset pages. Encodings and source image bytes never enter this query.
   Future<List<Map<String, Object?>>> corpusPage(int afterId, {int limit = 128}) =>
-      gateway.execute('queryVibeStyleCorpus', (db) => db.rawQuery('''
+      gateway.execute('queryVibeStyleCorpus', (db) => db.rawQuery(r'''
         SELECT i.id, i.file_path, i.file_size, i.modified_at,
           m.prompt, m.negative_prompt, m.model, m.seed, m.sampler, m.steps,
           m.cfg_scale, m.width, m.height, m.is_img2img, m.noise_schedule,
           m.cfg_rescale, m.smea, m.smea_dyn,
-          CASE WHEN json_valid(m.raw_json) AND
+          CASE WHEN json_valid(m.raw_json) THEN CASE WHEN
+            COALESCE(json_type(m.raw_json, '$.director_reference_images'), 'null') IN ('null','array') AND
+            COALESCE(json_type(m.raw_json, '$.director_references'), 'null') IN ('null','array') AND
             COALESCE(json_array_length(m.raw_json, '$.director_reference_images'), 0) = 0 AND
             COALESCE(json_array_length(m.raw_json, '$.director_references'), 0) = 0 AND
             COALESCE(json_extract(m.raw_json, '$.controlnet_model'), '') = '' AND
@@ -182,7 +184,7 @@ class GalleryVibeFamilyRepository {
             '$.dynamic_thresholding_mimic_scale',
             '$.dynamic_thresholding_percentile', '$.legacy_v3_extend',
             '$.minimize_sigma_inf', '$.normalize_reference_strength_multiple')
-          ELSE NULL END AS extra_controls,
+          ELSE NULL END ELSE NULL END AS extra_controls,
           (SELECT json_group_array(json_object('hash', v.vibe_hash,
             'strength', v.strength, 'info', v.info_extracted, 'ordinal', v.ordinal))
            FROM gallery_image_vibes v WHERE v.image_id = i.id) AS refs,

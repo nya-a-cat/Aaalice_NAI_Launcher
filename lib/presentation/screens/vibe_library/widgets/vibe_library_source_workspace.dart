@@ -223,11 +223,6 @@ class _SourceSwitcher extends StatelessWidget {
             key: const ValueKey('vibe-library-view-switcher'),
             segments: [
               ButtonSegment(
-                value: VibeLibrarySourceView.families,
-                icon: const Icon(Icons.hub_outlined),
-                label: Text(context.l10n.vibeFamily_title),
-              ),
-              ButtonSegment(
                 value: VibeLibrarySourceView.saved,
                 icon: const Icon(Icons.bookmarks_outlined),
                 label: Text(
@@ -240,6 +235,11 @@ class _SourceSwitcher extends StatelessWidget {
                 label: Text(
                   '${context.l10n.vibeLibrary_localGalleryView} $localCount',
                 ),
+              ),
+              ButtonSegment(
+                value: VibeLibrarySourceView.families,
+                icon: const Icon(Icons.hub_outlined),
+                label: Text(context.l10n.vibeFamily_title),
               ),
             ],
             selected: {selected},
