@@ -112,7 +112,7 @@ class VibeStyleFeatures {
     _normalize(color, 24, 32);
     _normalize(color, 32, 40);
     final edges = List<double>.filled(10, 0);
-    final texture = List<double>.filled(10, 0);
+    final texture = List<double>.filled(10, 0, growable: true);
     const offsets = [
       (-1, -1),
       (0, -1),
