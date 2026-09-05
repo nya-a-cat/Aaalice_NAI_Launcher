@@ -15,6 +15,7 @@ import 'gallery_records.dart';
 import 'gallery_schema.dart';
 import 'gallery_store_context.dart';
 import 'gallery_vibe_repository.dart';
+import 'gallery_vibe_family_repository.dart';
 
 export 'gallery_database_gateway.dart';
 export 'gallery_favorite_tag_repository.dart';
@@ -77,6 +78,8 @@ class GalleryDataSource extends EnhancedBaseDataSource {
   Set<String> get dependencies => const {};
 
   int get dataRevision => _context.dataRevision;
+
+  GalleryVibeFamilyRepository get vibeFamilies => GalleryVibeFamilyRepository(_gateway);
 
   void clearCache() => _context.clearCache();
   void clearQueryCache() => _context.clearQueryCache();
