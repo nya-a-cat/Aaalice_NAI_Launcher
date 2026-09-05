@@ -10,8 +10,9 @@ import '../../../providers/vibe_library_selection_provider.dart';
 import '../../../widgets/common/input_surface_container.dart';
 import '../../../widgets/gallery/gallery_state_views.dart';
 import 'local_gallery_vibe_content_view.dart';
+import 'vibe_families/vibe_family_workspace.dart';
 
-enum VibeLibrarySourceView { saved, localGallery }
+enum VibeLibrarySourceView { saved, localGallery, families }
 
 class VibeLibrarySourceWorkspace extends ConsumerStatefulWidget {
   const VibeLibrarySourceWorkspace({
@@ -53,9 +54,11 @@ class _VibeLibrarySourceWorkspaceState
           onChanged: _setView,
         ),
         Expanded(
-          child: _view == VibeLibrarySourceView.saved
-              ? widget.savedWorkspace
-              : _buildLocalWorkspace(localState),
+          child: switch (_view) {
+            VibeLibrarySourceView.saved => widget.savedWorkspace,
+            VibeLibrarySourceView.localGallery => _buildLocalWorkspace(localState),
+            VibeLibrarySourceView.families => const VibeFamilyWorkspace(),
+          },
         ),
       ],
     );
@@ -219,6 +222,11 @@ class _SourceSwitcher extends StatelessWidget {
           child: SegmentedButton<VibeLibrarySourceView>(
             key: const ValueKey('vibe-library-view-switcher'),
             segments: [
+              ButtonSegment(
+                value: VibeLibrarySourceView.families,
+                icon: const Icon(Icons.hub_outlined),
+                label: Text(context.l10n.vibeFamily_title),
+              ),
               ButtonSegment(
                 value: VibeLibrarySourceView.saved,
                 icon: const Icon(Icons.bookmarks_outlined),

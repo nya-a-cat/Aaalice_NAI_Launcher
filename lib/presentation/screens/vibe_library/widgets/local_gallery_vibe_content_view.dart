@@ -64,13 +64,13 @@ class LocalGalleryVibeContentView extends ConsumerWidget {
           group: group,
           width: itemWidth,
           isSaved: isSaved,
-          onTap: () => _showDetail(context, ref, group, isSaved: isSaved),
+          onTap: () => showDetail(context, ref, group, isSaved: isSaved),
         );
       },
     );
   }
 
-  Future<void> _showDetail(
+  static Future<void> showDetail(
     BuildContext context,
     WidgetRef ref,
     LocalGalleryVibeGroup group, {
@@ -93,7 +93,7 @@ class LocalGalleryVibeContentView extends ConsumerWidget {
     );
   }
 
-  Future<void> _sendToGeneration(
+  static Future<void> _sendToGeneration(
     BuildContext context,
     WidgetRef ref,
     LocalGalleryVibeGroup group,
@@ -117,7 +117,7 @@ class LocalGalleryVibeContentView extends ConsumerWidget {
     if (context.mounted) context.go(AppRoutes.home);
   }
 
-  Future<bool> _saveToLibrary(
+  static Future<bool> _saveToLibrary(
     BuildContext context,
     WidgetRef ref,
     LocalGalleryVibeGroup group,
