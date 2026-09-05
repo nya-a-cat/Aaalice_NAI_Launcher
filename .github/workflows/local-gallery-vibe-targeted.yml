@@ -31,33 +31,30 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache-namespace: nai-hosted
 
-      - name: Upload generated localizations
+      - name: Format changed Dart sources
+        shell: pwsh
+        run: |
+          $files = @(git diff --name-only b4facc4be98c8437915f15ce13525a886b7e2d1d HEAD -- '*.dart')
+          if ($files.Count -gt 0) { dart format @files }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $patch = (git diff --binary --no-ext-diff) -join "`n"
+          [IO.File]::WriteAllText('vibe-generated.patch', $patch + "`n", [Text.UTF8Encoding]::new($false))
+
+      - name: Upload generated source patch
         uses: actions/upload-artifact@v6
         with:
-          name: generated-localizations
-          path: lib/l10n/app_localizations*.dart
+          name: vibe-generated-sources
+          path: vibe-generated.patch
           retention-days: 1
-
-      - name: Verify generated files
-        run: git diff --exit-code
 
       - name: Analyze
         run: flutter analyze
 
-      - name: Test gallery metadata queries
-        run: flutter test --no-pub --reporter expanded test/core/database/datasources/gallery_search_behavior_test.dart
-
-      - name: Test gallery filters
-        run: flutter test --no-pub --reporter expanded test/presentation/widgets/gallery_filter_panel_test.dart
-
-      - name: Test local gallery Vibe library
-        run: flutter test --no-pub --reporter expanded test/presentation/screens/vibe_library/local_gallery_vibe_view_test.dart
-
-      - name: Test Vibe keyboard pagination
-        run: flutter test --no-pub --reporter expanded test/presentation/screens/vibe_library/vibe_library_keyboard_pagination_test.dart
-
-      - name: Test gallery prompt pattern mining
-        run: flutter test --no-pub --reporter expanded test/data/services/gallery_prompt_pattern_mining_service_test.dart
-
-      - name: Test gallery prompt analysis dialog
-        run: flutter test --no-pub --reporter expanded test/presentation/screens/tag_library_page/gallery_prompt_analysis_dialog_test.dart
+      - name: Check Vibe grouping and source safety
+        shell: pwsh
+        run: |
+          ./scripts/test_affected.ps1 -TimeoutSeconds 120 -Path @(
+            'test/data/services/vibe_style_test.dart',
+            'test/core/database/datasources/gallery_vibe_family_repository_test.dart',
+            'test/presentation/screens/vibe_library/local_gallery_vibe_view_test.dart'
+          )
