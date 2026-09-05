@@ -102,7 +102,8 @@ class VibeStyleFeatures {
         color[32 + (high * 8).floor().clamp(0, 7)]++;
         final lum = (0.2126 * r + 0.7152 * g + 0.0722 * b).toDouble();
         luminance[y * w + x] = lum;
-        final cell = math.min<int>(2, y * 3 ~/ h) * 3 + math.min<int>(2, x * 3 ~/ w);
+        final cell =
+            math.min<int>(2, y * 3 ~/ h) * 3 + math.min<int>(2, x * 3 ~/ w);
         cells[cell]++;
         spatial[cell * 3] += lum;
         spatial[cell * 3 + 1] += sat;
@@ -146,7 +147,8 @@ class VibeStyleFeatures {
           if (bits[j] != bits[(j + 1) % 8]) transitions++;
         }
         texture[transitions <= 2 ? bits.fold<int>(0, (a, b) => a + b) : 9]++;
-        final cell = math.min<int>(2, y * 3 ~/ h) * 3 + math.min<int>(2, x * 3 ~/ w);
+        final cell =
+            math.min<int>(2, y * 3 ~/ h) * 3 + math.min<int>(2, x * 3 ~/ w);
         spatial[cell * 3 + 2] += magnitude;
       }
     }
