@@ -34,8 +34,18 @@ jobs:
       - name: Format changed Dart sources
         shell: pwsh
         run: |
-          $files = @(git diff --name-only b4facc4be98c8437915f15ce13525a886b7e2d1d HEAD -- '*.dart')
-          if ($files.Count -gt 0) { dart format @files }
+          $files = @(
+            'lib/core/database/datasources/gallery_vibe_family_repository.dart',
+            'lib/data/models/vibe/vibe_family.dart',
+            'lib/data/services/vibe_style',
+            'lib/presentation/providers/vibe_family_provider.dart',
+            'lib/presentation/screens/vibe_library/widgets/vibe_families',
+            'lib/presentation/screens/vibe_library/widgets/local_gallery_vibe_content_view.dart',
+            'lib/presentation/screens/vibe_library/widgets/vibe_library_source_workspace.dart',
+            'test/data/services/vibe_style_test.dart',
+            'test/core/database/datasources/gallery_vibe_family_repository_test.dart'
+          )
+          dart format @files
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $patch = (git diff --binary --no-ext-diff) -join "`n"
           [IO.File]::WriteAllText('vibe-generated.patch', $patch + "`n", [Text.UTF8Encoding]::new($false))
