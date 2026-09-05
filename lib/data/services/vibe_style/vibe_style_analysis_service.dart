@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:math' as math;
+
 import '../../../core/database/datasources/gallery_vibe_family_repository.dart';
 import '../../models/vibe/vibe_family.dart';
 import 'vibe_style_features.dart';
@@ -50,9 +53,11 @@ class VibeStyleAnalysisService {
       for (final sample in unique.values) {
         _check();
         List<List<double>>? value = cached[sample.cacheKey];
-        if (value != null && (!VibeStyleFeatures.isValid(value) ||
-            !VibeStyleFeatures.matches(await File(sample.path).stat(), sample))) {
-          value = null;
+        if (value != null) {
+          try {
+            if (!VibeStyleFeatures.isValid(value) ||
+                !VibeStyleFeatures.matches(await File(sample.path).stat(), sample)) value = null;
+          } catch (_) { value = null; }
         }
         if (value == null) {
           try {
@@ -83,5 +88,3 @@ class VibeStyleAnalysisService {
     }
   }
 }
-import 'dart:io';
-import 'dart:math' as math;
