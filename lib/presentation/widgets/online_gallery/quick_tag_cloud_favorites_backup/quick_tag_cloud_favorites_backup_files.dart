@@ -8,8 +8,10 @@ import '../../../../data/services/online_gallery/quick_tag_cloud_favorites_backu
 
 Future<String?> pickQuickTagCloudBackupFile() async {
   final selected = await FilePicker.platform.pickFiles(
-    type: FileType.custom, allowedExtensions: ['json', 'txt'],
-    withData: false, withReadStream: true,
+    type: FileType.custom,
+    allowedExtensions: ['json', 'txt'],
+    withData: false,
+    withReadStream: true,
   );
   if (selected == null || selected.files.isEmpty) return null;
   final file = selected.files.single;
@@ -17,7 +19,8 @@ Future<String?> pickQuickTagCloudBackupFile() async {
   if (file.size > maximum) {
     throw const QuickTagCloudBackupException('tooLarge');
   }
-  final stream = file.readStream ??
+  final stream =
+      file.readStream ??
       (file.path == null ? null : File(file.path!).openRead());
   if (stream == null) throw const QuickTagCloudBackupException('invalid');
   final bytes = BytesBuilder(copy: false);

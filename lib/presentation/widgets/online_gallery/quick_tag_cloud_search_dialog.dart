@@ -21,7 +21,8 @@ class _QuickTagCloudSearchDialog extends StatefulWidget {
       _QuickTagCloudSearchDialogState();
 }
 
-class _QuickTagCloudSearchDialogState extends State<_QuickTagCloudSearchDialog> {
+class _QuickTagCloudSearchDialogState
+    extends State<_QuickTagCloudSearchDialog> {
   late final _query = TextEditingController(text: widget.initialQuery);
   final _value = TextEditingController();
   String _field = 'prompt';
@@ -125,7 +126,9 @@ class _QuickTagCloudSearchDialogState extends State<_QuickTagCloudSearchDialog> 
       key: const ValueKey('quick-tag-cloud-search-field'),
       initialValue: _field,
       isExpanded: true,
-      decoration: InputDecoration(labelText: l10n.onlineGallery_codexSearchField),
+      decoration: InputDecoration(
+        labelText: l10n.onlineGallery_codexSearchField,
+      ),
       items: [
         for (final entry in fields.entries)
           DropdownMenuItem(value: entry.key, child: Text(entry.value)),
@@ -140,12 +143,20 @@ class _QuickTagCloudSearchDialogState extends State<_QuickTagCloudSearchDialog> 
 
   Widget _buildValueInput(AppLocalizations l10n) {
     final options = switch (_field) {
-      'has' => {'image': l10n.onlineGallery_codexWithImages,
-                'noimage': l10n.onlineGallery_codexWithoutImages},
-      'fav' => {'true': l10n.onlineGallery_favorited,
-                'false': l10n.onlineGallery_unfavorited},
-      'type' => {'codex': 'codex', 'string': 'string',
-                'composition': 'composition', 'pack': 'pack'},
+      'has' => {
+        'image': l10n.onlineGallery_codexWithImages,
+        'noimage': l10n.onlineGallery_codexWithoutImages,
+      },
+      'fav' => {
+        'true': l10n.onlineGallery_favorited,
+        'false': l10n.onlineGallery_unfavorited,
+      },
+      'type' => {
+        'codex': 'codex',
+        'string': 'string',
+        'composition': 'composition',
+        'pack': 'pack',
+      },
       _ => <String, String>{},
     };
     if (options.isNotEmpty) {
@@ -153,9 +164,13 @@ class _QuickTagCloudSearchDialogState extends State<_QuickTagCloudSearchDialog> 
         key: ValueKey('quick-tag-cloud-search-value-$_field'),
         initialValue: options.containsKey(_value.text) ? _value.text : null,
         isExpanded: true,
-        decoration: InputDecoration(labelText: l10n.onlineGallery_codexSearchValue),
-        items: [for (final entry in options.entries)
-          DropdownMenuItem(value: entry.key, child: Text(entry.value))],
+        decoration: InputDecoration(
+          labelText: l10n.onlineGallery_codexSearchValue,
+        ),
+        items: [
+          for (final entry in options.entries)
+            DropdownMenuItem(value: entry.key, child: Text(entry.value)),
+        ],
         onChanged: (value) => setState(() => _value.text = value ?? ''),
       );
     }
@@ -176,13 +191,17 @@ class _QuickTagCloudSearchDialogState extends State<_QuickTagCloudSearchDialog> 
     final filter = QuickTagCloudSearchFilter(
       field: _field,
       value: _field == 'directory' && separator >= 0
-          ? value.substring(separator + 1) : value,
+          ? value.substring(separator + 1)
+          : value,
       codexId: _field == 'directory' && separator >= 0
-          ? value.substring(0, separator) : '',
+          ? value.substring(0, separator)
+          : '',
       excluded: _excluded,
     );
-    final candidate = [_query.text.trim(), filter.serialize()]
-        .where((part) => part.isNotEmpty).join(' ');
+    final candidate = [
+      _query.text.trim(),
+      filter.serialize(),
+    ].where((part) => part.isNotEmpty).join(' ');
     if (!_validate(candidate)) return;
     _query.text = candidate;
     _value.clear();
@@ -195,12 +214,17 @@ class _QuickTagCloudSearchDialogState extends State<_QuickTagCloudSearchDialog> 
       setState(() => _error = null);
       return true;
     }
-    final values = plan.issues.map((issue) => issue.value)
-        .where((value) => value.isNotEmpty).toSet().join(', ');
-    setState(() => _error = [
-      AppLocalizations.of(context)!.onlineGallery_codexSearchInvalid,
-      if (values.isNotEmpty) values,
-    ].join('\n'));
+    final values = plan.issues
+        .map((issue) => issue.value)
+        .where((value) => value.isNotEmpty)
+        .toSet()
+        .join(', ');
+    setState(
+      () => _error = [
+        AppLocalizations.of(context)!.onlineGallery_codexSearchInvalid,
+        if (values.isNotEmpty) values,
+      ].join('\n'),
+    );
     return false;
   }
 

@@ -101,6 +101,429 @@ abstract class AppLocalizations {
     Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
   ];
 
+  /// No description provided for @onlineGallery_codexSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get onlineGallery_codexSearchTitle;
+
+  /// No description provided for @onlineGallery_codexSearchType.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry type'**
+  String get onlineGallery_codexSearchType;
+
+  /// No description provided for @onlineGallery_codexSearchDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact directory'**
+  String get onlineGallery_codexSearchDirectory;
+
+  /// No description provided for @onlineGallery_codexCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'Community'**
+  String get onlineGallery_codexCommunity;
+
+  /// No description provided for @onlineGallery_communitySubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit on website'**
+  String get onlineGallery_communitySubmit;
+
+  /// No description provided for @onlineGallery_communityRatingNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses the current gallery age filter. Source content labels may be incomplete.'**
+  String get onlineGallery_communityRatingNotice;
+
+  /// No description provided for @onlineGallery_communityLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Community could not be loaded. Check your connection and retry.'**
+  String get onlineGallery_communityLoadFailed;
+
+  /// No description provided for @onlineGallery_communityEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No submissions match the current filters.'**
+  String get onlineGallery_communityEmpty;
+
+  /// No description provided for @onlineGallery_communityCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} submissions'**
+  String onlineGallery_communityCount(int count);
+
+  /// No description provided for @onlineGallery_codexRelay.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt relay'**
+  String get onlineGallery_codexRelay;
+
+  /// No description provided for @onlineGallery_codexAddToRelay.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to relay'**
+  String get onlineGallery_codexAddToRelay;
+
+  /// No description provided for @onlineGallery_codexFavoritesBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites backup'**
+  String get onlineGallery_codexFavoritesBackup;
+
+  /// No description provided for @onlineGallery_codexAdvancedSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced search'**
+  String get onlineGallery_codexAdvancedSearch;
+
+  /// No description provided for @onlineGallery_codexSearchField.
+  ///
+  /// In en, this message translates to:
+  /// **'Search field'**
+  String get onlineGallery_codexSearchField;
+
+  /// No description provided for @onlineGallery_codexSearchValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Match value'**
+  String get onlineGallery_codexSearchValue;
+
+  /// No description provided for @onlineGallery_codexSearchExclude.
+  ///
+  /// In en, this message translates to:
+  /// **'Exclude condition'**
+  String get onlineGallery_codexSearchExclude;
+
+  /// No description provided for @onlineGallery_codexSearchAddCondition.
+  ///
+  /// In en, this message translates to:
+  /// **'Add condition'**
+  String get onlineGallery_codexSearchAddCondition;
+
+  /// No description provided for @onlineGallery_codexSearchQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Search expression'**
+  String get onlineGallery_codexSearchQuery;
+
+  /// No description provided for @onlineGallery_codexSearchHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine field conditions. Use double quotes to preserve spaces.'**
+  String get onlineGallery_codexSearchHelp;
+
+  /// No description provided for @onlineGallery_codexSearchInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Check field values, operators and quotes. Use up to 10 text conditions.'**
+  String get onlineGallery_codexSearchInvalid;
+
+  /// No description provided for @quickTagBackupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites backup and restore'**
+  String get quickTagBackupTitle;
+
+  /// No description provided for @quickTagBackupHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Import JSON or NAITAG1 transfer text (up to 2 MiB). Preview reads official codex and community entries as needed to resolve favorites; backup content stays on this device. Unresolved entries and folder metadata are retained for re-export.'**
+  String get quickTagBackupHelp;
+
+  /// No description provided for @quickTagBackupInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste favorites JSON or NAITAG1 transfer text'**
+  String get quickTagBackupInputHint;
+
+  /// No description provided for @quickTagBackupImportFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose backup file'**
+  String get quickTagBackupImportFile;
+
+  /// No description provided for @quickTagBackupPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview restore'**
+  String get quickTagBackupPreview;
+
+  /// No description provided for @quickTagBackupExportJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Export JSON'**
+  String get quickTagBackupExportJson;
+
+  /// No description provided for @quickTagBackupCopyTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy transfer text'**
+  String get quickTagBackupCopyTransfer;
+
+  /// No description provided for @quickTagBackupMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge and deduplicate'**
+  String get quickTagBackupMerge;
+
+  /// No description provided for @quickTagBackupReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace codex favorites'**
+  String get quickTagBackupReplace;
+
+  /// No description provided for @quickTagBackupInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid backup format. Existing favorites are unchanged.'**
+  String get quickTagBackupInvalid;
+
+  /// No description provided for @quickTagBackupTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup exceeds the 2 MiB limit.'**
+  String get quickTagBackupTooLarge;
+
+  /// No description provided for @quickTagBackupStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites have changed. Preview the restore again.'**
+  String get quickTagBackupStale;
+
+  /// No description provided for @quickTagBackupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup or restore did not finish. Retry and check storage permissions.'**
+  String get quickTagBackupFailed;
+
+  /// No description provided for @quickTagBackupRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites restored'**
+  String get quickTagBackupRestored;
+
+  /// No description provided for @quickTagBackupReplaceWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This replaces local codex favorites and the backup library. Favorites from other sources are retained. Export a backup first.'**
+  String get quickTagBackupReplaceWarning;
+
+  /// No description provided for @quickTagBackupCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Codex {atlas} · Community {community} · Folders {folders}\nResolved {mapped} · Unresolved {unmapped} · Duplicates {duplicates}\nRemoved on replace {removed} · Metadata conflicts {conflicts}'**
+  String quickTagBackupCounts(
+    int atlas,
+    int community,
+    int folders,
+    int mapped,
+    int unmapped,
+    int duplicates,
+    int removed,
+    int conflicts,
+  );
+
+  /// No description provided for @qtcRelay_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt relay'**
+  String get qtcRelay_title;
+
+  /// No description provided for @qtcRelay_plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get qtcRelay_plan;
+
+  /// No description provided for @qtcRelay_newPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'New plan'**
+  String get qtcRelay_newPlan;
+
+  /// No description provided for @qtcRelay_renamePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename plan'**
+  String get qtcRelay_renamePlan;
+
+  /// No description provided for @qtcRelay_deletePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete plan'**
+  String get qtcRelay_deletePlan;
+
+  /// No description provided for @qtcRelay_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get qtcRelay_name;
+
+  /// No description provided for @qtcRelay_addBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Add block'**
+  String get qtcRelay_addBlock;
+
+  /// No description provided for @qtcRelay_blockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Block title'**
+  String get qtcRelay_blockTitle;
+
+  /// No description provided for @qtcRelay_weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Block weight'**
+  String get qtcRelay_weight;
+
+  /// No description provided for @qtcRelay_weightHint.
+  ///
+  /// In en, this message translates to:
+  /// **'0.05–10; applies to positive, negative and character prompts'**
+  String get qtcRelay_weightHint;
+
+  /// No description provided for @qtcRelay_invalidWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a finite number from 0.05 to 10'**
+  String get qtcRelay_invalidWeight;
+
+  /// No description provided for @qtcRelay_plain.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain text'**
+  String get qtcRelay_plain;
+
+  /// No description provided for @qtcRelay_plainHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Preserves existing syntax without adding block weights'**
+  String get qtcRelay_plainHint;
+
+  /// No description provided for @qtcRelay_comma.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma'**
+  String get qtcRelay_comma;
+
+  /// No description provided for @qtcRelay_newline.
+  ///
+  /// In en, this message translates to:
+  /// **'Comma and newline'**
+  String get qtcRelay_newline;
+
+  /// No description provided for @qtcRelay_copyPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy positive'**
+  String get qtcRelay_copyPositive;
+
+  /// No description provided for @qtcRelay_copyNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy negative'**
+  String get qtcRelay_copyNegative;
+
+  /// No description provided for @qtcRelay_copyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy all'**
+  String get qtcRelay_copyAll;
+
+  /// No description provided for @qtcRelay_send.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill generation page'**
+  String get qtcRelay_send;
+
+  /// No description provided for @qtcRelay_sendHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fills nonempty prompts and appends characters to separate slots'**
+  String get qtcRelay_sendHint;
+
+  /// No description provided for @qtcRelay_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled generation page. Generation has not started.'**
+  String get qtcRelay_sent;
+
+  /// No description provided for @qtcRelay_charactersNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Characters remain separate; Copy all includes their positive and negative prompts'**
+  String get qtcRelay_charactersNote;
+
+  /// No description provided for @qtcRelay_locked.
+  ///
+  /// In en, this message translates to:
+  /// **'This block is locked by the current content rating settings'**
+  String get qtcRelay_locked;
+
+  /// No description provided for @qtcRelay_corrupt.
+  ///
+  /// In en, this message translates to:
+  /// **'Relay storage could not be read. The original data is retained. Back it up before rebuilding.'**
+  String get qtcRelay_corrupt;
+
+  /// No description provided for @qtcRelay_recover.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up and rebuild'**
+  String get qtcRelay_recover;
+
+  /// No description provided for @qtcRelay_recoverConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'The original storage will be retained as a local recovery backup, then an empty plan will be created. Continue?'**
+  String get qtcRelay_recoverConfirm;
+
+  /// No description provided for @qtcRelay_saveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed. The last saved plan is retained. Please retry.'**
+  String get qtcRelay_saveFailed;
+
+  /// No description provided for @qtcRelay_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an entry or a custom positive/negative prompt block'**
+  String get qtcRelay_empty;
+
+  /// No description provided for @qtcRelay_moveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get qtcRelay_moveUp;
+
+  /// No description provided for @qtcRelay_moveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get qtcRelay_moveDown;
+
+  /// No description provided for @qtcRelay_merged.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate blocks merged'**
+  String get qtcRelay_merged;
+
+  /// No description provided for @qtcRelay_sendConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill this plan\'s nonempty prompts and append separate character slots? Existing content in those prompt fields will be replaced.'**
+  String get qtcRelay_sendConfirm;
+
+  /// No description provided for @qtcRelay_characterLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'The current model does not support these characters, or there are too few slots. Adjust the model or characters and retry.'**
+  String get qtcRelay_characterLimit;
+
   /// No description provided for @app_title.
   ///
   /// In en, this message translates to:

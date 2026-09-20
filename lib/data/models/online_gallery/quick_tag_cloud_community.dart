@@ -38,35 +38,39 @@ class QuickTagCloudCommunityQuery {
   }) {
     final terms = search.toLowerCase().trim().split(RegExp(r'\s+'))
       ..removeWhere((term) => term.isEmpty);
-    final filtered = entries.where((detail) {
-      final item = detail.item;
-      final rating = item.rating ?? 'q';
-      if (rating == 'q' && !allowNsfw ||
-          rating == 'e' && !(allowNsfw && allowR18g)) {
-        return false;
-      }
-      if (!(ratings.contains(rating) ||
-          rating == 'g' && ratings.contains('s'))) {
-        return false;
-      }
-      if (category.isNotEmpty && !detail.categoryPath.contains(category)) {
-        return false;
-      }
-      if (favoritesOnly && !favoriteKeys.contains(item.stableKey)) return false;
-      if (terms.isEmpty) return true;
-      final text = [
-        item.title,
-        item.author,
-        detail.prompt,
-        detail.negativePrompt,
-        detail.note,
-        ...item.tags,
-        ...detail.categoryPath,
-        for (final character in detail.characterPrompts)
-          '${character.label} ${character.prompt} ${character.negativePrompt}',
-      ].whereType<String>().join('\n').toLowerCase();
-      return terms.every(text.contains);
-    }).toList(growable: false);
+    final filtered = entries
+        .where((detail) {
+          final item = detail.item;
+          final rating = item.rating ?? 'q';
+          if (rating == 'q' && !allowNsfw ||
+              rating == 'e' && !(allowNsfw && allowR18g)) {
+            return false;
+          }
+          if (!(ratings.contains(rating) ||
+              rating == 'g' && ratings.contains('s'))) {
+            return false;
+          }
+          if (category.isNotEmpty && !detail.categoryPath.contains(category)) {
+            return false;
+          }
+          if (favoritesOnly && !favoriteKeys.contains(item.stableKey)) {
+            return false;
+          }
+          if (terms.isEmpty) return true;
+          final text = [
+            item.title,
+            item.author,
+            detail.prompt,
+            detail.negativePrompt,
+            detail.note,
+            ...item.tags,
+            ...detail.categoryPath,
+            for (final character in detail.characterPrompts)
+              '${character.label} ${character.prompt} ${character.negativePrompt}',
+          ].whereType<String>().join('\n').toLowerCase();
+          return terms.every(text.contains);
+        })
+        .toList(growable: false);
     if (popularFirst) {
       filtered.sort((left, right) {
         final score = (right.item.score ?? 0).compareTo(left.item.score ?? 0);

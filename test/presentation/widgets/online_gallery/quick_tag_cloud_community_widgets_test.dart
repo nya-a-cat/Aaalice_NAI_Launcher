@@ -78,38 +78,40 @@ void main() {
     });
   }
 
-  testWidgets('community prompt card supports enlarged text without networking', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _app(
-        MediaQuery(
-          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
-          child: Center(
-            child: SizedBox(
-              width: 320,
-              height: 460,
-              child: QuickTagCloudCommunityCard(
-                detail: const GalleryDetail(
-                  item: GalleryItem(
-                    id: 1,
-                    title: 'A long community title for scaled text',
-                    author: 'Contributor',
+  testWidgets(
+    'community prompt card supports enlarged text without networking',
+    (tester) async {
+      await tester.pumpWidget(
+        _app(
+          MediaQuery(
+            data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+            child: Center(
+              child: SizedBox(
+                width: 320,
+                height: 460,
+                child: QuickTagCloudCommunityCard(
+                  detail: const GalleryDetail(
+                    item: GalleryItem(
+                      id: 1,
+                      title: 'A long community title for scaled text',
+                      author: 'Contributor',
+                    ),
+                    media: [],
+                    prompt:
+                        'A detailed landscape with a long descriptive prompt',
+                    categoryPath: ['场景'],
                   ),
-                  media: [],
-                  prompt: 'A detailed landscape with a long descriptive prompt',
-                  categoryPath: ['场景'],
+                  onOpen: () {},
                 ),
-                onOpen: () {},
               ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
 
 Widget _app(Widget child) => MaterialApp(

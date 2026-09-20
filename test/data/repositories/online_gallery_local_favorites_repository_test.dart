@@ -178,7 +178,9 @@ void main() {
       saved.entry,
       saved.media,
     );
-    await repository.upsert(const QuickTagCloudGalleryMapper().toGalleryDetail(source));
+    await repository.upsert(
+      const QuickTagCloudGalleryMapper().toGalleryDetail(source),
+    );
     OnlineGalleryFavoritePage search(String text) => repository.query(
       OnlineGalleryFavoriteQuery(
         sourceId: GallerySourceId.quickTagCloud,
@@ -186,14 +188,22 @@ void main() {
         ratings: const {'q'},
       ),
     );
-    expect(search('title:entry prompt:"best quality" negative:boy '
-        'author:Contributor path:Characters has:image fav:true').total, 1);
+    expect(
+      search(
+        'title:entry prompt:"best quality" negative:boy '
+        'author:Contributor path:Characters has:image fav:true',
+      ).total,
+      1,
+    );
     expect(search('fav:false').total, 0);
     expect(search('-prompt:solo').total, 0);
     final code = quickTagCloudDirectoryCode(['Characters']);
     expect(search('dir:book:$code').total, 1);
     expect(search('dir:other:$code').total, 0);
-    expect(() => search('fav:maybe'), throwsA(isA<QuickTagCloudSearchException>()));
+    expect(
+      () => search('fav:maybe'),
+      throwsA(isA<QuickTagCloudSearchException>()),
+    );
   });
 
   test('QuickTagCloud 单 JSON 迁移经回读校验后写 marker 并删除旧 key', () async {

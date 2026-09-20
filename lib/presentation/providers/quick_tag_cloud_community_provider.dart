@@ -15,6 +15,7 @@ final quickTagCloudCommunityProvider =
     FutureProvider.autoDispose<QuickTagCloudCommunity>((ref) {
       final token = CancelToken();
       ref.onDispose(token.cancel);
-      return ref.watch(quickTagCloudCommunityServiceProvider)
+      return ref
+          .watch(quickTagCloudCommunityServiceProvider)
           .load(cancelToken: token);
     });

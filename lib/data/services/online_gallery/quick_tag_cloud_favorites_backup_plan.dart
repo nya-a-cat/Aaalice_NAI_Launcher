@@ -47,15 +47,42 @@ class QuickTagCloudBackupPlan {
     final preserved = _preservedConflicts(next, incoming, replace);
     final initialConflicts = preserved.length;
     final items = _mergeAtlas(current, incoming, replace, preserved);
-    final (folders, folderIds) = _mergeFolders(current, incoming, replace, preserved);
-    final memberships = _mergeMemberships(current, incoming, folderIds, replace, preserved);
+    final (folders, folderIds) = _mergeFolders(
+      current,
+      incoming,
+      replace,
+      preserved,
+    );
+    final memberships = _mergeMemberships(
+      current,
+      incoming,
+      folderIds,
+      replace,
+      preserved,
+    );
     final favorites = clone(next['favorites'] as Map<String, dynamic>);
     if (!replace) {
-      _mergeMetadata(next, incoming, 'document', preserved,
-          ignore: {'favorites', 'folders', 'memberships', 'version',
-            'exportedAt', 'aaalicePreservedConflicts'});
-      _mergeMetadata(favorites, incoming['favorites'] as Map<String, dynamic>,
-          'favorites', preserved, ignore: {'atlas', 'community'});
+      _mergeMetadata(
+        next,
+        incoming,
+        'document',
+        preserved,
+        ignore: {
+          'favorites',
+          'folders',
+          'memberships',
+          'version',
+          'exportedAt',
+          'aaalicePreservedConflicts',
+        },
+      );
+      _mergeMetadata(
+        favorites,
+        incoming['favorites'] as Map<String, dynamic>,
+        'favorites',
+        preserved,
+        ignore: {'atlas', 'community'},
+      );
     }
     next.addAll({
       'version': 2,
@@ -87,7 +114,9 @@ class QuickTagCloudBackupPlan {
       QuickTagCloudFavoritesBackupCodec.keyOf(item);
 
   static List<dynamic> _preservedConflicts(
-    Map<String, dynamic> next, Map<String, dynamic> incoming, bool replace,
+    Map<String, dynamic> next,
+    Map<String, dynamic> incoming,
+    bool replace,
   ) {
     final preserved = <dynamic>[];
     final seen = <String>{};
@@ -101,13 +130,13 @@ class QuickTagCloudBackupPlan {
   }
 
   static Map<String, Map<String, dynamic>> _mergeAtlas(
-    Map<String, dynamic> current, Map<String, dynamic> incoming,
-    bool replace, List<dynamic> preserved,
+    Map<String, dynamic> current,
+    Map<String, dynamic> incoming,
+    bool replace,
+    List<dynamic> preserved,
   ) {
     final items = <String, Map<String, dynamic>>{};
-    for (final item in [
-      if (!replace) ...atlas(current), ...atlas(incoming),
-    ]) {
+    for (final item in [if (!replace) ...atlas(current), ...atlas(incoming)]) {
       final key = _key(item);
       final existing = items[key];
       if (existing == null) {
@@ -120,8 +149,10 @@ class QuickTagCloudBackupPlan {
   }
 
   static (List<Map<String, dynamic>>, Map<String, String>) _mergeFolders(
-    Map<String, dynamic> current, Map<String, dynamic> incoming,
-    bool replace, List<dynamic> preserved,
+    Map<String, dynamic> current,
+    Map<String, dynamic> incoming,
+    bool replace,
+    List<dynamic> preserved,
   ) {
     final folders = <Map<String, dynamic>>[
       if (!replace)
@@ -131,8 +162,10 @@ class QuickTagCloudBackupPlan {
     final folderIds = <String, String>{};
     final source = (incoming['folders'] as List? ?? []).indexed.toList()
       ..sort((a, b) {
-        int order((int, dynamic) row) => row.$2['order'] is int &&
-            (row.$2['order'] as int) >= 0 ? row.$2['order'] as int : row.$1;
+        int order((int, dynamic) row) =>
+            row.$2['order'] is int && (row.$2['order'] as int) >= 0
+            ? row.$2['order'] as int
+            : row.$1;
         final rank = order(a).compareTo(order(b));
         return rank == 0 ? a.$1.compareTo(b.$1) : rank;
       });
@@ -141,8 +174,13 @@ class QuickTagCloudBackupPlan {
       final sameName = folders.where((f) => f['name'] == folder['name']);
       if (sameName.isNotEmpty) {
         folderIds[folder['id'] as String] = sameName.first['id'] as String;
-        _mergeMetadata(sameName.first, folder, 'folder', preserved,
-            ignore: {'id', 'order'});
+        _mergeMetadata(
+          sameName.first,
+          folder,
+          'folder',
+          preserved,
+          ignore: {'id', 'order'},
+        );
         continue;
       }
       final originalId = folder['id'] as String;
@@ -160,14 +198,20 @@ class QuickTagCloudBackupPlan {
   }
 
   static List<Map<String, dynamic>> _mergeMemberships(
-    Map<String, dynamic> current, Map<String, dynamic> incoming,
-    Map<String, String> folderIds, bool replace, List<dynamic> preserved,
+    Map<String, dynamic> current,
+    Map<String, dynamic> incoming,
+    Map<String, String> folderIds,
+    bool replace,
+    List<dynamic> preserved,
   ) {
     final memberships = <String, Map<String, dynamic>>{};
     for (final value in [
       if (!replace) ...(current['memberships'] as List? ?? []),
       for (final raw in (incoming['memberships'] as List? ?? []))
-        {...raw as Map<String, dynamic>, 'folderId': folderIds[raw['folderId']]},
+        {
+          ...raw as Map<String, dynamic>,
+          'folderId': folderIds[raw['folderId']],
+        },
     ]) {
       final relation = clone(value as Map<String, dynamic>);
       final key = jsonEncode([relation['itemKey'], relation['folderId']]);
@@ -193,10 +237,14 @@ class QuickTagCloudBackupPlan {
       final existing = target[field.key];
       if (existing == null || existing == '') {
         target[field.key] = field.value;
-      } else if (field.value != null && field.value != '' &&
+      } else if (field.value != null &&
+          field.value != '' &&
           jsonEncode(existing) != jsonEncode(field.value)) {
-        final conflict = {'scope': scope, 'field': field.key,
-          'value': field.value};
+        final conflict = {
+          'scope': scope,
+          'field': field.key,
+          'value': field.value,
+        };
         final encoded = jsonEncode(conflict);
         if (!preserved.any((item) => jsonEncode(item) == encoded)) {
           preserved.add(conflict);

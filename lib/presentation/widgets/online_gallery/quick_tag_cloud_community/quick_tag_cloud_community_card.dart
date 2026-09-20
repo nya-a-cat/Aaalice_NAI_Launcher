@@ -54,7 +54,8 @@ class _QuickTagCloudCommunityCardState
                   children: [
                     Text(
                       item.title?.isNotEmpty == true
-                          ? item.title! : context.l10n.onlineGallery_codexUntitled,
+                          ? item.title!
+                          : context.l10n.onlineGallery_codexUntitled,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleSmall,
@@ -109,7 +110,8 @@ class _QuickTagCloudCommunityCardState
             ).createImageProvider(OnlineGalleryImageCacheManager.instance),
             fit: BoxFit.cover,
             loadingBuilder: (context, child, progress) => progress == null
-                ? child : const Center(child: CircularProgressIndicator()),
+                ? child
+                : const Center(child: CircularProgressIndicator()),
             errorBuilder: (context, _, _) => Center(
               child: Tooltip(
                 message: context.l10n.detail_imageLoadFailed,
@@ -119,7 +121,8 @@ class _QuickTagCloudCommunityCardState
           ),
         ),
       Positioned(
-        top: 8, right: 8,
+        top: 8,
+        right: 8,
         child: Wrap(
           spacing: 4,
           children: [

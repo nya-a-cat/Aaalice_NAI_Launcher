@@ -42,9 +42,12 @@ Future<QuickTagCloudFilterSelection?> showQuickTagCloudFilterPicker(
                   runSpacing: 4,
                   children: [
                     for (final entry in {
-                      QuickTagCloudMediaFilter.all: l10n.onlineGallery_codexAllEntries,
-                      QuickTagCloudMediaFilter.withImages: l10n.onlineGallery_codexWithImages,
-                      QuickTagCloudMediaFilter.withoutImages: l10n.onlineGallery_codexWithoutImages,
+                      QuickTagCloudMediaFilter.all:
+                          l10n.onlineGallery_codexAllEntries,
+                      QuickTagCloudMediaFilter.withImages:
+                          l10n.onlineGallery_codexWithImages,
+                      QuickTagCloudMediaFilter.withoutImages:
+                          l10n.onlineGallery_codexWithoutImages,
                     }.entries)
                       ChoiceChip(
                         label: Text(entry.value),
@@ -75,7 +78,10 @@ Future<QuickTagCloudFilterSelection?> showQuickTagCloudFilterPicker(
                       for (final filter in meta.updateFilters)
                         DropdownMenuItem(
                           value: filter.id,
-                            child: Text(filter.label, overflow: TextOverflow.ellipsis),
+                          child: Text(
+                            filter.label,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                     ],
                     onChanged: (value) {

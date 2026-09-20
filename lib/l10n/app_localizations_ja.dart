@@ -9,6 +9,237 @@ class AppLocalizationsJa extends AppLocalizations {
   AppLocalizationsJa([String locale = 'ja']) : super(locale);
 
   @override
+  String get onlineGallery_codexSearchTitle => 'タイトル';
+
+  @override
+  String get onlineGallery_codexSearchType => '項目の種類';
+
+  @override
+  String get onlineGallery_codexSearchDirectory => '正確なディレクトリー';
+
+  @override
+  String get onlineGallery_codexCommunity => '共創広場';
+
+  @override
+  String get onlineGallery_communitySubmit => 'サイトで投稿';
+
+  @override
+  String get onlineGallery_communityRatingNotice =>
+      '現在のギャラリー年齢フィルターを適用します。配信元の分類は不完全な場合があります。';
+
+  @override
+  String get onlineGallery_communityLoadFailed =>
+      '共創広場を読み込めません。接続を確認して再試行してください。';
+
+  @override
+  String get onlineGallery_communityEmpty => '現在の条件に一致する投稿はありません。';
+
+  @override
+  String onlineGallery_communityCount(int count) {
+    return '$count 件の投稿';
+  }
+
+  @override
+  String get onlineGallery_codexRelay => 'プロンプト中継';
+
+  @override
+  String get onlineGallery_codexAddToRelay => '中継に追加';
+
+  @override
+  String get onlineGallery_codexFavoritesBackup => 'お気に入りのバックアップ';
+
+  @override
+  String get onlineGallery_codexAdvancedSearch => '詳細検索';
+
+  @override
+  String get onlineGallery_codexSearchField => '検索フィールド';
+
+  @override
+  String get onlineGallery_codexSearchValue => '検索内容';
+
+  @override
+  String get onlineGallery_codexSearchExclude => '除外条件';
+
+  @override
+  String get onlineGallery_codexSearchAddCondition => '条件を追加';
+
+  @override
+  String get onlineGallery_codexSearchQuery => '検索式';
+
+  @override
+  String get onlineGallery_codexSearchHelp =>
+      '複数の条件を組み合わせます。空白を含む語句は二重引用符で囲みます。';
+
+  @override
+  String get onlineGallery_codexSearchInvalid =>
+      '値、演算子、引用符を確認してください。テキスト条件は最大10個です。';
+
+  @override
+  String get quickTagBackupTitle => 'お気に入りのバックアップと復元';
+
+  @override
+  String get quickTagBackupHelp =>
+      'JSONまたはNAITAG1移行テキストを読み込みます（最大2 MiB）。プレビュー時に必要な公式法典とコミュニティ項目を読み込んでお気に入りを照合し、バックアップ内容は端末内にのみ保存します。未解決の項目とフォルダー情報も保持して再エクスポートできます。';
+
+  @override
+  String get quickTagBackupInputHint => 'お気に入りのJSONまたはNAITAG1テキストを貼り付け';
+
+  @override
+  String get quickTagBackupImportFile => 'バックアップファイルを選択';
+
+  @override
+  String get quickTagBackupPreview => '復元内容を確認';
+
+  @override
+  String get quickTagBackupExportJson => 'JSONをエクスポート';
+
+  @override
+  String get quickTagBackupCopyTransfer => '移行テキストをコピー';
+
+  @override
+  String get quickTagBackupMerge => '重複を除いて統合';
+
+  @override
+  String get quickTagBackupReplace => '法典のお気に入りを置き換え';
+
+  @override
+  String get quickTagBackupInvalid => 'バックアップ形式が無効です。既存のお気に入りは変更されていません。';
+
+  @override
+  String get quickTagBackupTooLarge => 'バックアップが2 MiBの上限を超えています。';
+
+  @override
+  String get quickTagBackupStale => 'お気に入りが変更されました。復元内容を再確認してください。';
+
+  @override
+  String get quickTagBackupFailed =>
+      'バックアップまたは復元が完了しませんでした。保存権限を確認して再試行してください。';
+
+  @override
+  String get quickTagBackupRestored => 'お気に入りを復元しました';
+
+  @override
+  String get quickTagBackupReplaceWarning =>
+      '端末内の法典のお気に入りとバックアップライブラリを置き換えます。他のソースは保持されます。先にバックアップをエクスポートしてください。';
+
+  @override
+  String quickTagBackupCounts(
+    int atlas,
+    int community,
+    int folders,
+    int mapped,
+    int unmapped,
+    int duplicates,
+    int removed,
+    int conflicts,
+  ) {
+    return '法典 $atlas · コミュニティ $community · フォルダー $folders\n解決済み $mapped · 未解決 $unmapped · 重複 $duplicates\n置換で削除 $removed · メタデータ競合 $conflicts';
+  }
+
+  @override
+  String get qtcRelay_title => 'プロンプト中継';
+
+  @override
+  String get qtcRelay_plan => 'プラン';
+
+  @override
+  String get qtcRelay_newPlan => '新規プラン';
+
+  @override
+  String get qtcRelay_renamePlan => 'プラン名を変更';
+
+  @override
+  String get qtcRelay_deletePlan => 'プランを削除';
+
+  @override
+  String get qtcRelay_name => '名前';
+
+  @override
+  String get qtcRelay_addBlock => 'ブロックを追加';
+
+  @override
+  String get qtcRelay_blockTitle => 'ブロック名';
+
+  @override
+  String get qtcRelay_weight => 'ブロックの重み';
+
+  @override
+  String get qtcRelay_weightHint => '0.05–10。正、負、キャラクタープロンプトに適用';
+
+  @override
+  String get qtcRelay_invalidWeight => '0.05から10までの有限数を入力してください';
+
+  @override
+  String get qtcRelay_plain => '原文';
+
+  @override
+  String get qtcRelay_plainHint => '既存の構文を保持し、ブロックの重みを追加しません';
+
+  @override
+  String get qtcRelay_comma => 'コンマ';
+
+  @override
+  String get qtcRelay_newline => 'コンマと改行';
+
+  @override
+  String get qtcRelay_copyPositive => '正プロンプトをコピー';
+
+  @override
+  String get qtcRelay_copyNegative => '負プロンプトをコピー';
+
+  @override
+  String get qtcRelay_copyAll => 'すべてコピー';
+
+  @override
+  String get qtcRelay_send => '生成画面に入力';
+
+  @override
+  String get qtcRelay_sendHint => '空でないプロンプトを入力し、キャラクターを個別スロットに追加します';
+
+  @override
+  String get qtcRelay_sent => '生成画面に入力しました。生成は開始していません。';
+
+  @override
+  String get qtcRelay_charactersNote => 'キャラクターは個別に保持され、すべてコピーに正負プロンプトが含まれます';
+
+  @override
+  String get qtcRelay_locked => '現在のレーティング設定により、このブロックはロックされています';
+
+  @override
+  String get qtcRelay_corrupt =>
+      '中継データを読み込めません。元のデータは保持されています。バックアップしてから再構築してください。';
+
+  @override
+  String get qtcRelay_recover => 'バックアップして再構築';
+
+  @override
+  String get qtcRelay_recoverConfirm =>
+      '元のデータを端末内の復旧用バックアップとして保持し、空のプランを作成します。続行しますか？';
+
+  @override
+  String get qtcRelay_saveFailed => '保存に失敗しました。最後に保存したプランは保持されています。再試行してください。';
+
+  @override
+  String get qtcRelay_empty => '素材または独自の正負プロンプトブロックを追加';
+
+  @override
+  String get qtcRelay_moveUp => '上へ';
+
+  @override
+  String get qtcRelay_moveDown => '下へ';
+
+  @override
+  String get qtcRelay_merged => '重複ブロックを統合しました';
+
+  @override
+  String get qtcRelay_sendConfirm =>
+      '空でない正負プロンプトを入力し、キャラクターの個別スロットを追加します。対象欄の既存内容は置き換えられます。続行しますか？';
+
+  @override
+  String get qtcRelay_characterLimit =>
+      '現在のモデルがキャラクターに対応していないか、空きスロットが不足しています。モデルまたはキャラクターを調整してください。';
+
+  @override
   String get app_title => 'NAI Launcher';
 
   @override

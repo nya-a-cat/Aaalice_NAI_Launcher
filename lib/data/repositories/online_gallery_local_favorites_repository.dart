@@ -421,7 +421,9 @@ class OnlineGalleryLocalFavoritesRepository {
       OnlineGalleryFavoritesReplacement.serialize(_box, () async {
         if (_box.isOpen &&
             _box.containsKey(OnlineGalleryFavoritesReplacement.journalKey)) {
-          throw StateError('Pending favorite replacement journal needs recovery');
+          throw StateError(
+            'Pending favorite replacement journal needs recovery',
+          );
         }
         return operation();
       });

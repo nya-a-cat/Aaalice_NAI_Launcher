@@ -9,6 +9,249 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get onlineGallery_codexSearchTitle => 'Title';
+
+  @override
+  String get onlineGallery_codexSearchType => 'Entry type';
+
+  @override
+  String get onlineGallery_codexSearchDirectory => 'Exact directory';
+
+  @override
+  String get onlineGallery_codexCommunity => 'Community';
+
+  @override
+  String get onlineGallery_communitySubmit => 'Submit on website';
+
+  @override
+  String get onlineGallery_communityRatingNotice =>
+      'Uses the current gallery age filter. Source content labels may be incomplete.';
+
+  @override
+  String get onlineGallery_communityLoadFailed =>
+      'Community could not be loaded. Check your connection and retry.';
+
+  @override
+  String get onlineGallery_communityEmpty =>
+      'No submissions match the current filters.';
+
+  @override
+  String onlineGallery_communityCount(int count) {
+    return '$count submissions';
+  }
+
+  @override
+  String get onlineGallery_codexRelay => 'Prompt relay';
+
+  @override
+  String get onlineGallery_codexAddToRelay => 'Add to relay';
+
+  @override
+  String get onlineGallery_codexFavoritesBackup => 'Favorites backup';
+
+  @override
+  String get onlineGallery_codexAdvancedSearch => 'Advanced search';
+
+  @override
+  String get onlineGallery_codexSearchField => 'Search field';
+
+  @override
+  String get onlineGallery_codexSearchValue => 'Match value';
+
+  @override
+  String get onlineGallery_codexSearchExclude => 'Exclude condition';
+
+  @override
+  String get onlineGallery_codexSearchAddCondition => 'Add condition';
+
+  @override
+  String get onlineGallery_codexSearchQuery => 'Search expression';
+
+  @override
+  String get onlineGallery_codexSearchHelp =>
+      'Combine field conditions. Use double quotes to preserve spaces.';
+
+  @override
+  String get onlineGallery_codexSearchInvalid =>
+      'Check field values, operators and quotes. Use up to 10 text conditions.';
+
+  @override
+  String get quickTagBackupTitle => 'Favorites backup and restore';
+
+  @override
+  String get quickTagBackupHelp =>
+      'Import JSON or NAITAG1 transfer text (up to 2 MiB). Preview reads official codex and community entries as needed to resolve favorites; backup content stays on this device. Unresolved entries and folder metadata are retained for re-export.';
+
+  @override
+  String get quickTagBackupInputHint =>
+      'Paste favorites JSON or NAITAG1 transfer text';
+
+  @override
+  String get quickTagBackupImportFile => 'Choose backup file';
+
+  @override
+  String get quickTagBackupPreview => 'Preview restore';
+
+  @override
+  String get quickTagBackupExportJson => 'Export JSON';
+
+  @override
+  String get quickTagBackupCopyTransfer => 'Copy transfer text';
+
+  @override
+  String get quickTagBackupMerge => 'Merge and deduplicate';
+
+  @override
+  String get quickTagBackupReplace => 'Replace codex favorites';
+
+  @override
+  String get quickTagBackupInvalid =>
+      'Invalid backup format. Existing favorites are unchanged.';
+
+  @override
+  String get quickTagBackupTooLarge => 'The backup exceeds the 2 MiB limit.';
+
+  @override
+  String get quickTagBackupStale =>
+      'Favorites have changed. Preview the restore again.';
+
+  @override
+  String get quickTagBackupFailed =>
+      'Backup or restore did not finish. Retry and check storage permissions.';
+
+  @override
+  String get quickTagBackupRestored => 'Favorites restored';
+
+  @override
+  String get quickTagBackupReplaceWarning =>
+      'This replaces local codex favorites and the backup library. Favorites from other sources are retained. Export a backup first.';
+
+  @override
+  String quickTagBackupCounts(
+    int atlas,
+    int community,
+    int folders,
+    int mapped,
+    int unmapped,
+    int duplicates,
+    int removed,
+    int conflicts,
+  ) {
+    return 'Codex $atlas · Community $community · Folders $folders\nResolved $mapped · Unresolved $unmapped · Duplicates $duplicates\nRemoved on replace $removed · Metadata conflicts $conflicts';
+  }
+
+  @override
+  String get qtcRelay_title => 'Prompt relay';
+
+  @override
+  String get qtcRelay_plan => 'Plan';
+
+  @override
+  String get qtcRelay_newPlan => 'New plan';
+
+  @override
+  String get qtcRelay_renamePlan => 'Rename plan';
+
+  @override
+  String get qtcRelay_deletePlan => 'Delete plan';
+
+  @override
+  String get qtcRelay_name => 'Name';
+
+  @override
+  String get qtcRelay_addBlock => 'Add block';
+
+  @override
+  String get qtcRelay_blockTitle => 'Block title';
+
+  @override
+  String get qtcRelay_weight => 'Block weight';
+
+  @override
+  String get qtcRelay_weightHint =>
+      '0.05–10; applies to positive, negative and character prompts';
+
+  @override
+  String get qtcRelay_invalidWeight => 'Enter a finite number from 0.05 to 10';
+
+  @override
+  String get qtcRelay_plain => 'Plain text';
+
+  @override
+  String get qtcRelay_plainHint =>
+      'Preserves existing syntax without adding block weights';
+
+  @override
+  String get qtcRelay_comma => 'Comma';
+
+  @override
+  String get qtcRelay_newline => 'Comma and newline';
+
+  @override
+  String get qtcRelay_copyPositive => 'Copy positive';
+
+  @override
+  String get qtcRelay_copyNegative => 'Copy negative';
+
+  @override
+  String get qtcRelay_copyAll => 'Copy all';
+
+  @override
+  String get qtcRelay_send => 'Fill generation page';
+
+  @override
+  String get qtcRelay_sendHint =>
+      'Fills nonempty prompts and appends characters to separate slots';
+
+  @override
+  String get qtcRelay_sent =>
+      'Filled generation page. Generation has not started.';
+
+  @override
+  String get qtcRelay_charactersNote =>
+      'Characters remain separate; Copy all includes their positive and negative prompts';
+
+  @override
+  String get qtcRelay_locked =>
+      'This block is locked by the current content rating settings';
+
+  @override
+  String get qtcRelay_corrupt =>
+      'Relay storage could not be read. The original data is retained. Back it up before rebuilding.';
+
+  @override
+  String get qtcRelay_recover => 'Back up and rebuild';
+
+  @override
+  String get qtcRelay_recoverConfirm =>
+      'The original storage will be retained as a local recovery backup, then an empty plan will be created. Continue?';
+
+  @override
+  String get qtcRelay_saveFailed =>
+      'Save failed. The last saved plan is retained. Please retry.';
+
+  @override
+  String get qtcRelay_empty =>
+      'Add an entry or a custom positive/negative prompt block';
+
+  @override
+  String get qtcRelay_moveUp => 'Move up';
+
+  @override
+  String get qtcRelay_moveDown => 'Move down';
+
+  @override
+  String get qtcRelay_merged => 'Duplicate blocks merged';
+
+  @override
+  String get qtcRelay_sendConfirm =>
+      'Fill this plan\'s nonempty prompts and append separate character slots? Existing content in those prompt fields will be replaced.';
+
+  @override
+  String get qtcRelay_characterLimit =>
+      'The current model does not support these characters, or there are too few slots. Adjust the model or characters and retry.';
+
+  @override
   String get app_title => 'NAI Launcher';
 
   @override

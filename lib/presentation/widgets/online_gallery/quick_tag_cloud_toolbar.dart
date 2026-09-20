@@ -287,12 +287,18 @@ class _QuickTagCloudToolbarState extends ConsumerState<QuickTagCloudToolbar> {
   }
 
   Future<void> _showCodexPicker(
-    BuildContext context, QuickTagCloudCatalog catalog,
-    QuickTagCloudGalleryQuery query, QuickTagCloudCodex? selectedCodex,
-    {required bool allowNsfw}
-  ) async {
+    BuildContext context,
+    QuickTagCloudCatalog catalog,
+    QuickTagCloudGalleryQuery query,
+    QuickTagCloudCodex? selectedCodex, {
+    required bool allowNsfw,
+  }) async {
     final selected = await showQuickTagCloudCodexPicker(
-      context, catalog, query, selectedCodex, allowNsfw: allowNsfw,
+      context,
+      catalog,
+      query,
+      selectedCodex,
+      allowNsfw: allowNsfw,
     );
     if (!mounted || selected == null || selected == query.codexId) return;
     ref.read(quickTagCloudFilterProvider.notifier).selectCodex(selected);
@@ -309,7 +315,11 @@ class _QuickTagCloudToolbarState extends ConsumerState<QuickTagCloudToolbar> {
       final codex = await ref.read(quickTagCloudCodexProvider(codexId).future);
       if (!mounted) return;
       setState(() => _openingCategoryPicker = false);
-      final selected = await showQuickTagCloudCategoryPicker(context, codex, selectedPath);
+      final selected = await showQuickTagCloudCategoryPicker(
+        context,
+        codex,
+        selectedPath,
+      );
       if (!mounted || selected == null) return;
       ref.read(quickTagCloudFilterProvider.notifier).selectCategory(selected);
       await widget.onFiltersChanged();
@@ -336,28 +346,35 @@ class _QuickTagCloudToolbarState extends ConsumerState<QuickTagCloudToolbar> {
     }
   }
 
-  Future<void> _showFilterDialog(BuildContext context,
-      QuickTagCloudCodexMeta? meta, QuickTagCloudGalleryQuery query) async {
+  Future<void> _showFilterDialog(
+    BuildContext context,
+    QuickTagCloudCodexMeta? meta,
+    QuickTagCloudGalleryQuery query,
+  ) async {
     final selected = await showQuickTagCloudFilterPicker(context, meta, query);
     if (!mounted || selected == null) return;
     final allowNsfw = QuickTagCloudAccess.allowsNsfw(widget.selectedRatings);
     final lockedSelection = !allowNsfw && meta?.nsfw == true;
-    await ref.read(quickTagCloudFilterProvider.notifier).applyFilters(
-      codexId: lockedSelection ? 'all' : query.codexId,
-      updateFilterId: lockedSelection ? '' : selected.updateFilterId,
-      scope: query.scope,
-      mediaFilter: selected.mediaFilter,
-      allowNsfw: allowNsfw,
-      allowR18g: QuickTagCloudAccess.allowsR18g(widget.selectedRatings),
-    );
+    await ref
+        .read(quickTagCloudFilterProvider.notifier)
+        .applyFilters(
+          codexId: lockedSelection ? 'all' : query.codexId,
+          updateFilterId: lockedSelection ? '' : selected.updateFilterId,
+          scope: query.scope,
+          mediaFilter: selected.mediaFilter,
+          allowNsfw: allowNsfw,
+          allowR18g: QuickTagCloudAccess.allowsR18g(widget.selectedRatings),
+        );
     if (mounted) await widget.onFiltersChanged();
   }
 
   Future<void> _openAdvancedSearch() async {
     final state = ref.read(onlineGalleryNotifierProvider);
     final query = await showQuickTagCloudSearch(
-      context, initialQuery: widget.favoritesMode
-          ? state.favoriteSearchQuery : state.searchQuery,
+      context,
+      initialQuery: widget.favoritesMode
+          ? state.favoriteSearchQuery
+          : state.searchQuery,
     );
     if (!mounted || query == null) return;
     final notifier = ref.read(onlineGalleryNotifierProvider.notifier);

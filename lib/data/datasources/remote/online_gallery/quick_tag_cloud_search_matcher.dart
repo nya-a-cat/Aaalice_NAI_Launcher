@@ -30,7 +30,9 @@ class QuickTagCloudSearchDocument {
     final prompt = field('prompt');
     if (plan.terms.any(title.contains) &&
         plan.terms.any(prompt.contains) &&
-        plan.terms.every((term) => title.contains(term) || prompt.contains(term))) {
+        plan.terms.every(
+          (term) => title.contains(term) || prompt.contains(term),
+        )) {
       return 3;
     }
     if (plan.terms.every(prompt.contains)) return 4;
@@ -87,7 +89,9 @@ class QuickTagCloudSearchDocument {
             _raw(image.raw, 'author'),
             _raw(image.raw, 'credit'),
           ],
-          ...record.meta.contributors.map((item) => '${item.name} ${item.role}'),
+          ...record.meta.contributors.map(
+            (item) => '${item.name} ${item.role}',
+          ),
         ].join('\n');
       case 'codex':
         return [codex.id, codex.title, ...codex.aliases].join('\n');
@@ -97,8 +101,15 @@ class QuickTagCloudSearchDocument {
         // Preserve native metadata recall while using website AND/field syntax.
         return [
           for (final key in [
-            'title', 'prompt', 'negative', 'note', 'raw', 'path',
-            'author', 'codex', 'type',
+            'title',
+            'prompt',
+            'negative',
+            'note',
+            'raw',
+            'path',
+            'author',
+            'codex',
+            'type',
           ])
             field(key),
           entry.rating,
@@ -143,7 +154,8 @@ bool matchQuickTagCloudSearchPlan(
   required bool Function(QuickTagCloudSearchFilter) matchesDirectory,
 }) {
   if (plan.hasErrors) return false;
-  if (plan.terms.isNotEmpty && !plan.terms.every(fieldText('default').contains)) {
+  if (plan.terms.isNotEmpty &&
+      !plan.terms.every(fieldText('default').contains)) {
     return false;
   }
   return plan.filters.every((filter) {
@@ -168,8 +180,12 @@ String quickTagCloudDirectoryCode(Iterable<String> path) {
       hash ^= byte;
       // Shift/add keeps the 32-bit result exact on Dart VM and web targets.
       hash =
-          (hash + (hash << 1) + (hash << 4) + (hash << 7) +
-              (hash << 8) + (hash << 24)) &
+          (hash +
+              (hash << 1) +
+              (hash << 4) +
+              (hash << 7) +
+              (hash << 8) +
+              (hash << 24)) &
           0xffffffff;
     }
   }

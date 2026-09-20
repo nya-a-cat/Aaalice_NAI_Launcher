@@ -9,7 +9,6 @@ import '../../../../core/cache/online_gallery_prefetch_coordinator.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/online_gallery/gallery_item.dart';
 import '../../../../data/models/online_gallery/quick_tag_cloud_community.dart';
-import '../../../../data/services/online_gallery/online_gallery_query.dart';
 import '../../../../data/services/online_gallery/quick_tag_cloud_community_service.dart';
 import '../../../providers/online_gallery_blacklist_provider.dart';
 import '../../../providers/online_gallery_local_favorites_provider.dart';
@@ -23,10 +22,11 @@ import '../../common/app_toast.dart';
 import 'quick_tag_cloud_community_card.dart';
 import 'quick_tag_cloud_community_filters.dart';
 
-Future<void> showQuickTagCloudCommunity(BuildContext context) => showDialog<void>(
-  context: context,
-  builder: (_) => const QuickTagCloudCommunityDialog(),
-);
+Future<void> showQuickTagCloudCommunity(BuildContext context) =>
+    showDialog<void>(
+      context: context,
+      builder: (_) => const QuickTagCloudCommunityDialog(),
+    );
 
 class QuickTagCloudCommunityDialog extends ConsumerStatefulWidget {
   const QuickTagCloudCommunityDialog({super.key});
@@ -57,7 +57,9 @@ class _QuickTagCloudCommunityDialogState
       ),
     );
     _launcher = OnlineGalleryDetailLauncher(
-      context: context, ref: ref, controller: _controller,
+      context: context,
+      ref: ref,
+      controller: _controller,
     );
   }
 
@@ -75,7 +77,9 @@ class _QuickTagCloudCommunityDialogState
     );
     final access = ref.watch(quickTagCloudFilterProvider);
     final favorites = ref.watch(onlineGalleryLocalFavoritesProvider);
-    final favoriteStore = ref.read(onlineGalleryLocalFavoritesProvider.notifier);
+    final favoriteStore = ref.read(
+      onlineGalleryLocalFavoritesProvider.notifier,
+    );
     final blacklist = ref.watch(
       onlineGalleryBlacklistNotifierProvider.select((state) => state.tags),
     );
@@ -86,26 +90,28 @@ class _QuickTagCloudCommunityDialogState
           if (favoriteStore.isFavorite(detail.item.stableKey))
             detail.item.stableKey,
     };
-    final allowedKeys = const OnlineGalleryQuery().filterLocal(
-      items: entries.map((entry) => entry.item),
-      ratings: const {'g', 's', 'q', 'e'},
-      blacklist: blacklist,
-    ).map((item) => item.stableKey).toSet();
-    final filtered = QuickTagCloudCommunityQuery(
-      search: _search,
-      category: _category,
-      favoritesOnly: _favoritesOnly,
-      popularFirst: _popularFirst,
-      ratings: ratings,
-      allowNsfw: access.allowNsfw,
-      allowR18g: access.allowR18g,
-    ).apply(
-      entries.where((entry) => allowedKeys.contains(entry.item.stableKey)),
-      favoriteKeys: favoriteKeys,
-    );
-    final content = SafeArea(
-      child: _body(data, filtered, favoriteKeys),
-    );
+    final allowedKeys = const OnlineGalleryQuery()
+        .filterLocal(
+          items: entries.map((entry) => entry.item),
+          ratings: const {'g', 's', 'q', 'e'},
+          blacklist: blacklist,
+        )
+        .map((item) => item.stableKey)
+        .toSet();
+    final filtered =
+        QuickTagCloudCommunityQuery(
+          search: _search,
+          category: _category,
+          favoritesOnly: _favoritesOnly,
+          popularFirst: _popularFirst,
+          ratings: ratings,
+          allowNsfw: access.allowNsfw,
+          allowR18g: access.allowR18g,
+        ).apply(
+          entries.where((entry) => allowedKeys.contains(entry.item.stableKey)),
+          favoriteKeys: favoriteKeys,
+        );
+    final content = SafeArea(child: _body(data, filtered, favoriteKeys));
     return LayoutBuilder(
       builder: (context, constraints) => constraints.maxWidth < 600
           ? Dialog.fullscreen(child: content)
@@ -142,9 +148,10 @@ class _QuickTagCloudCommunityDialogState
             builder: (context, constraints) => SliverGrid.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: (constraints.crossAxisExtent / 280)
-                    .floor().clamp(1, 4),
-                mainAxisExtent: 340 +
-                    (MediaQuery.textScalerOf(context).scale(100) - 100),
+                    .floor()
+                    .clamp(1, 4),
+                mainAxisExtent:
+                    340 + (MediaQuery.textScalerOf(context).scale(100) - 100),
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
               ),
@@ -156,10 +163,14 @@ class _QuickTagCloudCommunityDialogState
                   detail: detail,
                   favorite: favoriteKeys.contains(detail.item.stableKey),
                   showLikes: likesAvailable,
-                  onOpen: () => unawaited(_launcher.show(
-                    context, detail.item, knownDetail: detail,
-                    onLeaveDetail: galleryOwnedOverlayExit(this.context),
-                  )),
+                  onOpen: () => unawaited(
+                    _launcher.show(
+                      context,
+                      detail.item,
+                      knownDetail: detail,
+                      onLeaveDetail: galleryOwnedOverlayExit(this.context),
+                    ),
+                  ),
                 );
               },
             ),
@@ -176,17 +187,25 @@ class _QuickTagCloudCommunityDialogState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(children: [
-            Expanded(child: Text(l10n.onlineGallery_codexCommunity,
-              style: Theme.of(context).textTheme.titleLarge)),
-            IconButton(
-              tooltip: l10n.common_close,
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.close),
-            ),
-          ]),
-          Text(l10n.onlineGallery_communityRatingNotice,
-            style: Theme.of(context).textTheme.bodySmall),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.onlineGallery_codexCommunity,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              IconButton(
+                tooltip: l10n.common_close,
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close),
+              ),
+            ],
+          ),
+          Text(
+            l10n.onlineGallery_communityRatingNotice,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
           const SizedBox(height: 12),
           QuickTagCloudCommunityFilters(
             searchController: _controller.searchController,
@@ -231,8 +250,12 @@ class _QuickTagCloudCommunityDialogState
 
   Future<void> _openWebsite() async {
     try {
-      if (await launchUrl(Uri.parse(QuickTagCloudCommunityService.website),
-        mode: LaunchMode.externalApplication)) return;
+      if (await launchUrl(
+        Uri.parse(QuickTagCloudCommunityService.website),
+        mode: LaunchMode.externalApplication,
+      )) {
+        return;
+      }
     } catch (_) {
       // The source site remains an explicit external action.
     }

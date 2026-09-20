@@ -43,10 +43,7 @@ class OnlineGalleryDetailMediaActions {
       if (!context.mounted) return;
       await ref
           .read(reversePromptProvider.notifier)
-          .addImage(
-            bytes,
-            name: '${item.sourceId.key}_${item.sourceWorkId}',
-          );
+          .addImage(bytes, name: '${item.sourceId.key}_${item.sourceWorkId}');
       if (!context.mounted) return;
       final router = GoRouter.of(context);
       final overlay = Overlay.maybeOf(context, rootOverlay: true);
@@ -77,11 +74,12 @@ class OnlineGalleryDetailMediaActions {
                   ? media.displayUrl
                   : media.previewUrl);
         if (url.isEmpty) continue;
-        final file = await OnlineGalleryImageCacheManager.instance.getSingleFile(
-          url,
-          key: onlineGalleryImageCacheKeyForUrl(url),
-          headers: onlineGalleryImageHeadersForUrl(url),
-        );
+        final file = await OnlineGalleryImageCacheManager.instance
+            .getSingleFile(
+              url,
+              key: onlineGalleryImageCacheKeyForUrl(url),
+              headers: onlineGalleryImageHeadersForUrl(url),
+            );
         final extension = resolveGalleryDownloadExtension(media, url);
         await FileExportService.writeFileToDirectory(
           directory: directory,
@@ -138,7 +136,10 @@ class OnlineGalleryDetailMediaActions {
 
   void _showDownloadError(Object error) {
     if (context.mounted) {
-      AppToast.error(context, context.l10n.onlineGallery_downloadFailed('$error'));
+      AppToast.error(
+        context,
+        context.l10n.onlineGallery_downloadFailed('$error'),
+      );
     }
   }
 }

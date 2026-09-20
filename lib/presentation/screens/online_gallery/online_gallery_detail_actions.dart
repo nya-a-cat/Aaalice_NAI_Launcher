@@ -150,18 +150,16 @@ class OnlineGalleryDetailActions {
     final router = GoRouter.of(context);
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     final message = context.l10n.onlineGallery_sentToTextToImage;
-    ref
-        .read(characterPromptNotifierProvider.notifier)
-        .replaceAll([
-          for (var index = 0; index < projection.characterPrompts.length; index++)
-            CharacterPrompt(
-              id: 'codex-${item.stableKey}-$index',
-              name: projection.characterPrompts[index].label,
-              prompt: projection.characterPrompts[index].prompt,
-              negativePrompt: projection.characterPrompts[index].negativePrompt,
-              positionMode: CharacterPositionMode.aiChoice,
-            ),
-        ]);
+    ref.read(characterPromptNotifierProvider.notifier).replaceAll([
+      for (var index = 0; index < projection.characterPrompts.length; index++)
+        CharacterPrompt(
+          id: 'codex-${item.stableKey}-$index',
+          name: projection.characterPrompts[index].label,
+          prompt: projection.characterPrompts[index].prompt,
+          negativePrompt: projection.characterPrompts[index].negativePrompt,
+          positionMode: CharacterPositionMode.aiChoice,
+        ),
+    ]);
     ref
         .read(pendingPromptNotifierProvider.notifier)
         .set(
@@ -252,7 +250,9 @@ class OnlineGalleryDetailActions {
     final negative = character.negativePrompt.trim();
     if (prompt.isNotEmpty) blocks.add(prompt);
     if (negative.isNotEmpty) {
-      blocks.add('${context.l10n.onlineGallery_codexNegativePrompt}:\n$negative');
+      blocks.add(
+        '${context.l10n.onlineGallery_codexNegativePrompt}:\n$negative',
+      );
     }
     return blocks.join('\n\n');
   }
@@ -293,7 +293,10 @@ class OnlineGalleryDetailActions {
 
   void _showActionError(Object error) {
     if (context.mounted) {
-      AppToast.error(context, context.l10n.onlineGallery_actionFailed('$error'));
+      AppToast.error(
+        context,
+        context.l10n.onlineGallery_actionFailed('$error'),
+      );
     }
   }
 }

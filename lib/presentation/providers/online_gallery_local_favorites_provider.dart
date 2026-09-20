@@ -86,6 +86,24 @@ class OnlineGalleryLocalFavoritesNotifier
     }
   }
 
+  /// Publishes direct repository writes without resetting listener revisions.
+  Future<void> refreshAfterExternalWrite() async {
+    try {
+      await _repository.ensureInitialized();
+      if (!mounted) return;
+      state = state.copyWith(
+        isInitialized: true,
+        isLoading: false,
+        count: _repository.count,
+        revision: state.revision + 1,
+        clearError: true,
+      );
+    } catch (error) {
+      if (mounted) state = state.copyWith(isLoading: false, lastError: error);
+      rethrow;
+    }
+  }
+
   bool isFavorite(String stableKey) => _repository.contains(stableKey);
 
   OnlineGalleryFavoriteRecord? getByStableKey(String stableKey) =>

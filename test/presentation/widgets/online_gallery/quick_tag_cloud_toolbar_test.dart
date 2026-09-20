@@ -59,7 +59,12 @@ void main() {
       expect(find.text('Artist Codex'), findsOneWidget);
       expect(find.text('All categories'), findsOneWidget);
       expect(find.text('Filter'), findsOneWidget);
-      for (final key in ['advanced-search', 'relay', 'favorites-backup', 'community']) {
+      for (final key in [
+        'advanced-search',
+        'relay',
+        'favorites-backup',
+        'community',
+      ]) {
         expect(find.byKey(ValueKey('quick-tag-cloud-$key')), findsOneWidget);
       }
       final contributors = find.byKey(
@@ -81,57 +86,62 @@ void main() {
   }
 
   for (final width in [360.0, 412.0, 700.0]) {
-  testWidgets('wrapped source panel keeps every codex control reachable at $width', (
-    tester,
-  ) async {
-    tester.view.devicePixelRatio = 1;
-    tester.view.physicalSize = Size(width, 900);
-    addTearDown(tester.view.reset);
+    testWidgets(
+      'wrapped source panel keeps every codex control reachable at $width',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = Size(width, 900);
+        addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          quickTagCloudCatalogProvider.overrideWith((ref) async => _catalog()),
-          quickTagCloudCodexProvider.overrideWith((ref, id) async => _codex()),
-          quickTagCloudFilterProvider.overrideWith(
-            _TestQuickTagCloudFilterNotifier.new,
-          ),
-        ],
-        child: MaterialApp(
-          locale: const Locale('en'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(16),
-              child: _toolbar(
-                wrapControls: true,
-                onFiltersChanged: () async {},
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              quickTagCloudCatalogProvider.overrideWith(
+                (ref) async => _catalog(),
+              ),
+              quickTagCloudCodexProvider.overrideWith(
+                (ref, id) async => _codex(),
+              ),
+              quickTagCloudFilterProvider.overrideWith(
+                _TestQuickTagCloudFilterNotifier.new,
+              ),
+            ],
+            child: MaterialApp(
+              locale: const Locale('en'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _toolbar(
+                    wrapControls: true,
+                    onFiltersChanged: () async {},
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-    for (final finder in [
-      find.text('Browse'),
-      find.text('Artist Codex'),
-      find.text('All categories'),
-      find.text('Filter'),
-      find.byKey(const ValueKey('quick-tag-cloud-contributors')),
-      find.byKey(const ValueKey('quick-tag-cloud-advanced-search')),
-      find.byKey(const ValueKey('quick-tag-cloud-relay')),
-      find.byKey(const ValueKey('quick-tag-cloud-favorites-backup')),
-      find.byKey(const ValueKey('quick-tag-cloud-community')),
-    ]) {
-      final rect = tester.getRect(finder);
-      expect(rect.left, greaterThanOrEqualTo(0));
-      expect(rect.right, lessThanOrEqualTo(width));
-    }
-    expect(tester.takeException(), isNull);
-  });
+        for (final finder in [
+          find.text('Browse'),
+          find.text('Artist Codex'),
+          find.text('All categories'),
+          find.text('Filter'),
+          find.byKey(const ValueKey('quick-tag-cloud-contributors')),
+          find.byKey(const ValueKey('quick-tag-cloud-advanced-search')),
+          find.byKey(const ValueKey('quick-tag-cloud-relay')),
+          find.byKey(const ValueKey('quick-tag-cloud-favorites-backup')),
+          find.byKey(const ValueKey('quick-tag-cloud-community')),
+        ]) {
+          final rect = tester.getRect(finder);
+          expect(rect.left, greaterThanOrEqualTo(0));
+          expect(rect.right, lessThanOrEqualTo(width));
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
   testWidgets('opens category picker from the first click while loading', (

@@ -9,9 +9,8 @@ import 'quick_tag_cloud_community_parser.dart';
 class QuickTagCloudCommunityService {
   QuickTagCloudCommunityService({Dio? dio})
     : _ownsDio = dio == null,
-      _dio = dio ?? Dio(BaseOptions(
-        connectTimeout: const Duration(seconds: 10),
-      ));
+      _dio =
+          dio ?? Dio(BaseOptions(connectTimeout: const Duration(seconds: 10)));
 
   static const endpoint = 'https://novelai.quicktagcloud.com/api/community';
   static const website = 'https://novelai.quicktagcloud.com/strings.html';

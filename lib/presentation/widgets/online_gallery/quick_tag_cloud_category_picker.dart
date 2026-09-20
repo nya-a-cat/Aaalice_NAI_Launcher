@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/models/online_gallery/quick_tag_cloud_codex.dart';
 import '../../../l10n/app_localizations.dart';
+
 Future<List<String>?> showQuickTagCloudCategoryPicker(
   BuildContext context,
   QuickTagCloudCodex codex,

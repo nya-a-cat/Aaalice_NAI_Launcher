@@ -19,7 +19,8 @@ class QuickTagCloudFavoritesBackupCodec {
     }
     var source = text.trim();
     if (source.startsWith(transferPrefix)) {
-      final encoded = source.substring(transferPrefix.length)
+      final encoded = source
+          .substring(transferPrefix.length)
           .replaceAll(RegExp(r'\s+'), '');
       if (encoded.isEmpty || !RegExp(r'^[A-Za-z0-9_-]+$').hasMatch(encoded)) {
         throw const QuickTagCloudBackupException('invalid');
@@ -85,7 +86,7 @@ class QuickTagCloudFavoritesBackupCodec {
     }
     if (raw['exportedAt'] != null &&
         (raw['exportedAt'] is! String ||
-         DateTime.tryParse(raw['exportedAt'] as String) == null)) {
+            DateTime.tryParse(raw['exportedAt'] as String) == null)) {
       throw const QuickTagCloudBackupException('invalid');
     }
     final favorites = object(raw['favorites']);
@@ -105,7 +106,9 @@ class QuickTagCloudFavoritesBackupCodec {
       }
       if (item['snap'] != null) object(item['snap']);
     }
-    for (final id in community) { identifier(id, 256); }
+    for (final id in community) {
+      identifier(id, 256);
+    }
     if (raw['version'] == 2) _validateLibrary(raw, keys);
   }
 
@@ -119,8 +122,10 @@ class QuickTagCloudFavoritesBackupCodec {
       final folder = object(value);
       final id = identifier(folder['id'], 128);
       final name = identifier(folder['name'], 80);
-      if (!RegExp(r'^[A-Za-z0-9_-]+$').hasMatch(id) || id == '_unsorted' ||
-          !ids.add(id) || name.trim().runes.length > 20) {
+      if (!RegExp(r'^[A-Za-z0-9_-]+$').hasMatch(id) ||
+          id == '_unsorted' ||
+          !ids.add(id) ||
+          name.trim().runes.length > 20) {
         throw const QuickTagCloudBackupException('invalid');
       }
     }
@@ -134,7 +139,9 @@ class QuickTagCloudFavoritesBackupCodec {
   }
 
   static String identifier(Object? value, int maximum) {
-    if (value is! String || value.trim().isEmpty || value.length > maximum ||
+    if (value is! String ||
+        value.trim().isEmpty ||
+        value.length > maximum ||
         RegExp(r'[\u0000-\u001f\u007f-\u009f]').hasMatch(value)) {
       throw const QuickTagCloudBackupException('invalid');
     }
@@ -157,10 +164,12 @@ class QuickTagCloudFavoritesBackupCodec {
   }
 
   static Map<String, dynamic> empty() => {
-    'format': format, 'version': 2,
+    'format': format,
+    'version': 2,
     'exportedAt': DateTime.now().toUtc().toIso8601String(),
     'favorites': {'atlas': <dynamic>[], 'community': <dynamic>[]},
-    'folders': <dynamic>[], 'memberships': <dynamic>[],
+    'folders': <dynamic>[],
+    'memberships': <dynamic>[],
   };
 }
 

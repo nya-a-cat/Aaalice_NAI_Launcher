@@ -108,13 +108,16 @@ class GalleryDetailActionPanel extends StatelessWidget {
                   : const SizedBox.shrink(),
             ),
           ],
-          if (actions.addToRelay != null && viewModel.labels.addToRelay != null) ...[
+          if (actions.addToRelay != null &&
+              viewModel.labels.addToRelay != null) ...[
             const SizedBox(height: 8),
             FilledButton.tonalIcon(
               key: const ValueKey('gallery-detail-add-to-relay'),
               style: actionStyle,
-              onPressed: viewModel.hasCopyableContent && !viewModel.relayActionPending
-                  ? actions.addToRelay : null,
+              onPressed:
+                  viewModel.hasCopyableContent && !viewModel.relayActionPending
+                  ? actions.addToRelay
+                  : null,
               icon: viewModel.relayActionPending
                   ? const SizedBox.square(
                       dimension: 17,

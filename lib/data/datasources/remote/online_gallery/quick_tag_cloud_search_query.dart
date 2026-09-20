@@ -16,15 +16,15 @@ const quickTagCloudTextFields = {
   'path',
 };
 
-String normalizeQuickTagCloudSearchInput(String value) => unorm.nfkc(value)
+String normalizeQuickTagCloudSearchInput(String value) => unorm
+    .nfkc(value)
     .replaceAll(RegExp('[“”]'), '"')
     .replaceAll(RegExp('[‘’]'), "'");
 
 String normalizeQuickTagCloudSearchText(String value) =>
-    normalizeQuickTagCloudSearchInput(value)
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim()
-        .toLowerCase();
+    normalizeQuickTagCloudSearchInput(
+      value,
+    ).replaceAll(RegExp(r'\s+'), ' ').trim().toLowerCase();
 
 class QuickTagCloudSearchIssue {
   const QuickTagCloudSearchIssue(this.code, this.message, [this.value = '']);

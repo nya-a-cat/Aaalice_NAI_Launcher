@@ -4,6 +4,7 @@ import '../../../data/datasources/remote/online_gallery/quick_tag_cloud_gallery_
 import '../../../data/models/online_gallery/quick_tag_cloud_catalog.dart';
 import '../../../data/models/online_gallery/quick_tag_cloud_codex.dart';
 import '../../../l10n/app_localizations.dart';
+
 Future<String?> showQuickTagCloudCodexPicker(
   BuildContext context,
   QuickTagCloudCatalog catalog,

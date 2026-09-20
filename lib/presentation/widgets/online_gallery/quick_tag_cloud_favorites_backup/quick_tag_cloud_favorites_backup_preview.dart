@@ -32,16 +32,18 @@ class QuickTagCloudFavoritesBackupPreview extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l.quickTagBackupCounts(
-          (plan.document['favorites']['atlas'] as List).length,
-          (plan.document['favorites']['community'] as List).length,
-          (plan.document['folders'] as List).length,
-          mapped,
-          QuickTagCloudBackupPlan.keys(plan.document).length - mapped,
-          plan.duplicates,
-          plan.removed,
-          plan.conflicts,
-        )),
+        Text(
+          l.quickTagBackupCounts(
+            (plan.document['favorites']['atlas'] as List).length,
+            (plan.document['favorites']['community'] as List).length,
+            (plan.document['folders'] as List).length,
+            mapped,
+            QuickTagCloudBackupPlan.keys(plan.document).length - mapped,
+            plan.duplicates,
+            plan.removed,
+            plan.conflicts,
+          ),
+        ),
         const SizedBox(height: 12),
         SegmentedButton<bool>(
           segments: [

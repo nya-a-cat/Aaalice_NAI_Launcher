@@ -14,7 +14,8 @@ Widget buildOnlineGalleryQueryCountSuffix(
   final plan = codex ? QuickTagCloudSearchParser.parse(controller.text) : null;
   final count = plan == null
       ? GalleryTagQueryParser.parse(controller.text).ordinaryTagCount
-      : plan.terms.length + plan.filters.where((filter) => filter.isText).length;
+      : plan.terms.length +
+            plan.filters.where((filter) => filter.isText).length;
   final limit = codex ? quickTagCloudTextConditionLimit : maxGallerySearchTags;
   final exceeded = count > limit;
   return Row(

@@ -35,7 +35,9 @@ final quickTagCloudRelayAllowedRatingsProvider = Provider<Set<String>>((ref) {
   );
   final access = ref.watch(quickTagCloudFilterProvider);
   return QuickTagCloudRelayService.effectiveRatings(
-    ratings, allowNsfw: access.allowNsfw, allowR18g: access.allowR18g,
+    ratings,
+    allowNsfw: access.allowNsfw,
+    allowR18g: access.allowR18g,
   );
 });
 
@@ -53,7 +55,9 @@ class QuickTagCloudRelayController extends Notifier<QuickTagCloudRelayState> {
     try {
       final stored = _storage.getSetting<Object>(storageKey);
       if (stored == null) {
-        return QuickTagCloudRelayState(document: QuickTagCloudRelayDocument.empty());
+        return QuickTagCloudRelayState(
+          document: QuickTagCloudRelayDocument.empty(),
+        );
       }
       if (stored is! String || stored.length > maximumStorageCharacters) {
         throw const FormatException('Invalid relay storage');
@@ -64,7 +68,8 @@ class QuickTagCloudRelayController extends Notifier<QuickTagCloudRelayState> {
       return QuickTagCloudRelayState(document: document);
     } catch (_) {
       return QuickTagCloudRelayState(
-        document: QuickTagCloudRelayDocument.empty(), isCorrupt: true,
+        document: QuickTagCloudRelayDocument.empty(),
+        isCorrupt: true,
       );
     }
   }
@@ -83,7 +88,9 @@ class QuickTagCloudRelayController extends Notifier<QuickTagCloudRelayState> {
       }
       final previous = state;
       state = QuickTagCloudRelayState(
-        document: previous.document, isSaving: true, isCorrupt: previous.isCorrupt,
+        document: previous.document,
+        isSaving: true,
+        isCorrupt: previous.isCorrupt,
       );
       try {
         final next = change(previous.document);
@@ -93,7 +100,9 @@ class QuickTagCloudRelayController extends Notifier<QuickTagCloudRelayState> {
         }
         // Validate constructed values before committing; corruption never falls
         // through to an automatic default-state write.
-        QuickTagCloudRelayDocument.fromJson(jsonDecode(encoded) as Map<String, dynamic>);
+        QuickTagCloudRelayDocument.fromJson(
+          jsonDecode(encoded) as Map<String, dynamic>,
+        );
         if (recover) {
           final key = '$storageKey.recovery.${const Uuid().v4()}';
           final original = _storage.getSetting<Object>(storageKey);
@@ -117,32 +126,42 @@ class QuickTagCloudRelayController extends Notifier<QuickTagCloudRelayState> {
     return operation;
   }
 
-  Future<void> recoverWithBackup() => _commit(
-    (_) => QuickTagCloudRelayDocument.empty(), recover: true,
-  );
+  Future<void> recoverWithBackup() =>
+      _commit((_) => QuickTagCloudRelayDocument.empty(), recover: true);
 
   Future<void> selectPlan(String id) => _commit((document) {
-    if (!document.plans.any((plan) => plan.id == id)) throw StateError('Unknown plan');
+    if (!document.plans.any((plan) => plan.id == id)) {
+      throw StateError('Unknown plan');
+    }
     return document.copyWith(activePlanId: id);
   });
 
   Future<void> createPlan(String name) => _commit((document) {
-    final plan = QuickTagCloudRelayPlan(id: const Uuid().v4(), name: name.trim());
-    return document.copyWith(plans: [...document.plans, plan], activePlanId: plan.id);
+    final plan = QuickTagCloudRelayPlan(
+      id: const Uuid().v4(),
+      name: name.trim(),
+    );
+    return document.copyWith(
+      plans: [...document.plans, plan],
+      activePlanId: plan.id,
+    );
   });
 
-  Future<void> renamePlan(String id, String name) => _commit((document) =>
-    document.copyWith(plans: [
-      for (final plan in document.plans)
-        plan.id == id ? plan.copyWith(name: name.trim()) : plan,
-    ]),
+  Future<void> renamePlan(String id, String name) => _commit(
+    (document) => document.copyWith(
+      plans: [
+        for (final plan in document.plans)
+          plan.id == id ? plan.copyWith(name: name.trim()) : plan,
+      ],
+    ),
   );
 
   Future<void> deletePlan(String id) => _commit((document) {
     if (document.plans.length <= 1) throw StateError('Keep one relay plan');
     final plans = document.plans.where((plan) => plan.id != id).toList();
     return document.copyWith(
-      plans: plans, activePlanId: document.activePlanId == id ? plans.first.id : null,
+      plans: plans,
+      activePlanId: document.activePlanId == id ? plans.first.id : null,
     );
   });
 
@@ -154,13 +173,18 @@ class QuickTagCloudRelayController extends Notifier<QuickTagCloudRelayState> {
 
   Future<void> _changeBlocks(
     String planId,
-    List<QuickTagCloudRelayBlock> Function(List<QuickTagCloudRelayBlock>) change,
+    List<QuickTagCloudRelayBlock> Function(List<QuickTagCloudRelayBlock>)
+    change,
   ) => _commit((document) {
-    if (!document.plans.any((plan) => plan.id == planId)) throw StateError('Unknown plan');
-    return document.copyWith(plans: [
-      for (final plan in document.plans)
-        plan.id == planId ? plan.copyWith(blocks: change(plan.blocks)) : plan,
-    ]);
+    if (!document.plans.any((plan) => plan.id == planId)) {
+      throw StateError('Unknown plan');
+    }
+    return document.copyWith(
+      plans: [
+        for (final plan in document.plans)
+          plan.id == planId ? plan.copyWith(blocks: change(plan.blocks)) : plan,
+      ],
+    );
   });
 
   Future<void> addBlock(String planId, QuickTagCloudRelayBlock block) =>
@@ -171,30 +195,41 @@ class QuickTagCloudRelayController extends Notifier<QuickTagCloudRelayState> {
         final index = blocks.indexWhere((current) => current.id == block.id);
         if (index < 0) throw StateError('Relay block no longer exists');
         final current = blocks[index];
-        if (!current.allowedBy(ref.read(quickTagCloudRelayAllowedRatingsProvider))) {
+        if (!current.allowedBy(
+          ref.read(quickTagCloudRelayAllowedRatingsProvider),
+        )) {
           throw StateError('Source is locked by current rating settings');
         }
         final next = blocks.toList();
         next[index] = current.copyWith(
-          title: block.title, positive: block.positive, negative: block.negative,
-          weight: block.weight, enabled: block.enabled,
+          title: block.title,
+          positive: block.positive,
+          negative: block.negative,
+          weight: block.weight,
+          enabled: block.enabled,
         );
         return next;
       });
 
-  Future<void> toggleBlock(String planId, String blockId) =>
-      _changeBlocks(planId, (blocks) => [
-        for (final block in blocks)
-          block.id == blockId ? block.copyWith(enabled: !block.enabled) : block,
-      ]);
+  Future<void> toggleBlock(String planId, String blockId) => _changeBlocks(
+    planId,
+    (blocks) => [
+      for (final block in blocks)
+        block.id == blockId ? block.copyWith(enabled: !block.enabled) : block,
+    ],
+  );
 
-  Future<void> removeBlock(String planId, String blockId) =>
-      _changeBlocks(planId, (blocks) => blocks.where((block) => block.id != blockId).toList());
+  Future<void> removeBlock(String planId, String blockId) => _changeBlocks(
+    planId,
+    (blocks) => blocks.where((block) => block.id != blockId).toList(),
+  );
 
   Future<void> moveBlock(String planId, String blockId, int delta) =>
       _changeBlocks(planId, (blocks) {
         final index = blocks.indexWhere((block) => block.id == blockId);
-        if (index < 0 || index + delta < 0 || index + delta >= blocks.length) return blocks;
+        if (index < 0 || index + delta < 0 || index + delta >= blocks.length) {
+          return blocks;
+        }
         final next = blocks.toList();
         final block = next.removeAt(index);
         next.insert(index + delta, block);
@@ -208,22 +243,30 @@ class QuickTagCloudRelayController extends Notifier<QuickTagCloudRelayState> {
       return Future.error(ArgumentError('Expected QuickTagCloud detail'));
     }
     final block = QuickTagCloudRelayBlock(
-      id: const Uuid().v4(), title: detail.item.title ?? '',
-      positive: detail.prompt ?? '', negative: detail.negativePrompt ?? '',
-      sourceKey: detail.item.stableKey, rating: detail.item.rating ?? 'unknown',
+      id: const Uuid().v4(),
+      title: detail.item.title ?? '',
+      positive: detail.prompt ?? '',
+      negative: detail.negativePrompt ?? '',
+      sourceKey: detail.item.stableKey,
+      rating: detail.item.rating ?? 'unknown',
       characters: [
         for (final character in detail.characterPrompts)
           QuickTagCloudRelayCharacter(
-            label: character.label, positive: character.prompt,
+            label: character.label,
+            positive: character.prompt,
             negative: character.negativePrompt,
           ),
       ],
     );
     return _changeBlocks(planId, (blocks) {
-      if (!block.allowedBy(ref.read(quickTagCloudRelayAllowedRatingsProvider))) {
+      if (!block.allowedBy(
+        ref.read(quickTagCloudRelayAllowedRatingsProvider),
+      )) {
         throw StateError('Source is locked by current rating settings');
       }
-      if (blocks.any((item) => item.sourceKey == block.sourceKey)) return blocks;
+      if (blocks.any((item) => item.sourceKey == block.sourceKey)) {
+        return blocks;
+      }
       return [...blocks, block];
     });
   }

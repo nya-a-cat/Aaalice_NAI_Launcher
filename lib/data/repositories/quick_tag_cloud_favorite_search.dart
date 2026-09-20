@@ -75,7 +75,9 @@ class _FavoriteDocument {
       case 'negative':
         return [
           detail.negativePrompt ?? _text(entry['negative']),
-          ...detail.characterPrompts.map((character) => character.negativePrompt),
+          ...detail.characterPrompts.map(
+            (character) => character.negativePrompt,
+          ),
         ].join('\n');
       case 'note':
         return detail.note ?? detail.description ?? _text(entry['note']);
@@ -95,18 +97,29 @@ class _FavoriteDocument {
       case 'author':
         return [
           item.author ?? '',
-          for (final key in ['codexAuthor', 'declaredSource', 'entryAuthor', 'entryCredit'])
+          for (final key in [
+            'codexAuthor',
+            'declaredSource',
+            'entryAuthor',
+            'entryCredit',
+          ])
             _text(metadata[key]),
           _text(entry['author']),
           _text(entry['credit']),
-          ...detail.contributors.map((person) => '${person.name} ${person.role}'),
+          ...detail.contributors.map(
+            (person) => '${person.name} ${person.role}',
+          ),
           for (final media in detail.media) ...[
             _text(media.metadata['author']),
             _text(media.metadata['credit']),
           ],
         ].join('\n');
       case 'codex':
-        return [codexId, _text(metadata['codexTitle']), _text(metadata['codexAliases'])].join('\n');
+        return [
+          codexId,
+          _text(metadata['codexTitle']),
+          _text(metadata['codexAliases']),
+        ].join('\n');
       case 'type':
         // Older snapshots did not store this field; an unknown type stays empty.
         return _text(metadata['codexType']);
@@ -114,11 +127,18 @@ class _FavoriteDocument {
         return [
           for (final fieldName in quickTagCloudTextFields)
             if (fieldName != 'default') field(fieldName),
-          item.description ?? '', item.aiType ?? '', item.source,
-          item.rating ?? '', item.tags.join(' '), item.tagStringGeneral,
-          item.tagStringCharacter, item.tagStringCopyright,
-          item.tagStringArtist, item.tagStringMeta,
-          detail.categoryPath.join(' '), _text(metadata['codexVersion']),
+          item.description ?? '',
+          item.aiType ?? '',
+          item.source,
+          item.rating ?? '',
+          item.tags.join(' '),
+          item.tagStringGeneral,
+          item.tagStringCharacter,
+          item.tagStringCopyright,
+          item.tagStringArtist,
+          item.tagStringMeta,
+          detail.categoryPath.join(' '),
+          _text(metadata['codexVersion']),
           _text(entry['updateBatches']),
           ...detail.characterPrompts.map((character) => character.label),
         ].join('\n');

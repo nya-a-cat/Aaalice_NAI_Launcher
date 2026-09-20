@@ -5,13 +5,12 @@ import '../../../core/utils/app_logger.dart';
 import '../../../data/models/online_gallery/quick_tag_cloud_catalog.dart';
 import '../../../l10n/app_localizations.dart';
 
-Future<void> _openContributorLink(
-  BuildContext context,
-  String value,
-) async {
+Future<void> _openContributorLink(BuildContext context, String value) async {
   final uri = Uri.tryParse(value.trim());
   try {
-    if (uri != null && uri.scheme == 'https' && uri.host.isNotEmpty &&
+    if (uri != null &&
+        uri.scheme == 'https' &&
+        uri.host.isNotEmpty &&
         await canLaunchUrl(uri) &&
         await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       return;
@@ -90,8 +89,12 @@ Future<void> showQuickTagCloudContributors(
       actions: [
         TextButton.icon(
           key: const ValueKey('quick-tag-cloud-open-origin'),
-          onPressed: () => _openContributorLink(dialogContext,
-              Uri.https('novelai.quicktagcloud.com', '/', {'codex': meta.id}).toString()),
+          onPressed: () => _openContributorLink(
+            dialogContext,
+            Uri.https('novelai.quicktagcloud.com', '/', {
+              'codex': meta.id,
+            }).toString(),
+          ),
           icon: const Icon(Icons.open_in_new, size: 17),
           label: Text(l10n.onlineGallery_codexOpenOrigin),
         ),

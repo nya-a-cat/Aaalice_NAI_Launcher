@@ -40,7 +40,8 @@ class OnlineGalleryFavoritesReplacement {
   OnlineGalleryFavoritesReplacement._();
 
   static const journalKey = '__online_gallery_favorites_replacement_v1__';
-  static const _replacementIdPrefix = '__online_gallery_source_replacement_v1__:';
+  static const _replacementIdPrefix =
+      '__online_gallery_source_replacement_v1__:';
   static const _equality = DeepCollectionEquality();
   static final _writeTails = Expando<Future<void>>();
 
@@ -61,7 +62,9 @@ class OnlineGalleryFavoritesReplacement {
 
   /// Serializes initialization and repository writes sharing the same Hive box.
   static Future<T> serialize<T>(Box<dynamic> box, Future<T> Function() action) {
-    final result = (_writeTails[box] ?? Future<void>.value()).then((_) => action());
+    final result = (_writeTails[box] ?? Future<void>.value()).then(
+      (_) => action(),
+    );
     _writeTails[box] = result.then<void>(
       (_) {},
       onError: (Object _, StackTrace __) {},

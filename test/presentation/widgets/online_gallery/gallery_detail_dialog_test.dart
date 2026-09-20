@@ -172,7 +172,9 @@ void main() {
       expect(characterCopyCount, 1);
       expect(sentToGenerate, isTrue);
       expect(addedToQueue, isTrue);
-      await tester.tap(find.byKey(const ValueKey('gallery-detail-add-to-relay')));
+      await tester.tap(
+        find.byKey(const ValueKey('gallery-detail-add-to-relay')),
+      );
       await tester.pumpAndSettle();
       expect(addedToRelay, 1);
       expect(

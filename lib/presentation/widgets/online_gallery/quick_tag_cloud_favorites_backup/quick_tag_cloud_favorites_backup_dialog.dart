@@ -20,8 +20,10 @@ import 'quick_tag_cloud_favorites_backup_input.dart';
 import 'quick_tag_cloud_favorites_backup_preview.dart';
 
 Future<void> showQuickTagCloudFavoritesBackup(BuildContext context) =>
-    showDialog<void>(context: context,
-      builder: (_) => const QuickTagCloudFavoritesBackupDialog());
+    showDialog<void>(
+      context: context,
+      builder: (_) => const QuickTagCloudFavoritesBackupDialog(),
+    );
 
 class QuickTagCloudFavoritesBackupDialog extends ConsumerStatefulWidget {
   const QuickTagCloudFavoritesBackupDialog({super.key});
@@ -58,7 +60,11 @@ class _QuickTagCloudFavoritesBackupDialogState
 
   Future<void> _run(Future<void> Function() action) async {
     if (_busy) return;
-    setState(() { _busy = true; _error = null; _restored = false; });
+    setState(() {
+      _busy = true;
+      _error = null;
+      _restored = false;
+    });
     try {
       await action();
     } on QuickTagCloudBackupException catch (error) {
@@ -70,7 +76,13 @@ class _QuickTagCloudFavoritesBackupDialogState
     } catch (_) {
       if (mounted) setState(() => _error = 'failed');
     } finally {
-      if (mounted) setState(() { _busy = false; _saving = false; _cancel = null; });
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _saving = false;
+          _cancel = null;
+        });
+      }
     }
   }
 
@@ -88,35 +100,45 @@ class _QuickTagCloudFavoritesBackupDialogState
     final community = QuickTagCloudCommunityService();
     final resolver = QuickTagCloudBackupResolver(
       ref.read(quickTagCloudGallerySourceAdapterProvider),
-      allowNsfw: filter.allowNsfw, allowR18g: filter.allowR18g,
+      allowNsfw: filter.allowNsfw,
+      allowR18g: filter.allowR18g,
       communityService: community,
     );
     final token = CancelToken();
     _cancel = token;
     late final QuickTagCloudBackupPreview preview;
     try {
-      preview = await _store.prepare(_text.text,
-        resolve: resolver.resolve, resolveCommunity: resolver.resolveCommunity,
-        cancelToken: token);
+      preview = await _store.prepare(
+        _text.text,
+        resolve: resolver.resolve,
+        resolveCommunity: resolver.resolveCommunity,
+        cancelToken: token,
+      );
     } finally {
       community.dispose();
     }
     QuickTagCloudBackupPlan? merge, replace;
-    try { merge = preview.plan(replace: false); }
-    on QuickTagCloudBackupException catch (e) {
+    try {
+      merge = preview.plan(replace: false);
+    } on QuickTagCloudBackupException catch (e) {
       if (e.code != 'tooLarge') rethrow;
     }
-    try { replace = preview.plan(replace: true); }
-    on QuickTagCloudBackupException catch (e) {
+    try {
+      replace = preview.plan(replace: true);
+    } on QuickTagCloudBackupException catch (e) {
       if (e.code != 'tooLarge') rethrow;
     }
     if (merge == null && replace == null) {
       throw const QuickTagCloudBackupException('tooLarge');
     }
-    if (mounted) setState(() {
-      _preview = preview; _mergePlan = merge; _replacePlan = replace;
-      _replace = merge == null;
-    });
+    if (mounted) {
+      setState(() {
+        _preview = preview;
+        _mergePlan = merge;
+        _replacePlan = replace;
+        _replace = merge == null;
+      });
+    }
   });
 
   Future<void> _commit() async {
@@ -124,7 +146,8 @@ class _QuickTagCloudFavoritesBackupDialogState
     if (preview == null || _busy) return;
     if (_replace) {
       final confirmed = await ThemedConfirmDialog.show(
-        context: context, title: context.l10n.quickTagBackupReplace,
+        context: context,
+        title: context.l10n.quickTagBackupReplace,
         content: context.l10n.quickTagBackupReplaceWarning,
         confirmText: context.l10n.quickTagBackupReplace,
         type: ThemedConfirmDialogType.danger,
@@ -136,9 +159,16 @@ class _QuickTagCloudFavoritesBackupDialogState
       try {
         await _store.commit(preview, replace: _replace);
       } finally {
-        ref.invalidate(onlineGalleryLocalFavoritesProvider);
+        await ref
+            .read(onlineGalleryLocalFavoritesProvider.notifier)
+            .refreshAfterExternalWrite();
       }
-      if (mounted) setState(() { _restored = true; _preview = null; });
+      if (mounted) {
+        setState(() {
+          _restored = true;
+          _preview = null;
+        });
+      }
     });
   }
 
@@ -146,14 +176,18 @@ class _QuickTagCloudFavoritesBackupDialogState
     final snapshot = await _store.snapshot();
     if (!mounted) return;
     if (transfer) {
-      await Clipboard.setData(ClipboardData(
-        text: QuickTagCloudFavoritesBackupCodec.transfer(snapshot.current)));
+      await Clipboard.setData(
+        ClipboardData(
+          text: QuickTagCloudFavoritesBackupCodec.transfer(snapshot.current),
+        ),
+      );
     } else {
       await FileExportService.saveText(
         text: QuickTagCloudFavoritesBackupCodec.encode(snapshot.current),
         fileName: 'novelai-tag-favorites.json',
         dialogTitle: context.l10n.quickTagBackupExportJson,
-        mimeType: 'application/json', allowedExtensions: ['json'],
+        mimeType: 'application/json',
+        allowedExtensions: ['json'],
       );
     }
   });
@@ -186,7 +220,9 @@ class _QuickTagCloudFavoritesBackupDialogState
   Widget _buildContent(BuildContext context) {
     final l = context.l10n;
     final preview = _preview;
-    final plan = preview == null ? null : (_replace ? _replacePlan : _mergePlan);
+    final plan = preview == null
+        ? null
+        : (_replace ? _replacePlan : _mergePlan);
     final error = switch (_error) {
       'tooLarge' => l.quickTagBackupTooLarge,
       'invalid' => l.quickTagBackupInvalid,

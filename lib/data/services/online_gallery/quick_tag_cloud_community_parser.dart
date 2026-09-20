@@ -50,11 +50,9 @@ class QuickTagCloudCommunityParser {
     final tags = entry['tags'] is List
         ? (entry['tags'] as List).whereType<String>().toList(growable: false)
         : const <String>[];
-    final sourceUrl = Uri.https(
-      'novelai.quicktagcloud.com',
-      '/strings.html',
-      {'entry': id},
-    ).toString();
+    final sourceUrl = Uri.https('novelai.quicktagcloud.com', '/strings.html', {
+      'entry': id,
+    }).toString();
     final media = _media(entry, workId, prompt, negative);
     final characters = [
       for (final character in QuickTagCloudParser.normalizeCharacterPrompts(
@@ -67,11 +65,12 @@ class QuickTagCloudCommunityParser {
         ),
     ];
     final metadata = _metadata(entry, id, category, sourceUrl);
-    final coverIndex = _integer(entry['coverIndex']).clamp(
-      0, media.isEmpty ? 0 : media.length - 1,
-    );
+    final coverIndex = _integer(
+      entry['coverIndex'],
+    ).clamp(0, media.isEmpty ? 0 : media.length - 1);
     final cover = media.isEmpty
-        ? const GalleryMedia(id: 'no-image') : media[coverIndex];
+        ? const GalleryMedia(id: 'no-image')
+        : media[coverIndex];
     final item = GalleryItem(
       id: int.parse(
         sha256.convert(utf8.encode(workId)).toString().substring(0, 7),
@@ -158,24 +157,30 @@ class QuickTagCloudCommunityParser {
       final params = image['params'] is Map
           ? Map<String, dynamic>.from(image['params'] as Map)
           : const <String, dynamic>{};
-      final extension = Uri.parse(original.isEmpty ? preview : original)
-          .path.split('.').last.toLowerCase();
-      media.add(GalleryMedia(
-        id: '$workId:${media.length}',
-        previewUrl: preview,
-        displayUrl: original.isEmpty ? preview : original,
-        downloadUrl: original.isEmpty ? preview : original,
-        width: _integer(image['width']).clamp(0, 100000),
-        height: _integer(image['height']).clamp(0, 100000),
-        extension: RegExp(r'^[a-z0-9]{1,10}$').hasMatch(extension)
-            ? extension : null,
-        prompt: _text(params['prompt']).isEmpty
-            ? prompt : _text(params['prompt']),
-        negativePrompt: _text(params['negative']).isEmpty
-            ? negative : _text(params['negative']),
-        rawMetadata: params.isEmpty ? null : jsonEncode(params),
-        metadata: {...image, 'hasOriginal': original.isNotEmpty},
-      ));
+      final extension = Uri.parse(
+        original.isEmpty ? preview : original,
+      ).path.split('.').last.toLowerCase();
+      media.add(
+        GalleryMedia(
+          id: '$workId:${media.length}',
+          previewUrl: preview,
+          displayUrl: original.isEmpty ? preview : original,
+          downloadUrl: original.isEmpty ? preview : original,
+          width: _integer(image['width']).clamp(0, 100000),
+          height: _integer(image['height']).clamp(0, 100000),
+          extension: RegExp(r'^[a-z0-9]{1,10}$').hasMatch(extension)
+              ? extension
+              : null,
+          prompt: _text(params['prompt']).isEmpty
+              ? prompt
+              : _text(params['prompt']),
+          negativePrompt: _text(params['negative']).isEmpty
+              ? negative
+              : _text(params['negative']),
+          rawMetadata: params.isEmpty ? null : jsonEncode(params),
+          metadata: {...image, 'hasOriginal': original.isNotEmpty},
+        ),
+      );
     }
     return media;
   }
@@ -187,13 +192,18 @@ class QuickTagCloudCommunityParser {
     if (RegExp(
       r'(^|/|%2f)(\.|%2e){1,2}(/|%2f|$|[?#])',
       caseSensitive: false,
-    ).hasMatch(raw)) return '';
+    ).hasMatch(raw)) {
+      return '';
+    }
     final uri = Uri.tryParse(raw);
     if (uri == null) return '';
-    if (uri.pathSegments.any((segment) =>
-        segment.contains('%') || segment.contains(r'\') ||
-        segment.split('/').any((part) => part == '..' || part == '.') ||
-        segment.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f))) {
+    if (uri.pathSegments.any(
+      (segment) =>
+          segment.contains('%') ||
+          segment.contains(r'\') ||
+          segment.split('/').any((part) => part == '..' || part == '.') ||
+          segment.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f),
+    )) {
       return '';
     }
     final resolved = uri.hasScheme || raw.startsWith('//')
@@ -203,8 +213,11 @@ class QuickTagCloudCommunityParser {
         : Uri.parse(_r2Base).resolveUri(uri);
     if (resolved.scheme != 'https' ||
         !_imageHosts.contains(resolved.host.toLowerCase()) ||
-        resolved.userInfo.isNotEmpty || resolved.hasFragment ||
-        resolved.hasPort && resolved.port != 443) return '';
+        resolved.userInfo.isNotEmpty ||
+        resolved.hasFragment ||
+        resolved.hasPort && resolved.port != 443) {
+      return '';
+    }
     return resolved.toString();
   }
 
@@ -228,17 +241,24 @@ class QuickTagCloudCommunityParser {
   static String ratingFor(Map<String, dynamic> entry) {
     final declared = _text(entry['rating']).toLowerCase();
     if (declared == 'e' || declared == 'r18g') return 'e';
-    final text = [entry['rating'], entry['title'], entry['prompt'],
+    final text = [
+      entry['rating'],
+      entry['title'],
+      entry['prompt'],
       if (entry['tags'] is List) ...(entry['tags'] as List),
       for (final character in QuickTagCloudParser.normalizeCharacterPrompts(
         entry['characterPrompts'],
-      )) character.prompt,
+      ))
+        character.prompt,
     ].whereType<String>().join(' ').toLowerCase().replaceAll('_', ' ');
     if (RegExp(r'\br[-_ ]?18g\b|重口|\bgore\b|\bguro\b').hasMatch(text)) {
       return 'e';
     }
-    if (entry['nsfw'] != false || declared == 'q' ||
-        RegExp(r'\b(nsfw|r[-_ ]?18|restricted|explicit|nude|naked|nipples|penis|pussy|sex|intercourse)\b').hasMatch(text)) {
+    if (entry['nsfw'] != false ||
+        declared == 'q' ||
+        RegExp(
+          r'\b(nsfw|r[-_ ]?18|restricted|explicit|nude|naked|nipples|penis|pussy|sex|intercourse)\b',
+        ).hasMatch(text)) {
       return 'q';
     }
     return 'g';
@@ -247,13 +267,16 @@ class QuickTagCloudCommunityParser {
   static String _createdAt(Object? value) {
     final number = _integer(value);
     if (number > 0 && number < 8640000000000000) {
-      return DateTime.fromMillisecondsSinceEpoch(number, isUtc: true)
-          .toIso8601String();
+      return DateTime.fromMillisecondsSinceEpoch(
+        number,
+        isUtc: true,
+      ).toIso8601String();
     }
     return DateTime.tryParse(_text(value))?.toUtc().toIso8601String() ?? '';
   }
 
   static String _text(Object? value) => value is String ? value.trim() : '';
   static int _integer(Object? value) => value is num && value.isFinite
-      ? value.toInt() : int.tryParse(value?.toString() ?? '') ?? 0;
+      ? value.toInt()
+      : int.tryParse(value?.toString() ?? '') ?? 0;
 }

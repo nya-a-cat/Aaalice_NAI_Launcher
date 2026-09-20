@@ -8,7 +8,9 @@ GalleryDetailDialogLabels onlineGalleryDetailLabels(
 ) {
   final isCodex = sourceId == GallerySourceId.quickTagCloud;
   return GalleryDetailDialogLabels(
-    sourceName: isCodex ? l10n.onlineGallery_sourceQuickTagCloud : sourceId.label,
+    sourceName: isCodex
+        ? l10n.onlineGallery_sourceQuickTagCloud
+        : sourceId.label,
     untitled: l10n.onlineGallery_codexUntitled,
     codex: l10n.onlineGallery_codexLabel,
     category: l10n.common_category,

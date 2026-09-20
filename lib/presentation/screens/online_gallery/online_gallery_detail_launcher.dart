@@ -47,7 +47,9 @@ class OnlineGalleryDetailLauncher {
       if (knownDetail == null) {
         await _recordViewed(item);
       } else {
-        await ref.read(onlineGalleryLocalFavoritesProvider.notifier).initialize();
+        await ref
+            .read(onlineGalleryLocalFavoritesProvider.notifier)
+            .initialize();
       }
       if (!context.mounted) return;
       await showDialog<void>(
@@ -58,7 +60,8 @@ class OnlineGalleryDetailLauncher {
           detail,
           useKnownDetail: knownDetail != null,
           closeForNavigation: galleryOwnedOverlayExit(
-            dialogContext, onExit: onLeaveDetail,
+            dialogContext,
+            onExit: onLeaveDetail,
           ),
         ),
       );
@@ -156,8 +159,9 @@ class OnlineGalleryDetailLauncher {
       onSendToReverse: mediaActions.sendToReverse,
       onCopyArtistChain: hasFocusedAiTagMedia ? actions.copyArtistChain : null,
       onCopyFullPrompt: hasFocusedAiTagMedia ? actions.copyFullPrompt : null,
-      onCopyRawArtistFragments:
-          hasFocusedAiTagMedia ? actions.copyRawArtistFragments : null,
+      onCopyRawArtistFragments: hasFocusedAiTagMedia
+          ? actions.copyRawArtistFragments
+          : null,
       hasArtistChain: hasFocusedAiTagMedia ? actions.hasArtistChain : null,
     );
   }
@@ -181,7 +185,10 @@ class OnlineGalleryDetailLauncher {
       return true;
     } catch (error) {
       if (context.mounted) {
-        AppToast.error(context, context.l10n.onlineGallery_actionFailed('$error'));
+        AppToast.error(
+          context,
+          context.l10n.onlineGallery_actionFailed('$error'),
+        );
       }
       return false;
     }

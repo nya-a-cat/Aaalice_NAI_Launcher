@@ -12,7 +12,8 @@ import 'quick_tag_cloud_remote_catalog_service.dart';
 /// One preview owns one resolver and cancel token. Network requests use only
 /// the fixed official catalog; imported URLs/snapshots are never fetched.
 class QuickTagCloudBackupResolver {
-  QuickTagCloudBackupResolver(this.adapter, {
+  QuickTagCloudBackupResolver(
+    this.adapter, {
     required this.allowNsfw,
     required this.allowR18g,
     this.communityService,
@@ -29,14 +30,18 @@ class QuickTagCloudBackupResolver {
     final service = communityService;
     if (service == null) return null;
     try {
-      final entries = await (_community ??= service.load(cancelToken: token)
-          .then((value) => {
-            for (final detail in QuickTagCloudCommunityQuery(
-              ratings: const {'g', 's', 'q', 'e'},
-              allowNsfw: allowNsfw, allowR18g: allowR18g,
-            ).apply(value.entries))
-              detail.item.sourceWorkId: detail,
-          }));
+      final entries = await (_community ??= service
+          .load(cancelToken: token)
+          .then(
+            (value) => {
+              for (final detail in QuickTagCloudCommunityQuery(
+                ratings: const {'g', 's', 'q', 'e'},
+                allowNsfw: allowNsfw,
+                allowR18g: allowR18g,
+              ).apply(value.entries))
+                detail.item.sourceWorkId: detail,
+            },
+          ));
       return entries['community:$id'];
     } on DioException catch (error) {
       if (CancelToken.isCancel(error)) rethrow;
@@ -48,27 +53,44 @@ class QuickTagCloudBackupResolver {
   }
 
   Future<GalleryDetail?> resolve(
-    String codexId, String entryId, CancelToken token,
+    String codexId,
+    String entryId,
+    CancelToken token,
   ) async {
     try {
-      final catalog = await (_catalog ??= adapter.getCatalog(cancelToken: token));
+      final catalog = await (_catalog ??= adapter.getCatalog(
+        cancelToken: token,
+      ));
       final (meta, canonicalEntry) = _canonical(catalog, codexId, entryId);
       if (meta == null ||
           QuickTagCloudAccess.isCodexLocked(meta, allowNsfw: allowNsfw)) {
         return null;
       }
-      final book = await _books.putIfAbsent(meta.id,
-          () => adapter.getCodex(meta.id, cancelToken: token));
-      final entries = _entries.putIfAbsent(meta.id,
-          () => {for (final item in book.entries) item.id: item});
+      final book = await _books.putIfAbsent(
+        meta.id,
+        () => adapter.getCodex(meta.id, cancelToken: token),
+      );
+      final entries = _entries.putIfAbsent(
+        meta.id,
+        () => {for (final item in book.entries) item.id: item},
+      );
       final entry = entries[canonicalEntry];
       if (entry == null ||
           QuickTagCloudAccess.isCodexLocked(book, allowNsfw: allowNsfw) ||
-          QuickTagCloudAccess.isEntryAccessBlocked(entry,
-              allowNsfw: allowNsfw, allowR18g: allowR18g)) return null;
+          QuickTagCloudAccess.isEntryAccessBlocked(
+            entry,
+            allowNsfw: allowNsfw,
+            allowR18g: allowR18g,
+          )) {
+        return null;
+      }
       return const QuickTagCloudGalleryMapper().toGalleryDetail(
-        QuickTagCloudGalleryRecord(meta, book, entry,
-            book.mediaOverride ?? catalog.media),
+        QuickTagCloudGalleryRecord(
+          meta,
+          book,
+          entry,
+          book.mediaOverride ?? catalog.media,
+        ),
       );
     } on DioException catch (error) {
       if (CancelToken.isCancel(error)) rethrow;
@@ -81,7 +103,9 @@ class QuickTagCloudBackupResolver {
 
   /// Exact owner migrations and one-hop aliases from upstream backup core.
   (QuickTagCloudCodexMeta?, String) _canonical(
-    QuickTagCloudCatalog catalog, String codexId, String entryId,
+    QuickTagCloudCatalog catalog,
+    String codexId,
+    String entryId,
   ) {
     String? target;
     if (codexId == 'mengshen_pack' &&
@@ -91,21 +115,28 @@ class QuickTagCloudBackupResolver {
       if (number >= 259 && number <= 1944) target = 'nai45_community_pack';
     }
     if (codexId == 'community_ai_misc' &&
-        entryId.startsWith('community_ai_misc-')) target = 'nai45_community_pack';
+        entryId.startsWith('community_ai_misc-')) {
+      target = 'nai45_community_pack';
+    }
     if ({'codex_6e699406', 'codex_8489ac52'}.contains(codexId) &&
-        entryId.startsWith('$codexId-')) target = 'suozhang_r18';
+        entryId.startsWith('$codexId-')) {
+      target = 'suozhang_r18';
+    }
     final migrated = target == null ? null : catalog.findCodex(target);
     final meta = migrated ?? catalog.findCodex(codexId);
     if (meta == null) return (null, entryId);
     var canonical = entryId;
-    if (migrated == null && meta.id != codexId &&
+    if (migrated == null &&
+        meta.id != codexId &&
         entryId.startsWith('$codexId-')) {
       canonical = '${meta.id}${entryId.substring(codexId.length)}';
     }
     final aliases = meta.raw['entryAliases'];
     if (aliases is Map && aliases[canonical] is String) {
       final next = aliases[canonical] as String;
-      if (next.isNotEmpty && next.trim() == next && next.length <= 128 &&
+      if (next.isNotEmpty &&
+          next.trim() == next &&
+          next.length <= 128 &&
           !aliases.containsKey(next) &&
           !RegExp(r'[\u0000-\u001f\u007f-\u009f]').hasMatch(next)) {
         canonical = next;

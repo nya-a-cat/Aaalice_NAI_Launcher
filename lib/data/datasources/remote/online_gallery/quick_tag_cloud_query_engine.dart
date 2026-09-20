@@ -47,13 +47,12 @@ class QuickTagCloudQueryEngine {
     final records = await _candidateRecords(query, cancelToken);
     _synchronizeRevision();
     final cacheRevision = _repository.cacheRevision;
-    final normalizedSearch = normalizeQuickTagCloudSearchInput(searchText)
-        .trim()
-        .toLowerCase();
+    final normalizedSearch = normalizeQuickTagCloudSearchInput(
+      searchText,
+    ).trim().toLowerCase();
     final ratingsKey = (selectedRatings.toList()..sort()).join();
     final usesSaved =
-        query.favoritesOnly ||
-        query.scope == QuickTagCloudBrowseScope.recent;
+        query.favoritesOnly || query.scope == QuickTagCloudBrowseScope.recent;
     final matchingCacheKey = !usesSaved && !searchPlan.usesFavorites
         ? '${_repository.currentCatalog?.release ?? ''}|${query.stableKey}|$ratingsKey|$normalizedSearch|sort:$sortByRelevance'
         : null;
@@ -77,7 +76,8 @@ class QuickTagCloudQueryEngine {
       _sortByRelevance(filtered, searchPlan, cache: records.length <= 5000);
     }
     final result = List<QuickTagCloudGalleryRecord>.unmodifiable(filtered);
-    if (matchingCacheKey != null && cacheRevision == _repository.cacheRevision) {
+    if (matchingCacheKey != null &&
+        cacheRevision == _repository.cacheRevision) {
       _matchingRecordSets.remove(matchingCacheKey);
       _matchingRecordSets[matchingCacheKey] = result;
       while (_matchingRecordSets.length > 4) {
@@ -99,10 +99,7 @@ class QuickTagCloudQueryEngine {
         ? _userService.recent
         : null;
     if (saved == null) {
-      return _repository.loadCatalogRecords(
-        query,
-        cancelToken: cancelToken,
-      );
+      return _repository.loadCatalogRecords(query, cancelToken: cancelToken);
     }
     final records = <QuickTagCloudGalleryRecord>[];
     for (var index = 0; index < saved.length; index++) {
@@ -112,7 +109,12 @@ class QuickTagCloudQueryEngine {
       }
       final item = saved[index];
       records.add(
-        QuickTagCloudGalleryRecord(item.meta, item.codex, item.entry, item.media),
+        QuickTagCloudGalleryRecord(
+          item.meta,
+          item.codex,
+          item.entry,
+          item.media,
+        ),
       );
     }
     return records;
@@ -252,10 +254,7 @@ class QuickTagCloudQueryEngine {
     final loader = _favoriteKeysLoader;
     if (loader == null) {
       throw const QuickTagCloudSearchException([
-        QuickTagCloudSearchIssue(
-          'favorites_unavailable',
-          '本地收藏尚未连接，暂时无法按收藏筛选',
-        ),
+        QuickTagCloudSearchIssue('favorites_unavailable', '本地收藏尚未连接，暂时无法按收藏筛选'),
       ]);
     }
     return Set<String>.unmodifiable(await loader());

@@ -55,7 +55,10 @@ class QuickTagCloudCommunityFilters extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              for (final name in ['', ...QuickTagCloudCommunityParser.categories])
+              for (final name in [
+                '',
+                ...QuickTagCloudCommunityParser.categories,
+              ])
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChip(

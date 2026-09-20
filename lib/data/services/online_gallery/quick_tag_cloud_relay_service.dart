@@ -16,7 +16,8 @@ class QuickTagCloudRelayOutput {
   final List<QuickTagCloudRelayCharacter> characters;
   final int mergedCount;
   final int lockedCount;
-  bool get isEmpty => positive.isEmpty && negative.isEmpty && characters.isEmpty;
+  bool get isEmpty =>
+      positive.isEmpty && negative.isEmpty && characters.isEmpty;
 
   /// Character sections remain explicitly separate, including character UC.
   String get allText => [
@@ -47,13 +48,15 @@ class QuickTagCloudRelayService {
     required bool allowR18g,
   }) => Set.unmodifiable({
     for (final rating in selectedRatings)
-      if (rating == 'g' || rating == 's' ||
+      if (rating == 'g' ||
+          rating == 's' ||
           (rating == 'q' && allowNsfw) ||
-          (rating == 'e' && allowNsfw && allowR18g)) rating,
+          (rating == 'e' && allowNsfw && allowR18g))
+        rating,
   });
 
-  static String clean(String value) => value
-      .replaceAll(RegExp(r'^[\s,，]+|[\s,，]+$'), '').trim();
+  static String clean(String value) =>
+      value.replaceAll(RegExp(r'^[\s,，]+|[\s,，]+$'), '').trim();
 
   QuickTagCloudRelayOutput compile(
     QuickTagCloudRelayPlan plan, {
@@ -78,34 +81,46 @@ class QuickTagCloudRelayService {
         final pos = adapt(character.positive);
         final neg = adapt(character.negative);
         if (pos.isEmpty && neg.isEmpty) continue;
-        characters.add(QuickTagCloudRelayCharacter(
-          label: character.label, positive: pos, negative: neg,
-        ));
+        characters.add(
+          QuickTagCloudRelayCharacter(
+            label: character.label,
+            positive: pos,
+            negative: neg,
+          ),
+        );
       }
     }
     final pos = _deduplicate(positive);
     final neg = _deduplicate(negative);
     final separator = join == QuickTagCloudRelayJoin.newline ? ',\n' : ', ';
     return QuickTagCloudRelayOutput(
-      positive: pos.join(separator), negative: neg.join(separator),
-      characters: List.unmodifiable(characters), lockedCount: locked,
+      positive: pos.join(separator),
+      negative: neg.join(separator),
+      characters: List.unmodifiable(characters),
+      lockedCount: locked,
       mergedCount: positive.length + negative.length - pos.length - neg.length,
     );
   }
 
   String compileBlock(
-    String value, QuickTagCloudRelayFormat format, double weight,
+    String value,
+    QuickTagCloudRelayFormat format,
+    double weight,
   ) {
-    if (!weight.isFinite || weight < QuickTagCloudRelayBlock.minimumWeight ||
+    if (!weight.isFinite ||
+        weight < QuickTagCloudRelayBlock.minimumWeight ||
         weight > QuickTagCloudRelayBlock.maximumWeight) {
       throw const FormatException('Relay weight outside 0.05–10');
     }
     final source = clean(value);
     if (source.isEmpty) return '';
     final adapted = format == QuickTagCloudRelayFormat.sd
-        ? naiToSd(source) : source;
+        ? naiToSd(source)
+        : source;
     final label = _weightLabel(weight);
-    if (format == QuickTagCloudRelayFormat.plain || label == '1') return adapted;
+    if (format == QuickTagCloudRelayFormat.plain || label == '1') {
+      return adapted;
+    }
     if (format == QuickTagCloudRelayFormat.sd) return '($adapted:$label)';
     if (RegExp(r'(?:^|[^\d.])[+-]?\d+(?:\.\d+)?::').hasMatch(adapted)) {
       final layers = (math.log(weight) / math.log(1.05)).round();
@@ -126,16 +141,23 @@ class QuickTagCloudRelayService {
     var numeric = false, closedNumeric = false, escaped = false;
     for (var index = 0; index < source.length; index++) {
       final char = source[index];
-      if (escaped) { escaped = false; continue; }
-      if (char == r'\') { escaped = true; continue; }
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (char == r'\') {
+        escaped = true;
+        continue;
+      }
       if (source.startsWith('::', index)) {
         if (numeric) {
           numeric = false;
           index++;
           continue;
         }
-        if (RegExp(r'^[+-]?\d+(?:\.\d+)?$')
-            .hasMatch(source.substring(start, index).trim())) {
+        if (RegExp(
+          r'^[+-]?\d+(?:\.\d+)?$',
+        ).hasMatch(source.substring(start, index).trim())) {
           numeric = true;
           closedNumeric = source.indexOf('::', index + 2) >= 0;
           index++;
@@ -144,7 +166,12 @@ class QuickTagCloudRelayService {
       }
       if (numeric && !closedNumeric && ',\n}]'.contains(char)) numeric = false;
       if (!numeric) {
-        final close = switch (char) { '{' => '}', '[' => ']', '(' => ')', _ => null };
+        final close = switch (char) {
+          '{' => '}',
+          '[' => ']',
+          '(' => ')',
+          _ => null,
+        };
         if (close != null) closing.add(close);
         if (closing.isNotEmpty && char == closing.last) closing.removeLast();
       }
@@ -161,13 +188,17 @@ class QuickTagCloudRelayService {
 
   static List<String> _deduplicate(List<String> values) {
     final seen = <String>{};
-    return values.where((value) =>
-      seen.add(value.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase()),
-    ).toList();
+    return values
+        .where(
+          (value) => seen.add(
+            value.trim().replaceAll(RegExp(r'\s+'), ' ').toLowerCase(),
+          ),
+        )
+        .toList();
   }
 
-  static String _weightLabel(double value) => value.toStringAsFixed(3)
-      .replaceFirst(RegExp(r'\.?0+$'), '');
+  static String _weightLabel(double value) =>
+      value.toStringAsFixed(3).replaceFirst(RegExp(r'\.?0+$'), '');
 
   static String naiToSd(String source) => _NaiSdReader(source).read().text;
 }
@@ -187,22 +218,34 @@ class _NaiSdReader {
       final char = source[position];
       if (stop.isNotEmpty && char == stop) {
         final start = position;
-        while (position < source.length && source[position] == stop) position++;
-        return (text: out.toString(), closingCount: position - start, closingStart: start);
+        while (position < source.length && source[position] == stop) {
+          position++;
+        }
+        return (
+          text: out.toString(),
+          closingCount: position - start,
+          closingStart: start,
+        );
       }
       if (char == r'\' && position + 1 < source.length) {
         out.write(source.substring(position, position + 2));
         position += 2;
         continue;
       }
-      if (char == '}' || char == ']') { position++; continue; }
+      if (char == '}' || char == ']') {
+        position++;
+        continue;
+      }
       final code = char.codeUnitAt(0);
       final isDigit = code >= 48 && code <= 57;
       final previous = position == 0 ? 0 : source.codeUnitAt(position - 1);
-      final startsNumber = char == '+' || char == '-' ||
+      final startsNumber =
+          char == '+' ||
+          char == '-' ||
           (isDigit && (previous < 48 || previous > 57));
       final numeric = startsNumber
-          ? _numericWeight.matchAsPrefix(source, position) : null;
+          ? _numericWeight.matchAsPrefix(source, position)
+          : null;
       if (numeric != null) {
         _readNumeric(numeric, out);
         continue;
@@ -225,9 +268,13 @@ class _NaiSdReader {
     var limit = end;
     if (limit < 0) {
       limit = position;
-      while (limit < source.length && !',\n}]'.contains(source[limit])) limit++;
+      while (limit < source.length && !',\n}]'.contains(source[limit])) {
+        limit++;
+      }
     }
-    final content = QuickTagCloudRelayService.clean(source.substring(position, limit));
+    final content = QuickTagCloudRelayService.clean(
+      source.substring(position, limit),
+    );
     position = end < 0 ? limit : limit + 2;
     if (content.isEmpty) return;
     final number = double.tryParse(numeric.group(1)!);
@@ -241,7 +288,8 @@ class _NaiSdReader {
   void _readBracket(String opening, StringBuffer out) {
     var count = 0;
     while (position < source.length && source[position] == opening) {
-      count++; position++;
+      count++;
+      position++;
     }
     final reader = _NaiSdReader(source.substring(position), depth + 1);
     final inner = reader.read(opening == '{' ? '}' : ']');
@@ -254,7 +302,9 @@ class _NaiSdReader {
     position += inner.closingStart + matched;
     final content = QuickTagCloudRelayService.clean(inner.text);
     if (content.isEmpty) return;
-    final factor = math.pow(1.05, opening == '{' ? matched : -matched).toDouble();
+    final factor = math
+        .pow(1.05, opening == '{' ? matched : -matched)
+        .toDouble();
     if (!factor.isFinite) throw const FormatException('Prompt weight overflow');
     out.write('($content:${QuickTagCloudRelayService._weightLabel(factor)})');
   }

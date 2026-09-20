@@ -9,6 +9,229 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get onlineGallery_codexSearchTitle => '标题';
+
+  @override
+  String get onlineGallery_codexSearchType => '条目类型';
+
+  @override
+  String get onlineGallery_codexSearchDirectory => '精确目录';
+
+  @override
+  String get onlineGallery_codexCommunity => '共创广场';
+
+  @override
+  String get onlineGallery_communitySubmit => '前往原站投稿';
+
+  @override
+  String get onlineGallery_communityRatingNotice => '沿用当前画廊年龄分级。上游内容标记可能不完整。';
+
+  @override
+  String get onlineGallery_communityLoadFailed => '无法加载共创广场，请检查网络后重试。';
+
+  @override
+  String get onlineGallery_communityEmpty => '当前条件下没有投稿。';
+
+  @override
+  String onlineGallery_communityCount(int count) {
+    return '$count 条投稿';
+  }
+
+  @override
+  String get onlineGallery_codexRelay => '中转站';
+
+  @override
+  String get onlineGallery_codexAddToRelay => '加入中转站';
+
+  @override
+  String get onlineGallery_codexFavoritesBackup => '收藏备份与恢复';
+
+  @override
+  String get onlineGallery_codexAdvancedSearch => '高级搜索';
+
+  @override
+  String get onlineGallery_codexSearchField => '搜索字段';
+
+  @override
+  String get onlineGallery_codexSearchValue => '匹配内容';
+
+  @override
+  String get onlineGallery_codexSearchExclude => '排除条件';
+
+  @override
+  String get onlineGallery_codexSearchAddCondition => '添加条件';
+
+  @override
+  String get onlineGallery_codexSearchQuery => '搜索表达式';
+
+  @override
+  String get onlineGallery_codexSearchHelp => '组合多个字段条件；支持用双引号保留空格。';
+
+  @override
+  String get onlineGallery_codexSearchInvalid => '请检查字段值、操作符和引号；文本条件最多 10 个。';
+
+  @override
+  String get quickTagBackupTitle => '收藏备份与恢复';
+
+  @override
+  String get quickTagBackupHelp =>
+      '导入 JSON 或 NAITAG1 迁移文本（最多 2 MiB）。预览时按需读取官方法典与共创条目来核对收藏；备份内容仅存本机。无法解析的条目和收藏夹信息会保留并可重新导出。';
+
+  @override
+  String get quickTagBackupInputHint => '粘贴收藏 JSON 或 NAITAG1 迁移文本';
+
+  @override
+  String get quickTagBackupImportFile => '选择备份文件';
+
+  @override
+  String get quickTagBackupPreview => '预览恢复内容';
+
+  @override
+  String get quickTagBackupExportJson => '导出 JSON';
+
+  @override
+  String get quickTagBackupCopyTransfer => '复制迁移文本';
+
+  @override
+  String get quickTagBackupMerge => '合并并去重';
+
+  @override
+  String get quickTagBackupReplace => '覆盖法典收藏';
+
+  @override
+  String get quickTagBackupInvalid => '备份格式无效，现有收藏未更改。';
+
+  @override
+  String get quickTagBackupTooLarge => '备份超过 2 MiB 限制。';
+
+  @override
+  String get quickTagBackupStale => '收藏已发生变化，请重新预览后恢复。';
+
+  @override
+  String get quickTagBackupFailed => '备份或恢复未完成，请重试并检查存储权限。';
+
+  @override
+  String get quickTagBackupRestored => '收藏恢复完成';
+
+  @override
+  String get quickTagBackupReplaceWarning =>
+      '这会替换本机的法典收藏及备份库，其他来源收藏保持不变。请先导出当前备份。';
+
+  @override
+  String quickTagBackupCounts(
+    int atlas,
+    int community,
+    int folders,
+    int mapped,
+    int unmapped,
+    int duplicates,
+    int removed,
+    int conflicts,
+  ) {
+    return '法典 $atlas · 共创 $community · 收藏夹 $folders\n可用详情 $mapped · 待解析 $unmapped · 重复 $duplicates\n覆盖移除 $removed · 元数据冲突 $conflicts';
+  }
+
+  @override
+  String get qtcRelay_title => 'Tag 中转站';
+
+  @override
+  String get qtcRelay_plan => '方案';
+
+  @override
+  String get qtcRelay_newPlan => '新建方案';
+
+  @override
+  String get qtcRelay_renamePlan => '重命名方案';
+
+  @override
+  String get qtcRelay_deletePlan => '删除方案';
+
+  @override
+  String get qtcRelay_name => '名称';
+
+  @override
+  String get qtcRelay_addBlock => '添加片段';
+
+  @override
+  String get qtcRelay_blockTitle => '片段名称';
+
+  @override
+  String get qtcRelay_weight => '片段权重';
+
+  @override
+  String get qtcRelay_weightHint => '0.05–10，同时作用于正向、负向与角色内容';
+
+  @override
+  String get qtcRelay_invalidWeight => '请输入 0.05 到 10 之间的有限数字';
+
+  @override
+  String get qtcRelay_plain => '原文';
+
+  @override
+  String get qtcRelay_plainHint => '保留已有语法，不附加片段权重';
+
+  @override
+  String get qtcRelay_comma => '逗号';
+
+  @override
+  String get qtcRelay_newline => '逗号换行';
+
+  @override
+  String get qtcRelay_copyPositive => '复制正向';
+
+  @override
+  String get qtcRelay_copyNegative => '复制负向';
+
+  @override
+  String get qtcRelay_copyAll => '复制全部';
+
+  @override
+  String get qtcRelay_send => '填入生成页';
+
+  @override
+  String get qtcRelay_sendHint => '填入非空正负内容，角色追加到独立槽位';
+
+  @override
+  String get qtcRelay_sent => '已填入生成页，尚未生成';
+
+  @override
+  String get qtcRelay_charactersNote => '角色保留为独立内容，复制全部包含角色正负词';
+
+  @override
+  String get qtcRelay_locked => '当前分级设置锁定此片段';
+
+  @override
+  String get qtcRelay_corrupt => '中转站存储无法读取，原数据已保留。请备份后重建。';
+
+  @override
+  String get qtcRelay_recover => '保留备份并重建';
+
+  @override
+  String get qtcRelay_recoverConfirm => '原始存储将保留为本地恢复备份，然后创建空方案。是否继续？';
+
+  @override
+  String get qtcRelay_saveFailed => '保存失败，已保留上次成功保存的方案。请重试。';
+
+  @override
+  String get qtcRelay_empty => '添加素材或自定义正负提示词片段';
+
+  @override
+  String get qtcRelay_moveUp => '上移';
+
+  @override
+  String get qtcRelay_moveDown => '下移';
+
+  @override
+  String get qtcRelay_merged => '已合并重复片段';
+
+  @override
+  String get qtcRelay_sendConfirm =>
+      '将填入方案的非空正负提示词，并追加独立角色槽位。现有非空目标内容会被替换。是否继续？';
+
+  @override
+  String get qtcRelay_characterLimit => '当前模型不支持这些角色槽位，或剩余槽位不足。请调整模型或角色后重试。';
+
+  @override
   String get app_title => 'NAI 启动器';
 
   @override
@@ -12491,6 +12714,229 @@ class AppLocalizationsZh extends AppLocalizations {
 /// The translations for Chinese, using the Han script (`zh_Hant`).
 class AppLocalizationsZhHant extends AppLocalizationsZh {
   AppLocalizationsZhHant() : super('zh_Hant');
+
+  @override
+  String get onlineGallery_codexSearchTitle => '標題';
+
+  @override
+  String get onlineGallery_codexSearchType => '詞條類型';
+
+  @override
+  String get onlineGallery_codexSearchDirectory => '精確目錄';
+
+  @override
+  String get onlineGallery_codexCommunity => '共創廣場';
+
+  @override
+  String get onlineGallery_communitySubmit => '前往原站投稿';
+
+  @override
+  String get onlineGallery_communityRatingNotice => '沿用目前畫廊年齡分級。上游內容標記可能不完整。';
+
+  @override
+  String get onlineGallery_communityLoadFailed => '無法載入共創廣場，請檢查網路後重試。';
+
+  @override
+  String get onlineGallery_communityEmpty => '目前條件下沒有投稿。';
+
+  @override
+  String onlineGallery_communityCount(int count) {
+    return '$count 則投稿';
+  }
+
+  @override
+  String get onlineGallery_codexRelay => '中轉站';
+
+  @override
+  String get onlineGallery_codexAddToRelay => '加入中轉站';
+
+  @override
+  String get onlineGallery_codexFavoritesBackup => '收藏備份與還原';
+
+  @override
+  String get onlineGallery_codexAdvancedSearch => '進階搜尋';
+
+  @override
+  String get onlineGallery_codexSearchField => '搜尋欄位';
+
+  @override
+  String get onlineGallery_codexSearchValue => '比對內容';
+
+  @override
+  String get onlineGallery_codexSearchExclude => '排除條件';
+
+  @override
+  String get onlineGallery_codexSearchAddCondition => '新增條件';
+
+  @override
+  String get onlineGallery_codexSearchQuery => '搜尋運算式';
+
+  @override
+  String get onlineGallery_codexSearchHelp => '組合多個欄位條件；可用雙引號保留空格。';
+
+  @override
+  String get onlineGallery_codexSearchInvalid => '請檢查欄位值、運算子和引號；文字條件最多 10 個。';
+
+  @override
+  String get quickTagBackupTitle => '收藏備份與還原';
+
+  @override
+  String get quickTagBackupHelp =>
+      '匯入 JSON 或 NAITAG1 移轉文字（最多 2 MiB）。預覽時按需讀取官方法典與共創條目來核對收藏；備份內容僅存本機。無法解析的條目與收藏夾資訊會保留並可重新匯出。';
+
+  @override
+  String get quickTagBackupInputHint => '貼上收藏 JSON 或 NAITAG1 移轉文字';
+
+  @override
+  String get quickTagBackupImportFile => '選擇備份檔案';
+
+  @override
+  String get quickTagBackupPreview => '預覽還原內容';
+
+  @override
+  String get quickTagBackupExportJson => '匯出 JSON';
+
+  @override
+  String get quickTagBackupCopyTransfer => '複製移轉文字';
+
+  @override
+  String get quickTagBackupMerge => '合併並去除重複';
+
+  @override
+  String get quickTagBackupReplace => '覆蓋法典收藏';
+
+  @override
+  String get quickTagBackupInvalid => '備份格式無效，現有收藏未變更。';
+
+  @override
+  String get quickTagBackupTooLarge => '備份超過 2 MiB 限制。';
+
+  @override
+  String get quickTagBackupStale => '收藏已變更，請重新預覽後還原。';
+
+  @override
+  String get quickTagBackupFailed => '備份或還原未完成，請重試並檢查儲存權限。';
+
+  @override
+  String get quickTagBackupRestored => '收藏還原完成';
+
+  @override
+  String get quickTagBackupReplaceWarning =>
+      '這會取代本機的法典收藏及備份庫，其他來源收藏保持不變。請先匯出目前備份。';
+
+  @override
+  String quickTagBackupCounts(
+    int atlas,
+    int community,
+    int folders,
+    int mapped,
+    int unmapped,
+    int duplicates,
+    int removed,
+    int conflicts,
+  ) {
+    return '法典 $atlas · 共創 $community · 收藏夾 $folders\n可用詳情 $mapped · 待解析 $unmapped · 重複 $duplicates\n覆蓋移除 $removed · 中繼資料衝突 $conflicts';
+  }
+
+  @override
+  String get qtcRelay_title => 'Tag 中轉站';
+
+  @override
+  String get qtcRelay_plan => '方案';
+
+  @override
+  String get qtcRelay_newPlan => '新增方案';
+
+  @override
+  String get qtcRelay_renamePlan => '重新命名方案';
+
+  @override
+  String get qtcRelay_deletePlan => '刪除方案';
+
+  @override
+  String get qtcRelay_name => '名稱';
+
+  @override
+  String get qtcRelay_addBlock => '新增片段';
+
+  @override
+  String get qtcRelay_blockTitle => '片段名稱';
+
+  @override
+  String get qtcRelay_weight => '片段權重';
+
+  @override
+  String get qtcRelay_weightHint => '0.05–10，同時套用於正向、負向與角色內容';
+
+  @override
+  String get qtcRelay_invalidWeight => '請輸入 0.05 到 10 之間的有限數字';
+
+  @override
+  String get qtcRelay_plain => '原文';
+
+  @override
+  String get qtcRelay_plainHint => '保留既有語法，不附加片段權重';
+
+  @override
+  String get qtcRelay_comma => '逗號';
+
+  @override
+  String get qtcRelay_newline => '逗號換行';
+
+  @override
+  String get qtcRelay_copyPositive => '複製正向';
+
+  @override
+  String get qtcRelay_copyNegative => '複製負向';
+
+  @override
+  String get qtcRelay_copyAll => '複製全部';
+
+  @override
+  String get qtcRelay_send => '填入生成頁';
+
+  @override
+  String get qtcRelay_sendHint => '填入非空正負內容，角色新增至獨立欄位';
+
+  @override
+  String get qtcRelay_sent => '已填入生成頁，尚未生成';
+
+  @override
+  String get qtcRelay_charactersNote => '角色保留為獨立內容，複製全部包含角色正負詞';
+
+  @override
+  String get qtcRelay_locked => '目前分級設定已鎖定此片段';
+
+  @override
+  String get qtcRelay_corrupt => '中轉站儲存內容無法讀取，原資料已保留。請備份後重建。';
+
+  @override
+  String get qtcRelay_recover => '保留備份並重建';
+
+  @override
+  String get qtcRelay_recoverConfirm => '原始儲存內容將保留為本機還原備份，然後建立空方案。是否繼續？';
+
+  @override
+  String get qtcRelay_saveFailed => '儲存失敗，已保留上次成功儲存的方案。請重試。';
+
+  @override
+  String get qtcRelay_empty => '新增素材或自訂正負提示詞片段';
+
+  @override
+  String get qtcRelay_moveUp => '上移';
+
+  @override
+  String get qtcRelay_moveDown => '下移';
+
+  @override
+  String get qtcRelay_merged => '已合併重複片段';
+
+  @override
+  String get qtcRelay_sendConfirm =>
+      '將填入方案的非空正負提示詞，並新增獨立角色欄位。既有非空目標內容將被取代。是否繼續？';
+
+  @override
+  String get qtcRelay_characterLimit => '目前模型不支援這些角色欄位，或剩餘欄位不足。請調整模型或角色後重試。';
 
   @override
   String get app_title => 'NAI 啟動器';

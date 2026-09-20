@@ -59,10 +59,7 @@ class QuickTagCloudFavoritesBackupInput extends StatelessWidget {
           const SizedBox(height: 12),
           const LinearProgressIndicator(),
           if (onCancel != null)
-            TextButton(
-              onPressed: onCancel,
-              child: Text(l.common_cancel),
-            ),
+            TextButton(onPressed: onCancel, child: Text(l.common_cancel)),
         ],
       ],
     );

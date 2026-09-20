@@ -61,7 +61,9 @@ class OnlineGalleryToolbarSearch {
         icon: Icons.search_rounded,
         treatSpacesAsSeparators: true,
         onSubmitted: () => _submitTagSearch(
-          _controller.favoriteSearchController.text, onValid: _galleryNotifier.searchFavorites, codexOnly: true,
+          _controller.favoriteSearchController.text,
+          onValid: _galleryNotifier.searchFavorites,
+          codexOnly: true,
         ),
       );
     }
@@ -146,7 +148,9 @@ class OnlineGalleryToolbarSearch {
         icon: Icons.search_rounded,
         treatSpacesAsSeparators: true,
         onSubmitted: () => _submitTagSearch(
-          _controller.favoriteSearchController.text, onValid: _galleryNotifier.searchFavorites, codexOnly: true,
+          _controller.favoriteSearchController.text,
+          onValid: _galleryNotifier.searchFavorites,
+          codexOnly: true,
         ),
       );
     }
@@ -359,25 +363,40 @@ class OnlineGalleryToolbarSearch {
 
   bool _validateTagQuery(String value) {
     final codex = _activeSource(state) == GallerySourceId.quickTagCloud;
-    if (codex ? !QuickTagCloudSearchParser.parse(value).hasErrors
-        : GalleryTagQueryParser.parse(value).isValid) return true;
+    if (codex
+        ? !QuickTagCloudSearchParser.parse(value).hasErrors
+        : GalleryTagQueryParser.parse(value).isValid) {
+      return true;
+    }
     AppToast.warning(
       context,
-      codex ? context.l10n.onlineGallery_codexSearchInvalid
+      codex
+          ? context.l10n.onlineGallery_codexSearchInvalid
           : context.l10n.onlineGallery_maxTagsExceeded(maxGallerySearchTags),
     );
     return false;
   }
 
-  void _submitTagSearch(String value, {required ValueChanged<String> onValid, bool codexOnly = false}) {
-    if ((codexOnly && _activeSource(state) != GallerySourceId.quickTagCloud) || _validateTagQuery(value)) onValid(value);
+  void _submitTagSearch(
+    String value, {
+    required ValueChanged<String> onValid,
+    bool codexOnly = false,
+  }) {
+    if ((codexOnly && _activeSource(state) != GallerySourceId.quickTagCloud) ||
+        _validateTagQuery(value)) {
+      onValid(value);
+    }
   }
 
   Widget _buildTagCountSuffix(
-    ThemeData theme, TextEditingController controller,
-    {required VoidCallback onClear}
-  ) => buildOnlineGalleryQueryCountSuffix(
-    context, theme, controller, onClear: onClear,
+    ThemeData theme,
+    TextEditingController controller, {
+    required VoidCallback onClear,
+  }) => buildOnlineGalleryQueryCountSuffix(
+    context,
+    theme,
+    controller,
+    onClear: onClear,
     codex: _activeSource(state) == GallerySourceId.quickTagCloud,
   );
 

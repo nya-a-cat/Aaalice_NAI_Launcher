@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/online_gallery/gallery_item.dart';
 import 'package:nai_launcher/data/models/online_gallery/gallery_source.dart';
@@ -37,34 +36,40 @@ void main() {
     box.calls.clear();
   });
 
-  test('replaces one source, preserves saved times, and can clear it', () async {
-    final other = box.get('ai_tag:other');
-    await repository.replaceSourceRecords(
-      _source,
-      next,
-      expectedRecords: before.reversed,
-    );
+  test(
+    'replaces one source, preserves saved times, and can clear it',
+    () async {
+      final other = box.get('ai_tag:other');
+      await repository.replaceSourceRecords(
+        _source,
+        next,
+        expectedRecords: before.reversed,
+      );
 
-    expect(_snapshot(repository), _maps(next));
-    expect(box.get('ai_tag:other'), other);
-    expect(box.containsKey(OnlineGalleryFavoritesReplacement.journalKey), false);
-    expect(repository.count, 4);
-    expect(
-      repository
-          .query(const OnlineGalleryFavoriteQuery(sourceId: _source))
-          .records
-          .map((record) => record.sourceWorkId),
-      ['e', 'd', 'a'],
-    );
-    final restored = _repository(box);
-    await restored.ensureInitialized();
-    expect(_snapshot(restored), _maps(next));
+      expect(_snapshot(repository), _maps(next));
+      expect(box.get('ai_tag:other'), other);
+      expect(
+        box.containsKey(OnlineGalleryFavoritesReplacement.journalKey),
+        false,
+      );
+      expect(repository.count, 4);
+      expect(
+        repository
+            .query(const OnlineGalleryFavoriteQuery(sourceId: _source))
+            .records
+            .map((record) => record.sourceWorkId),
+        ['e', 'd', 'a'],
+      );
+      final restored = _repository(box);
+      await restored.ensureInitialized();
+      expect(_snapshot(restored), _maps(next));
 
-    await repository.replaceSourceRecords(_source, [], expectedRecords: next);
-    expect(repository.count, 1);
-    expect(_snapshot(repository), isEmpty);
-    expect(box.get('ai_tag:other'), other);
-  });
+      await repository.replaceSourceRecords(_source, [], expectedRecords: next);
+      expect(repository.count, 1);
+      expect(_snapshot(repository), isEmpty);
+      expect(box.get('ai_tag:other'), other);
+    },
+  );
 
   test('commit ID survives a restart and ordinary favorite writes', () async {
     await repository.replaceSourceRecords(
@@ -86,43 +91,57 @@ void main() {
     expect(reopened.lastSourceReplacementId(_source), isNull);
   });
 
-  test('rollback restores source commit ID and preserves other source ID', () async {
-    await repository.replaceSourceRecords(
-      _source,
-      before,
-      replacementId: 'previous',
-    );
-    await repository.replaceSourceRecords(
-      GallerySourceId.aiTag,
-      [_record('other', source: GallerySourceId.aiTag)],
-      replacementId: 'other-source',
-    );
-    final diskBefore = box.toMap();
-    box.calls.clear();
-    box.failures['deleteAll:1'] = 1;
-    await expectLater(
-      repository.replaceSourceRecords(_source, next, replacementId: 'failed'),
-      throwsA(isA<OnlineGalleryFavoritesReplacementException>()),
-    );
-    expect(box.toMap(), diskBefore);
-    expect(repository.lastSourceReplacementId(_source), 'previous');
-    expect(repository.lastSourceReplacementId(GallerySourceId.aiTag), 'other-source');
-  });
-
-  for (final operation in ['put', 'delete']) {
-    test('rolls back an applied journal $operation that reports failure', () async {
+  test(
+    'rollback restores source commit ID and preserves other source ID',
+    () async {
+      await repository.replaceSourceRecords(
+        _source,
+        before,
+        replacementId: 'previous',
+      );
+      await repository.replaceSourceRecords(GallerySourceId.aiTag, [
+        _record('other', source: GallerySourceId.aiTag),
+      ], replacementId: 'other-source');
       final diskBefore = box.toMap();
-      box.failures['$operation:1'] = 1;
+      box.calls.clear();
+      box.failures['deleteAll:1'] = 1;
       await expectLater(
         repository.replaceSourceRecords(_source, next, replacementId: 'failed'),
-        throwsA(
-          isA<OnlineGalleryFavoritesReplacementException>()
-              .having((error) => error.recoveryRequired, 'recovery', false),
-        ),
+        throwsA(isA<OnlineGalleryFavoritesReplacementException>()),
       );
       expect(box.toMap(), diskBefore);
-      expect(_snapshot(repository), _maps(before));
-    });
+      expect(repository.lastSourceReplacementId(_source), 'previous');
+      expect(
+        repository.lastSourceReplacementId(GallerySourceId.aiTag),
+        'other-source',
+      );
+    },
+  );
+
+  for (final operation in ['put', 'delete']) {
+    test(
+      'rolls back an applied journal $operation that reports failure',
+      () async {
+        final diskBefore = box.toMap();
+        box.failures['$operation:1'] = 1;
+        await expectLater(
+          repository.replaceSourceRecords(
+            _source,
+            next,
+            replacementId: 'failed',
+          ),
+          throwsA(
+            isA<OnlineGalleryFavoritesReplacementException>().having(
+              (error) => error.recoveryRequired,
+              'recovery',
+              false,
+            ),
+          ),
+        );
+        expect(box.toMap(), diskBefore);
+        expect(_snapshot(repository), _maps(before));
+      },
+    );
   }
 
   for (final operation in ['putAll', 'deleteAll']) {
@@ -169,7 +188,10 @@ void main() {
         ),
       );
 
-      expect(box.containsKey(OnlineGalleryFavoritesReplacement.journalKey), true);
+      expect(
+        box.containsKey(OnlineGalleryFavoritesReplacement.journalKey),
+        true,
+      );
       expect(_snapshot(repository), _maps(before));
       await expectLater(
         repository.upsert(_record('later').detail),
@@ -184,40 +206,43 @@ void main() {
     });
   }
 
-  test('validates every record before writing and rejects duplicate keys', () async {
-    final valid = _record('valid');
-    final invalid = OnlineGalleryFavoriteRecord(
-      schemaVersion: valid.schemaVersion,
-      stableKey: 'quick_tag_cloud:forged',
-      sourceId: valid.sourceId,
-      sourceWorkId: valid.sourceWorkId,
-      savedAt: valid.savedAt,
-      detail: valid.detail,
-    );
-    final invalidVersion = OnlineGalleryFavoriteRecord(
-      schemaVersion: 999,
-      stableKey: valid.stableKey,
-      sourceId: valid.sourceId,
-      sourceWorkId: valid.sourceWorkId,
-      savedAt: valid.savedAt,
-      detail: valid.detail,
-    );
-    final diskBefore = box.toMap();
-    for (final records in [
-      [valid, _record('foreign', source: GallerySourceId.aiTag)],
-      [valid, invalid],
-      [valid, invalidVersion],
-      [valid, valid],
-    ]) {
-      await expectLater(
-        repository.replaceSourceRecords(_source, records),
-        throwsFormatException,
+  test(
+    'validates every record before writing and rejects duplicate keys',
+    () async {
+      final valid = _record('valid');
+      final invalid = OnlineGalleryFavoriteRecord(
+        schemaVersion: valid.schemaVersion,
+        stableKey: 'quick_tag_cloud:forged',
+        sourceId: valid.sourceId,
+        sourceWorkId: valid.sourceWorkId,
+        savedAt: valid.savedAt,
+        detail: valid.detail,
       );
-      expect(box.calls, isEmpty);
-      expect(box.toMap(), diskBefore);
-      expect(_snapshot(repository), _maps(before));
-    }
-  });
+      final invalidVersion = OnlineGalleryFavoriteRecord(
+        schemaVersion: 999,
+        stableKey: valid.stableKey,
+        sourceId: valid.sourceId,
+        sourceWorkId: valid.sourceWorkId,
+        savedAt: valid.savedAt,
+        detail: valid.detail,
+      );
+      final diskBefore = box.toMap();
+      for (final records in [
+        [valid, _record('foreign', source: GallerySourceId.aiTag)],
+        [valid, invalid],
+        [valid, invalidVersion],
+        [valid, valid],
+      ]) {
+        await expectLater(
+          repository.replaceSourceRecords(_source, records),
+          throwsFormatException,
+        );
+        expect(box.calls, isEmpty);
+        expect(box.toMap(), diskBefore);
+        expect(_snapshot(repository), _maps(before));
+      }
+    },
+  );
 
   test('expected snapshot detects changed details and saved time', () async {
     for (final changed in [
@@ -236,14 +261,21 @@ void main() {
     }
   });
 
-  test('changes in another source do not conflict with expected snapshot', () async {
-    await repository.upsert(
-      _record('foreign', source: GallerySourceId.aiTag).detail,
-    );
-    await repository.replaceSourceRecords(_source, next, expectedRecords: before);
-    expect(_snapshot(repository), _maps(next));
-    expect(repository.contains('ai_tag:foreign'), true);
-  });
+  test(
+    'changes in another source do not conflict with expected snapshot',
+    () async {
+      await repository.upsert(
+        _record('foreign', source: GallerySourceId.aiTag).detail,
+      );
+      await repository.replaceSourceRecords(
+        _source,
+        next,
+        expectedRecords: before,
+      );
+      expect(_snapshot(repository), _maps(next));
+      expect(repository.contains('ai_tag:foreign'), true);
+    },
+  );
 
   test('expected snapshot detects writes from another repository', () async {
     final otherRepository = _repository(box);
@@ -257,42 +289,47 @@ void main() {
     expect(box.toMap(), diskBefore);
   });
 
-  test('initialization waits for an in-flight replacement before recovery', () async {
-    await repository.replaceSourceRecords(
-      _source,
-      before,
-      replacementId: 'previous',
-    );
-    final entered = Completer<void>();
-    final release = Completer<void>();
-    box.putAllEntered = entered;
-    box.putAllRelease = release;
-    final replacing = repository.replaceSourceRecords(
-      _source,
-      next,
-      replacementId: 'next',
-    );
-    await entered.future;
-    expect(
-      box.get(OnlineGalleryFavoritesReplacement.replacementIdKey(_source)),
-      'next',
-    );
-    expect(repository.lastSourceReplacementId(_source), 'previous');
-    final restored = _repository(box);
-    final initializing = restored.ensureInitialized();
-    await Future<void>.value();
-    release.complete();
-    await replacing;
-    await initializing;
-    expect(restored.lastSourceReplacementId(_source), 'next');
-    expect(_snapshot(repository), _maps(next));
-    expect(_snapshot(restored), _maps(next));
-    expect(
-      OnlineGalleryFavoritesReplacement.readSource(box, _source)
-          .map((key, value) => MapEntry(key, value.toMap())),
-      _maps(next),
-    );
-  });
+  test(
+    'initialization waits for an in-flight replacement before recovery',
+    () async {
+      await repository.replaceSourceRecords(
+        _source,
+        before,
+        replacementId: 'previous',
+      );
+      final entered = Completer<void>();
+      final release = Completer<void>();
+      box.putAllEntered = entered;
+      box.putAllRelease = release;
+      final replacing = repository.replaceSourceRecords(
+        _source,
+        next,
+        replacementId: 'next',
+      );
+      await entered.future;
+      expect(
+        box.get(OnlineGalleryFavoritesReplacement.replacementIdKey(_source)),
+        'next',
+      );
+      expect(repository.lastSourceReplacementId(_source), 'previous');
+      final restored = _repository(box);
+      final initializing = restored.ensureInitialized();
+      await Future<void>.value();
+      release.complete();
+      await replacing;
+      await initializing;
+      expect(restored.lastSourceReplacementId(_source), 'next');
+      expect(_snapshot(repository), _maps(next));
+      expect(_snapshot(restored), _maps(next));
+      expect(
+        OnlineGalleryFavoritesReplacement.readSource(
+          box,
+          _source,
+        ).map((key, value) => MapEntry(key, value.toMap())),
+        _maps(next),
+      );
+    },
+  );
 
   test('checks expected snapshot after earlier queued writes finish', () async {
     final entered = Completer<void>();
@@ -367,15 +404,15 @@ OnlineGalleryLocalFavoritesRepository _repository(_FaultBox box) =>
       legacyStorage: _MemoryStorage(),
     );
 
-Map<String, dynamic> _snapshot(OnlineGalleryLocalFavoritesRepository repository) =>
-    _maps(
-      repository
-          .query(const OnlineGalleryFavoriteQuery(sourceId: _source))
-          .records,
-    );
+Map<String, dynamic> _snapshot(
+  OnlineGalleryLocalFavoritesRepository repository,
+) => _maps(
+  repository.query(const OnlineGalleryFavoriteQuery(sourceId: _source)).records,
+);
 
-Map<String, dynamic> _maps(Iterable<OnlineGalleryFavoriteRecord> records) =>
-    {for (final record in records) record.stableKey: record.toMap()};
+Map<String, dynamic> _maps(Iterable<OnlineGalleryFavoriteRecord> records) => {
+  for (final record in records) record.stableKey: record.toMap(),
+};
 
 OnlineGalleryFavoriteRecord _record(
   String workId, {
@@ -393,7 +430,10 @@ OnlineGalleryFavoriteRecord _record(
     ),
     media: const [],
     prompt: '$title prompt',
-    rawSourceMetadata: const {'codexId': 'book', 'nested': {'label': 'snapshot'}},
+    rawSourceMetadata: const {
+      'codexId': 'book',
+      'nested': {'label': 'snapshot'},
+    },
   ),
   savedAt: savedAt ?? DateTime.utc(2023),
 );
@@ -465,7 +505,11 @@ class _FaultBox extends Fake implements Box<dynamic> {
     Iterable<MapEntry> entries, {
     required bool delete,
   }) {
-    final call = calls.update(operation, (value) => value + 1, ifAbsent: () => 1);
+    final call = calls.update(
+      operation,
+      (value) => value + 1,
+      ifAbsent: () => 1,
+    );
     final failAfter = failures['$operation:$call'];
     var applied = 0;
     if (failAfter == 0) throw StateError('$operation:$call');

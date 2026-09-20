@@ -1238,8 +1238,11 @@ void main() {
           await tester.testTextInput.receiveAction(TextInputAction.search);
           await tester.pump();
           expect(
-            find.text(AppLocalizations.of(tester.element(searchField))!
-                .onlineGallery_codexSearchInvalid),
+            find.text(
+              AppLocalizations.of(
+                tester.element(searchField),
+              )!.onlineGallery_codexSearchInvalid,
+            ),
             findsOneWidget,
           );
           await tester.pump(const Duration(seconds: 4));
