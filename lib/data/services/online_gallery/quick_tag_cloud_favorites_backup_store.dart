@@ -207,8 +207,9 @@ class QuickTagCloudFavoritesBackupStore {
   }
 
   Future<void> commit(
-    QuickTagCloudBackupPreview preview, {required bool replace},
-  ) => _exclusive(() async {
+    QuickTagCloudBackupPreview preview, {
+    required bool replace,
+  }) => _exclusive(() async {
       if (storage.getSetting<String>(storageKey) != preview.previousRaw) {
         throw const QuickTagCloudBackupException('stale');
       }

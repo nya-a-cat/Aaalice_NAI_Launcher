@@ -193,8 +193,10 @@ class QuickTagCloudRelayPanel extends ConsumerWidget {
 }
 
 Future<String?> _askPlanName(
-  BuildContext context, {required String title, required String initial},
-) async {
+  BuildContext context, {
+  required String title,
+  required String initial,
+}) async {
   final controller = TextEditingController(text: initial);
   try {
     return await showDialog<String>(context: context, builder: (context) => AlertDialog(
