@@ -1,0 +1,79 @@
+import '../../../data/models/online_gallery/gallery_source.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../widgets/online_gallery/gallery_detail_models.dart';
+
+GalleryDetailDialogLabels onlineGalleryDetailLabels(
+  AppLocalizations l10n,
+  GallerySourceId sourceId,
+) {
+  final isCodex = sourceId == GallerySourceId.quickTagCloud;
+  return GalleryDetailDialogLabels(
+    sourceName: isCodex ? l10n.onlineGallery_sourceQuickTagCloud : sourceId.label,
+    untitled: l10n.onlineGallery_codexUntitled,
+    codex: l10n.onlineGallery_codexLabel,
+    category: l10n.common_category,
+    positivePrompt: l10n.onlineGallery_codexPrompt,
+    negativePrompt: l10n.onlineGallery_codexNegativePrompt,
+    characterPrompts: l10n.onlineGallery_codexCharacterPrompts,
+    note: l10n.onlineGallery_codexNote,
+    rawTags: l10n.onlineGallery_tags,
+    artists: l10n.onlineGallery_artists,
+    characters: l10n.onlineGallery_characters,
+    copyrights: l10n.onlineGallery_copyrights,
+    general: l10n.onlineGallery_general,
+    metadata: l10n.onlineGallery_metadata,
+    tagContextMenuTooltip: l10n.onlineGallery_tagContextMenuTooltip,
+    outputFilteredTagTooltip: l10n.onlineGallery_outputFilteredTagTooltip,
+    author: l10n.onlineGallery_codexAuthor,
+    imageFile: l10n.onlineGallery_codexImageFile,
+    originalFile: l10n.onlineGallery_codexOriginalFile,
+    declaredSource: l10n.onlineGallery_codexDeclaredSource,
+    contributors: l10n.onlineGallery_codexContributors,
+    noImage: l10n.onlineGallery_codexNoImage,
+    noImageDescription: l10n.onlineGallery_codexNoImageDescription,
+    imageLoadFailed: l10n.detail_imageLoadFailed,
+    retry: l10n.common_retry,
+    zoomHint: l10n.onlineGallery_pinchToZoom,
+    copyActions: l10n.common_copy,
+    copyPositive: isCodex
+        ? l10n.onlineGallery_codexCopyPositive
+        : l10n.localGallery_copyPrompt,
+    copyNegative: isCodex
+        ? l10n.onlineGallery_codexCopyNegative
+        : l10n.prompt_negativePrompt,
+    copyCharacter: l10n.onlineGallery_codexCopyCharacter,
+    copyAll: isCodex
+        ? l10n.onlineGallery_codexCopyAll
+        : l10n.onlineGallery_copyFullPrompt,
+    addFavorite: l10n.common_favorite,
+    removeFavorite: l10n.common_unfavorite,
+    openSource: l10n.onlineGallery_codexOpenSource,
+    sendToGenerate: isCodex
+        ? l10n.onlineGallery_codexSendToGeneration
+        : l10n.onlineGallery_sendToTextToImage,
+    addToQueue: isCodex
+        ? l10n.onlineGallery_codexAddToQueue
+        : l10n.onlineGallery_addToQueue,
+    addToRelay: l10n.onlineGallery_codexAddToRelay,
+    downloadOriginal: isCodex
+        ? l10n.onlineGallery_codexDownloadOriginal
+        : l10n.common_download,
+    previousImage: l10n.onlineGallery_previousPage,
+    nextImage: l10n.onlineGallery_nextPage,
+    close: l10n.common_close,
+    emptyValue: l10n.common_emptyValue,
+    imageCounter: (current, total) => '$current / $total',
+    multipleImages: l10n.onlineGallery_multipleImages,
+    views: l10n.onlineGallery_views,
+    favoriteCount: l10n.onlineGallery_favCount,
+    rating: l10n.onlineGallery_ratingLabel,
+    score: l10n.onlineGallery_score,
+    copyMetadata: l10n.onlineGallery_copyFullMetadata,
+    downloadAll: l10n.onlineGallery_downloadAllMedia,
+    sendToReverse: l10n.onlineGallery_sendToReversePrompt,
+    copyArtistChain: l10n.onlineGallery_copyArtistChain,
+    copyFullPrompt: l10n.onlineGallery_copyFullPrompt,
+    copyRawArtistFragments: l10n.onlineGallery_copyRawArtistFragments,
+    noArtistChain: l10n.onlineGallery_noArtistChain,
+  );
+}

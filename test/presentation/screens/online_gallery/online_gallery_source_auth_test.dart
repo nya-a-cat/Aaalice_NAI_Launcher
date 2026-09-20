@@ -1231,10 +1231,17 @@ void main() {
           );
           await tester.enterText(searchField, 'a b c d e f g');
           await tester.pump();
-          expect(find.text('7/6'), findsOneWidget);
+          expect(find.text('7/10'), findsOneWidget);
+          await tester.enterText(searchField, 'a b c d e f g h i j k');
+          await tester.pump();
+          expect(find.text('11/10'), findsOneWidget);
           await tester.testTextInput.receiveAction(TextInputAction.search);
           await tester.pump();
-          expect(find.text('最多可组合搜索 6 个标签'), findsOneWidget);
+          expect(
+            find.text(AppLocalizations.of(tester.element(searchField))!
+                .onlineGallery_codexSearchInvalid),
+            findsOneWidget,
+          );
           await tester.pump(const Duration(seconds: 4));
         }
         expect(find.text('Leaf category'), findsOneWidget);

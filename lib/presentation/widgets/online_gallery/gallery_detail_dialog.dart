@@ -42,6 +42,8 @@ class GalleryDetailDialog extends ConsumerStatefulWidget {
     this.onCopyRawArtistFragments,
     this.hasArtistChain,
     this.isOutputFiltered,
+    this.onAddToRelay,
+    this.onCloseForNavigation,
   });
 
   final GalleryItem item;
@@ -69,6 +71,8 @@ class GalleryDetailDialog extends ConsumerStatefulWidget {
   final void Function(GalleryMedia media)? onCopyRawArtistFragments;
   final bool Function(GalleryMedia media)? hasArtistChain;
   final bool Function(String tag)? isOutputFiltered;
+  final Future<void> Function()? onAddToRelay;
+  final VoidCallback? onCloseForNavigation;
 
   @override
   ConsumerState<GalleryDetailDialog> createState() =>
@@ -77,6 +81,7 @@ class GalleryDetailDialog extends ConsumerStatefulWidget {
 
 class _GalleryDetailDialogState extends ConsumerState<GalleryDetailDialog> {
   late final GalleryDetailController _controller;
+  bool _relayActionPending = false;
 
   @override
   void initState() {
@@ -151,6 +156,7 @@ class _GalleryDetailDialogState extends ConsumerState<GalleryDetailDialog> {
       downloadActionPending: _controller.downloadActionPending,
       canToggleFavorite: widget.canToggleFavorite,
       isOutputFiltered: outputFilter,
+      relayActionPending: _relayActionPending,
     );
     final actions = GalleryDetailActions(
       close: () => Navigator.of(context).maybePop(),
@@ -178,6 +184,7 @@ class _GalleryDetailDialogState extends ConsumerState<GalleryDetailDialog> {
       copyFullPrompt: widget.onCopyFullPrompt,
       copyRawArtistFragments: widget.onCopyRawArtistFragments,
       hasArtistChain: widget.hasArtistChain,
+      addToRelay: widget.onAddToRelay == null ? null : _addToRelay,
     );
     return GalleryDetailDialogView(
       controller: _controller,
@@ -188,8 +195,19 @@ class _GalleryDetailDialogState extends ConsumerState<GalleryDetailDialog> {
 
   void _searchTag(String tag) {
     final query = OnlineGalleryOutputFilterSettings.normalizeTag(tag) ?? tag;
-    Navigator.of(context).pop();
+    if (widget.onCloseForNavigation == null) Navigator.of(context).pop();
     widget.onTagSearch(query);
+    widget.onCloseForNavigation?.call();
+  }
+
+  Future<void> _addToRelay() async {
+    if (_relayActionPending || widget.onAddToRelay == null) return;
+    setState(() => _relayActionPending = true);
+    try {
+      await widget.onAddToRelay!();
+    } finally {
+      if (mounted) setState(() => _relayActionPending = false);
+    }
   }
 
   Future<void> _showTagMenu(String tag, TapDownDetails details) async {
@@ -201,7 +219,8 @@ class _GalleryDetailDialogState extends ConsumerState<GalleryDetailDialog> {
       onSearch: _searchTag,
     );
     if (!mounted || action != OnlineGalleryTagContextAction.blacklist) return;
-    Navigator.of(context).pop();
+    if (widget.onCloseForNavigation == null) Navigator.of(context).pop();
     widget.onBlacklistChanged();
+    widget.onCloseForNavigation?.call();
   }
 }

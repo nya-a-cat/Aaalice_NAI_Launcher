@@ -1,27 +1,31 @@
 import 'package:dio/dio.dart';
 
-import '../../../../core/online_gallery/gallery_tag_query.dart';
 import '../../../services/online_gallery/quick_tag_cloud_access.dart';
 import '../../../services/online_gallery/quick_tag_cloud_user_service.dart';
 import 'quick_tag_cloud_gallery_query.dart';
 import 'quick_tag_cloud_gallery_repository.dart';
+import 'quick_tag_cloud_search_matcher.dart';
+import 'quick_tag_cloud_search_parser.dart';
 
 class QuickTagCloudQueryEngine {
   QuickTagCloudQueryEngine({
     required QuickTagCloudGalleryRepository repository,
     required QuickTagCloudUserService userService,
+    Future<Set<String>> Function()? favoriteKeysLoader,
   }) : _repository = repository,
-       _userService = userService;
+       _userService = userService,
+       _favoriteKeysLoader = favoriteKeysLoader;
 
   final QuickTagCloudGalleryRepository _repository;
   final QuickTagCloudUserService _userService;
+  final Future<Set<String>> Function()? _favoriteKeysLoader;
   final Map<String, List<QuickTagCloudGalleryRecord>> _matchingRecordSets = {};
-  final Map<String, String> _searchHaystacks = {};
+  final Map<String, QuickTagCloudSearchDocument> _searchDocuments = {};
   int _observedRepositoryRevision = -1;
 
   void clearCaches() {
     _matchingRecordSets.clear();
-    _searchHaystacks.clear();
+    _searchDocuments.clear();
     _observedRepositoryRevision = _repository.cacheRevision;
   }
 
@@ -34,42 +38,23 @@ class QuickTagCloudQueryEngine {
   }) async {
     _synchronizeRevision();
     QuickTagCloudGalleryRepository.throwIfCancelled(cancelToken);
-    await _userService.ensureInitialized();
-    QuickTagCloudGalleryRepository.throwIfCancelled(cancelToken);
-    final saved = query.favoritesOnly
-        ? _userService.favorites
-        : query.scope == QuickTagCloudBrowseScope.recent
-        ? _userService.recent
-        : null;
-    final List<QuickTagCloudGalleryRecord> records;
-    if (saved == null) {
-      records = await _repository.loadCatalogRecords(
-        query,
-        cancelToken: cancelToken,
-      );
-    } else {
-      records = <QuickTagCloudGalleryRecord>[];
-      for (var index = 0; index < saved.length; index++) {
-        if (index > 0 && index % 256 == 0) {
-          await Future<void>.delayed(Duration.zero);
-          QuickTagCloudGalleryRepository.throwIfCancelled(cancelToken);
-        }
-        final item = saved[index];
-        records.add(
-          QuickTagCloudGalleryRecord(
-            item.meta,
-            item.codex,
-            item.entry,
-            item.media,
-          ),
-        );
-      }
+    final searchPlan = QuickTagCloudSearchParser.parse(searchText);
+    if (searchPlan.hasErrors) {
+      throw QuickTagCloudSearchException(searchPlan.issues);
     }
+    final favoriteKeys = await _loadFavoriteKeys(searchPlan);
+    QuickTagCloudGalleryRepository.throwIfCancelled(cancelToken);
+    final records = await _candidateRecords(query, cancelToken);
     _synchronizeRevision();
     final cacheRevision = _repository.cacheRevision;
-    final normalizedSearch = searchText.trim().toLowerCase();
+    final normalizedSearch = normalizeQuickTagCloudSearchInput(searchText)
+        .trim()
+        .toLowerCase();
     final ratingsKey = (selectedRatings.toList()..sort()).join();
-    final matchingCacheKey = saved == null
+    final usesSaved =
+        query.favoritesOnly ||
+        query.scope == QuickTagCloudBrowseScope.recent;
+    final matchingCacheKey = !usesSaved && !searchPlan.usesFavorites
         ? '${_repository.currentCatalog?.release ?? ''}|${query.stableKey}|$ratingsKey|$normalizedSearch|sort:$sortByRelevance'
         : null;
     final cachedMatches = matchingCacheKey == null
@@ -79,15 +64,70 @@ class QuickTagCloudQueryEngine {
       QuickTagCloudGalleryRepository.throwIfCancelled(cancelToken);
       return cachedMatches;
     }
-    final localTagPlan = GalleryTagQueryPlanner.plan(
-      GalleryTagQueryParser.parse(normalizedSearch),
-      serverTagLimit: maxGallerySearchTags,
+    final filtered = await _filterRecords(
+      records,
+      query: query,
+      searchPlan: searchPlan,
+      selectedRatings: selectedRatings,
+      favoriteKeys: favoriteKeys,
+      cancelToken: cancelToken,
     );
-    final terms = localTagPlan.query.ordinaryClauses
-        .map((clause) => clause.value)
-        .toList(growable: false);
+    QuickTagCloudGalleryRepository.throwIfCancelled(cancelToken);
+    if (sortByRelevance && searchPlan.terms.isNotEmpty) {
+      _sortByRelevance(filtered, searchPlan, cache: records.length <= 5000);
+    }
+    final result = List<QuickTagCloudGalleryRecord>.unmodifiable(filtered);
+    if (matchingCacheKey != null && cacheRevision == _repository.cacheRevision) {
+      _matchingRecordSets.remove(matchingCacheKey);
+      _matchingRecordSets[matchingCacheKey] = result;
+      while (_matchingRecordSets.length > 4) {
+        _matchingRecordSets.remove(_matchingRecordSets.keys.first);
+      }
+    }
+    return result;
+  }
+
+  Future<List<QuickTagCloudGalleryRecord>> _candidateRecords(
+    QuickTagCloudGalleryQuery query,
+    CancelToken? cancelToken,
+  ) async {
+    await _userService.ensureInitialized();
+    QuickTagCloudGalleryRepository.throwIfCancelled(cancelToken);
+    final saved = query.favoritesOnly
+        ? _userService.favorites
+        : query.scope == QuickTagCloudBrowseScope.recent
+        ? _userService.recent
+        : null;
+    if (saved == null) {
+      return _repository.loadCatalogRecords(
+        query,
+        cancelToken: cancelToken,
+      );
+    }
+    final records = <QuickTagCloudGalleryRecord>[];
+    for (var index = 0; index < saved.length; index++) {
+      if (index > 0 && index % 256 == 0) {
+        await Future<void>.delayed(Duration.zero);
+        QuickTagCloudGalleryRepository.throwIfCancelled(cancelToken);
+      }
+      final item = saved[index];
+      records.add(
+        QuickTagCloudGalleryRecord(item.meta, item.codex, item.entry, item.media),
+      );
+    }
+    return records;
+  }
+
+  Future<List<QuickTagCloudGalleryRecord>> _filterRecords(
+    List<QuickTagCloudGalleryRecord> records, {
+    required QuickTagCloudGalleryQuery query,
+    required QuickTagCloudSearchPlan searchPlan,
+    required Set<String> selectedRatings,
+    required Set<String> favoriteKeys,
+    CancelToken? cancelToken,
+  }) async {
     final filtered = <QuickTagCloudGalleryRecord>[];
-    final cacheSearchHaystacks = records.length <= 5000;
+    final cacheSearchDocuments = records.length <= 5000;
     for (var index = 0; index < records.length; index++) {
       if (index % 256 == 0) {
         QuickTagCloudGalleryRepository.throwIfCancelled(cancelToken);
@@ -114,39 +154,21 @@ class QuickTagCloudQueryEngine {
           record.entry.hasImage) {
         continue;
       }
-      if (terms.length == 1) {
-        final haystack = _searchHaystack(record, cache: cacheSearchHaystacks);
-        if (!haystack.contains(terms.single)) continue;
-      } else if (terms.length > 1 &&
-          !localTagPlan.matchesNormalizedTags(record.normalizedTags)) {
+      if (!_searchDocument(
+        record,
+        cache: cacheSearchDocuments,
+      ).matches(searchPlan, favoriteKeys: favoriteKeys)) {
         continue;
       }
       filtered.add(record);
     }
-    QuickTagCloudGalleryRepository.throwIfCancelled(cancelToken);
-    if (sortByRelevance && terms.isNotEmpty) {
-      filtered.sort((left, right) {
-        final leftScore = _searchScore(left, normalizedSearch);
-        final rightScore = _searchScore(right, normalizedSearch);
-        return rightScore.compareTo(leftScore);
-      });
-    }
-    final result = List<QuickTagCloudGalleryRecord>.unmodifiable(filtered);
-    if (matchingCacheKey != null &&
-        cacheRevision == _repository.cacheRevision) {
-      _matchingRecordSets.remove(matchingCacheKey);
-      _matchingRecordSets[matchingCacheKey] = result;
-      while (_matchingRecordSets.length > 4) {
-        _matchingRecordSets.remove(_matchingRecordSets.keys.first);
-      }
-    }
-    return result;
+    return filtered;
   }
 
   void _synchronizeRevision() {
     if (_observedRepositoryRevision == _repository.cacheRevision) return;
     _matchingRecordSets.clear();
-    _searchHaystacks.clear();
+    _searchDocuments.clear();
     _observedRepositoryRevision = _repository.cacheRevision;
   }
 
@@ -209,65 +231,55 @@ class QuickTagCloudQueryEngine {
       record.entry.updateBatches.contains(filterId) ||
       filterId == 'latest' && _matchesLatest(record);
 
-  String _searchHaystack(
+  QuickTagCloudSearchDocument _searchDocument(
     QuickTagCloudGalleryRecord record, {
     required bool cache,
   }) {
-    String build() => [
-      record.entry.title,
-      record.entry.tags,
-      record.entry.negative,
-      record.entry.note,
-      record.entry.rating,
-      record.entry.rawTag,
-      record.entry.path.join(' '),
-      record.entry.updateBatches.join(' '),
-      record.entry.characterPrompts
-          .map(
-            (character) =>
-                '${character.label} ${character.prompt} ${character.negative}',
-          )
-          .join(' '),
-      record.entry.images
-          .map(
-            (image) => [
-              image.rawTag,
-              _rawSearchValue(image.raw, 'author'),
-              _rawSearchValue(image.raw, 'credit'),
-              _rawSearchValue(image.raw, 'rawTags'),
-            ].join(' '),
-          )
-          .join(' '),
-      _rawSearchValue(record.entry.raw, 'author'),
-      _rawSearchValue(record.entry.raw, 'credit'),
-      _rawSearchValue(record.entry.raw, 'rawTags'),
-      _rawSearchValue(record.entry.raw, 'type'),
-      record.codex.title,
-      record.codex.author,
-      record.codex.source,
-      record.codex.type,
-      record.codex.version,
-      record.codex.aliases.join(' '),
-      record.meta.contributors
-          .map((item) => '${item.name} ${item.role}')
-          .join(' '),
-      record.meta.links.map((item) => '${item.label} ${item.url}').join(' '),
-    ].join('\n').toLowerCase();
-
-    return cache ? _searchHaystacks.putIfAbsent(record.workId, build) : build();
+    if (!cache) return QuickTagCloudSearchDocument(record);
+    final cached = _searchDocuments[record.workId];
+    if (cached != null && identical(cached.record, record)) return cached;
+    final document = QuickTagCloudSearchDocument(record);
+    _searchDocuments.remove(record.workId);
+    _searchDocuments[record.workId] = document;
+    while (_searchDocuments.length > 5000) {
+      _searchDocuments.remove(_searchDocuments.keys.first);
+    }
+    return document;
   }
 
-  String _rawSearchValue(Map<String, dynamic> raw, String key) {
-    final value = raw[key];
-    if (value is Iterable) return value.join(' ');
-    return value?.toString() ?? '';
+  Future<Set<String>> _loadFavoriteKeys(QuickTagCloudSearchPlan plan) async {
+    if (!plan.usesFavorites) return const {};
+    final loader = _favoriteKeysLoader;
+    if (loader == null) {
+      throw const QuickTagCloudSearchException([
+        QuickTagCloudSearchIssue(
+          'favorites_unavailable',
+          '本地收藏尚未连接，暂时无法按收藏筛选',
+        ),
+      ]);
+    }
+    return Set<String>.unmodifiable(await loader());
   }
 
-  int _searchScore(QuickTagCloudGalleryRecord record, String query) {
-    final title = record.entry.title.toLowerCase();
-    if (title == query) return 4;
-    if (title.startsWith(query)) return 3;
-    if (title.contains(query)) return 2;
-    return 1;
+  void _sortByRelevance(
+    List<QuickTagCloudGalleryRecord> records,
+    QuickTagCloudSearchPlan plan, {
+    required bool cache,
+  }) {
+    final ranked = [
+      for (final (index, record) in records.indexed)
+        (
+          record: record,
+          index: index,
+          tier: _searchDocument(record, cache: cache).relevanceTier(plan),
+        ),
+    ];
+    ranked.sort((left, right) {
+      final tierOrder = left.tier.compareTo(right.tier);
+      return tierOrder != 0 ? tierOrder : left.index.compareTo(right.index);
+    });
+    records
+      ..clear()
+      ..addAll(ranked.map((item) => item.record));
   }
 }

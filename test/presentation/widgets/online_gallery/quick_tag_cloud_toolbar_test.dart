@@ -13,7 +13,7 @@ import 'package:nai_launcher/presentation/providers/quick_tag_cloud_gallery_prov
 import 'package:nai_launcher/presentation/widgets/online_gallery/quick_tag_cloud_toolbar.dart';
 
 void main() {
-  for (final width in [1600.0, 700.0]) {
+  for (final width in [700.0, 840.0, 1180.0, 1600.0]) {
     testWidgets('keeps codex controls in the gallery toolbar at width $width', (
       tester,
     ) async {
@@ -59,6 +59,9 @@ void main() {
       expect(find.text('Artist Codex'), findsOneWidget);
       expect(find.text('All categories'), findsOneWidget);
       expect(find.text('Filter'), findsOneWidget);
+      for (final key in ['advanced-search', 'relay', 'favorites-backup', 'community']) {
+        expect(find.byKey(ValueKey('quick-tag-cloud-$key')), findsOneWidget);
+      }
       final contributors = find.byKey(
         const ValueKey('quick-tag-cloud-contributors'),
       );
@@ -77,11 +80,12 @@ void main() {
     });
   }
 
-  testWidgets('wrapped source panel keeps every codex control reachable', (
+  for (final width in [360.0, 412.0, 700.0]) {
+  testWidgets('wrapped source panel keeps every codex control reachable at $width', (
     tester,
   ) async {
     tester.view.devicePixelRatio = 1;
-    tester.view.physicalSize = const Size(700, 800);
+    tester.view.physicalSize = Size(width, 900);
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
@@ -99,7 +103,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Padding(
-              padding: const EdgeInsets.all(40),
+              padding: const EdgeInsets.all(16),
               child: _toolbar(
                 wrapControls: true,
                 onFiltersChanged: () async {},
@@ -117,13 +121,18 @@ void main() {
       find.text('All categories'),
       find.text('Filter'),
       find.byKey(const ValueKey('quick-tag-cloud-contributors')),
+      find.byKey(const ValueKey('quick-tag-cloud-advanced-search')),
+      find.byKey(const ValueKey('quick-tag-cloud-relay')),
+      find.byKey(const ValueKey('quick-tag-cloud-favorites-backup')),
+      find.byKey(const ValueKey('quick-tag-cloud-community')),
     ]) {
       final rect = tester.getRect(finder);
       expect(rect.left, greaterThanOrEqualTo(0));
-      expect(rect.right, lessThanOrEqualTo(700));
+      expect(rect.right, lessThanOrEqualTo(width));
     }
     expect(tester.takeException(), isNull);
   });
+  }
 
   testWidgets('opens category picker from the first click while loading', (
     tester,

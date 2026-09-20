@@ -90,6 +90,8 @@ class QuickTagCloudGalleryMapper {
   Map<String, dynamic> metadataFor(QuickTagCloudGalleryRecord record) => {
     'codexId': record.codex.id,
     'codexTitle': record.codex.title,
+    'codexType': record.codex.type,
+    'codexAliases': record.codex.aliases,
     'codexVersion': record.codex.version,
     'codexAuthor': record.codex.author,
     'codexNsfw': record.codex.nsfw,

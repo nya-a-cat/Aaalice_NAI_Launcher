@@ -317,7 +317,7 @@ class OnlineGalleryCommandService {
       viewMode: GalleryViewMode.search,
       clearError: true,
     );
-    if (!parsed.isValid) {
+    if (state.sourceId != GallerySourceId.quickTagCloud && !parsed.isValid) {
       state = state.copyWith(
         errorCode: OnlineGalleryErrorCode.tooManySearchTags,
       );
@@ -339,7 +339,8 @@ class OnlineGalleryCommandService {
       viewMode: GalleryViewMode.popular,
       clearError: true,
     );
-    if (!parsed.isValid) {
+    if (state.popularSourceId != GallerySourceId.quickTagCloud &&
+        !parsed.isValid) {
       state = state.copyWith(
         errorCode: OnlineGalleryErrorCode.tooManySearchTags,
       );

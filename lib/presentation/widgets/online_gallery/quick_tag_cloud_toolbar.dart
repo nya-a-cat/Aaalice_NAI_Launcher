@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/utils/app_logger.dart';
 import '../../../data/datasources/remote/online_gallery/quick_tag_cloud_gallery_source_adapter.dart';
@@ -10,6 +9,15 @@ import '../../../data/services/online_gallery/quick_tag_cloud_access.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../providers/online_gallery_provider.dart';
 import '../../providers/quick_tag_cloud_gallery_provider.dart';
+import 'quick_tag_cloud_category_picker.dart';
+import 'quick_tag_cloud_codex_picker.dart';
+import 'quick_tag_cloud_contributors_dialog.dart';
+import 'quick_tag_cloud_filter_picker.dart';
+import 'quick_tag_cloud_search_dialog.dart';
+import 'quick_tag_cloud_browse_scope_control.dart';
+import 'quick_tag_cloud_relay/quick_tag_cloud_relay_dialog.dart';
+import 'quick_tag_cloud_favorites_backup/quick_tag_cloud_favorites_backup_dialog.dart';
+import 'quick_tag_cloud_community/quick_tag_cloud_community_dialog.dart';
 
 class QuickTagCloudToolbar extends ConsumerStatefulWidget {
   const QuickTagCloudToolbar({
@@ -94,7 +102,7 @@ class _QuickTagCloudToolbarState extends ConsumerState<QuickTagCloudToolbar> {
     final invalidCategory =
         codex != null &&
         query.categoryPath.isNotEmpty &&
-        !_containsCategoryPath(codex.tree, query.categoryPath);
+        !quickTagCloudContainsCategoryPath(codex.tree, query.categoryPath);
     final availableUpdateFilters =
         (codex?.asMediaMeta() ?? selectedMeta)?.updateFilters
             .map((filter) => filter.id)
@@ -125,30 +133,11 @@ class _QuickTagCloudToolbarState extends ConsumerState<QuickTagCloudToolbar> {
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         if (!widget.favoritesMode)
-          SegmentedButton<QuickTagCloudBrowseScope>(
-            segments: [
-              ButtonSegment(
-                value: QuickTagCloudBrowseScope.catalog,
-                icon: const Icon(Icons.auto_stories_outlined, size: 16),
-                label: Text(l10n.onlineGallery_codexBrowse),
-              ),
-              ButtonSegment(
-                value: QuickTagCloudBrowseScope.latest,
-                icon: const Icon(Icons.new_releases_outlined, size: 16),
-                label: Text(l10n.onlineGallery_codexLatest),
-              ),
-              ButtonSegment(
-                value: QuickTagCloudBrowseScope.recent,
-                icon: const Icon(Icons.history, size: 16),
-                label: Text(l10n.onlineGallery_codexRecent),
-              ),
-            ],
-            selected: {query.scope},
-            showSelectedIcon: false,
-            onSelectionChanged: (selection) async {
-              ref
-                  .read(quickTagCloudFilterProvider.notifier)
-                  .selectScope(selection.single);
+          QuickTagCloudBrowseScopeControl(
+            scope: query.scope,
+            wrap: widget.wrapControls,
+            onChanged: (scope) async {
+              ref.read(quickTagCloudFilterProvider.notifier).selectScope(scope);
               await widget.onFiltersChanged();
             },
           ),
@@ -182,6 +171,30 @@ class _QuickTagCloudToolbarState extends ConsumerState<QuickTagCloudToolbar> {
           onPressed: catalog == null
               ? null
               : () => _showFilterDialog(context, selectedMeta, query),
+        ),
+        _ToolbarButton(
+          key: const ValueKey('quick-tag-cloud-advanced-search'),
+          icon: Icons.manage_search,
+          label: l10n.onlineGallery_codexAdvancedSearch,
+          onPressed: _openAdvancedSearch,
+        ),
+        _ToolbarButton(
+          key: const ValueKey('quick-tag-cloud-relay'),
+          icon: Icons.playlist_add_check_outlined,
+          label: l10n.onlineGallery_codexRelay,
+          onPressed: () => showQuickTagCloudRelay(context),
+        ),
+        _ToolbarButton(
+          key: const ValueKey('quick-tag-cloud-favorites-backup'),
+          icon: Icons.import_export,
+          label: l10n.onlineGallery_codexFavoritesBackup,
+          onPressed: () => showQuickTagCloudFavoritesBackup(context),
+        ),
+        _ToolbarButton(
+          key: const ValueKey('quick-tag-cloud-community'),
+          icon: Icons.groups_outlined,
+          label: l10n.onlineGallery_codexCommunity,
+          onPressed: () => showQuickTagCloudCommunity(context),
         ),
         if (catalog?.isOffline == true)
           Tooltip(
@@ -232,7 +245,7 @@ class _QuickTagCloudToolbarState extends ConsumerState<QuickTagCloudToolbar> {
             key: const ValueKey('quick-tag-cloud-contributors'),
             tooltip: l10n.onlineGallery_codexContributors,
             visualDensity: VisualDensity.compact,
-            onPressed: () => _showContributors(
+            onPressed: () => showQuickTagCloudContributors(
               context,
               codexValue?.valueOrNull?.asMediaMeta() ?? selectedMeta,
             ),
@@ -274,70 +287,12 @@ class _QuickTagCloudToolbarState extends ConsumerState<QuickTagCloudToolbar> {
   }
 
   Future<void> _showCodexPicker(
-    BuildContext context,
-    QuickTagCloudCatalog catalog,
-    QuickTagCloudGalleryQuery query,
-    QuickTagCloudCodex? selectedCodex, {
-    required bool allowNsfw,
-  }) async {
-    final l10n = AppLocalizations.of(context)!;
-    final selected = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.onlineGallery_codexSelect),
-        content: SizedBox(
-          width: 620,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 620),
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                ListTile(
-                  selected: query.codexId == 'all',
-                  leading: const Icon(Icons.library_books_outlined),
-                  title: Text(l10n.onlineGallery_codexAll),
-                  onTap: () => Navigator.pop(dialogContext, 'all'),
-                ),
-                const Divider(),
-                for (final meta in catalog.codexes)
-                  Builder(
-                    builder: (context) {
-                      final displayed = selectedCodex?.id == meta.id
-                          ? selectedCodex!.asMediaMeta()
-                          : meta;
-                      return ListTile(
-                        selected: query.codexId == meta.id,
-                        leading: Icon(
-                          meta.nsfw
-                              ? Icons.lock_outline
-                              : Icons.menu_book_outlined,
-                        ),
-                        title: Text(displayed.title),
-                        subtitle: Text(
-                          '${displayed.author.isEmpty ? displayed.id : displayed.author}\n'
-                          '${l10n.onlineGallery_codexEntryCount(displayed.entryCount, displayed.imagedCount)}',
-                        ),
-                        isThreeLine: true,
-                        trailing: Text(displayed.version),
-                        onTap: meta.nsfw && !allowNsfw
-                            ? () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      l10n.onlineGallery_codexBookLocked,
-                                    ),
-                                  ),
-                                );
-                              }
-                            : () => Navigator.pop(dialogContext, meta.id),
-                      );
-                    },
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    BuildContext context, QuickTagCloudCatalog catalog,
+    QuickTagCloudGalleryQuery query, QuickTagCloudCodex? selectedCodex,
+    {required bool allowNsfw}
+  ) async {
+    final selected = await showQuickTagCloudCodexPicker(
+      context, catalog, query, selectedCodex, allowNsfw: allowNsfw,
     );
     if (!mounted || selected == null || selected == query.codexId) return;
     ref.read(quickTagCloudFilterProvider.notifier).selectCodex(selected);
@@ -354,7 +309,10 @@ class _QuickTagCloudToolbarState extends ConsumerState<QuickTagCloudToolbar> {
       final codex = await ref.read(quickTagCloudCodexProvider(codexId).future);
       if (!mounted) return;
       setState(() => _openingCategoryPicker = false);
-      await _showCategoryPicker(context, codex, selectedPath);
+      final selected = await showQuickTagCloudCategoryPicker(context, codex, selectedPath);
+      if (!mounted || selected == null) return;
+      ref.read(quickTagCloudFilterProvider.notifier).selectCategory(selected);
+      await widget.onFiltersChanged();
     } catch (error, stackTrace) {
       AppLogger.e(
         'Failed to load QuickTagCloud categories for $codexId',
@@ -378,351 +336,42 @@ class _QuickTagCloudToolbarState extends ConsumerState<QuickTagCloudToolbar> {
     }
   }
 
-  Future<void> _showCategoryPicker(
-    BuildContext context,
-    QuickTagCloudCodex codex,
-    List<String> selectedPath,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final selected = await showDialog<List<String>>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.onlineGallery_codexCategory),
-        content: SizedBox(
-          width: 520,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 600),
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                ListTile(
-                  selected: selectedPath.isEmpty,
-                  leading: const Icon(Icons.apps),
-                  title: Text(l10n.onlineGallery_codexAllCategories),
-                  onTap: () => Navigator.pop(dialogContext, <String>[]),
-                ),
-                ..._categoryTiles(
-                  dialogContext,
-                  codex.tree,
-                  const [],
-                  selectedPath,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  Future<void> _showFilterDialog(BuildContext context,
+      QuickTagCloudCodexMeta? meta, QuickTagCloudGalleryQuery query) async {
+    final selected = await showQuickTagCloudFilterPicker(context, meta, query);
     if (!mounted || selected == null) return;
-    ref.read(quickTagCloudFilterProvider.notifier).selectCategory(selected);
-    await widget.onFiltersChanged();
-  }
-
-  List<Widget> _categoryTiles(
-    BuildContext context,
-    List<dynamic> nodes,
-    List<String> parent,
-    List<String> selected,
-  ) {
-    return [
-      for (final rawNode in nodes.whereType<Map>())
-        _categoryTile(
-          context,
-          Map<String, dynamic>.from(rawNode),
-          parent,
-          selected,
-        ),
-    ];
-  }
-
-  Widget _categoryTile(
-    BuildContext context,
-    Map<String, dynamic> node,
-    List<String> parent,
-    List<String> selected,
-  ) {
-    final name = node['name']?.toString() ?? '';
-    final path = [...parent, name];
-    final children = node['children'] is List
-        ? List<dynamic>.from(node['children'] as List)
-        : const <dynamic>[];
-    final title = Row(
-      children: [
-        Expanded(child: Text(name)),
-        if (node['count'] != null)
-          SizedBox(
-            width: 56,
-            child: Text(
-              node['count'].toString(),
-              textAlign: TextAlign.right,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
-      ],
-    );
-    if (children.isEmpty) {
-      return ListTile(
-        selected: _samePath(path, selected),
-        contentPadding: EdgeInsets.only(
-          left: 16.0 + parent.length * 14,
-          right: 16,
-        ),
-        title: title,
-        trailing: const SizedBox.square(dimension: 24),
-        onTap: () => Navigator.pop(context, path),
-      );
-    }
-    return ExpansionTile(
-      initiallyExpanded:
-          selected.length >= path.length &&
-          _samePath(path, selected.take(path.length).toList()),
-      tilePadding: EdgeInsets.only(left: 16.0 + parent.length * 14, right: 16),
-      title: InkWell(
-        onTap: () => Navigator.pop(context, path),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: title,
-        ),
-      ),
-      children: _categoryTiles(context, children, path, selected),
-    );
-  }
-
-  bool _containsCategoryPath(List<dynamic> nodes, List<String> path) {
-    var level = nodes;
-    for (final part in path) {
-      Map<String, dynamic>? match;
-      for (final raw in level.whereType<Map>()) {
-        final candidate = Map<String, dynamic>.from(raw);
-        if (candidate['name']?.toString() == part) {
-          match = candidate;
-          break;
-        }
-      }
-      if (match == null) return false;
-      level = match['children'] is List
-          ? List<dynamic>.from(match['children'] as List)
-          : const [];
-    }
-    return true;
-  }
-
-  bool _samePath(List<String> left, List<String> right) {
-    if (left.length != right.length) return false;
-    for (var index = 0; index < left.length; index++) {
-      if (left[index] != right[index]) return false;
-    }
-    return true;
-  }
-
-  Future<void> _showFilterDialog(
-    BuildContext context,
-    QuickTagCloudCodexMeta? meta,
-    QuickTagCloudGalleryQuery query,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    var mediaFilter = query.mediaFilter;
-    var updateFilterId = query.updateFilterId;
     final allowNsfw = QuickTagCloudAccess.allowsNsfw(widget.selectedRatings);
-    final allowR18g = QuickTagCloudAccess.allowsR18g(widget.selectedRatings);
-    var changed = false;
-    final apply = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (dialogContext, setDialogState) => AlertDialog(
-          title: Text(l10n.common_filter),
-          content: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 520),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.onlineGallery_codexMediaFilter,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  SegmentedButton<QuickTagCloudMediaFilter>(
-                    segments: [
-                      ButtonSegment(
-                        value: QuickTagCloudMediaFilter.all,
-                        label: Text(l10n.onlineGallery_codexAllEntries),
-                      ),
-                      ButtonSegment(
-                        value: QuickTagCloudMediaFilter.withImages,
-                        label: Text(l10n.onlineGallery_codexWithImages),
-                      ),
-                      ButtonSegment(
-                        value: QuickTagCloudMediaFilter.withoutImages,
-                        label: Text(l10n.onlineGallery_codexWithoutImages),
-                      ),
-                    ],
-                    selected: {mediaFilter},
-                    showSelectedIcon: false,
-                    onSelectionChanged: (selection) {
-                      changed = true;
-                      setDialogState(() => mediaFilter = selection.single);
-                    },
-                  ),
-                  if (meta != null && meta.updateFilters.isNotEmpty) ...[
-                    const SizedBox(height: 20),
-                    Text(
-                      l10n.onlineGallery_codexUpdateBatch,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<String>(
-                      initialValue: updateFilterId,
-                      items: [
-                        DropdownMenuItem(
-                          value: '',
-                          child: Text(l10n.onlineGallery_codexAllEntries),
-                        ),
-                        for (final filter in meta.updateFilters)
-                          DropdownMenuItem(
-                            value: filter.id,
-                            child: Text(filter.label),
-                          ),
-                      ],
-                      onChanged: (value) {
-                        changed = true;
-                        setDialogState(() => updateFilterId = value ?? '');
-                      },
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(l10n.common_cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(l10n.common_apply),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (!mounted || apply != true || !changed) return;
     final lockedSelection = !allowNsfw && meta?.nsfw == true;
-    await ref
-        .read(quickTagCloudFilterProvider.notifier)
-        .applyFilters(
-          codexId: lockedSelection ? 'all' : query.codexId,
-          updateFilterId: lockedSelection ? '' : updateFilterId,
-          scope: query.scope,
-          mediaFilter: mediaFilter,
-          allowNsfw: allowNsfw,
-          allowR18g: allowR18g,
-        );
+    await ref.read(quickTagCloudFilterProvider.notifier).applyFilters(
+      codexId: lockedSelection ? 'all' : query.codexId,
+      updateFilterId: lockedSelection ? '' : selected.updateFilterId,
+      scope: query.scope,
+      mediaFilter: selected.mediaFilter,
+      allowNsfw: allowNsfw,
+      allowR18g: QuickTagCloudAccess.allowsR18g(widget.selectedRatings),
+    );
     if (mounted) await widget.onFiltersChanged();
   }
 
-  Future<void> _openCodexOrigin(
-    BuildContext context,
-    QuickTagCloudCodexMeta meta,
-  ) async {
-    final uri = Uri.https('novelai.quicktagcloud.com', '/', {'codex': meta.id});
-    try {
-      if (await canLaunchUrl(uri) &&
-          await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-        return;
-      }
-    } catch (error, stackTrace) {
-      AppLogger.e(
-        'Failed to open QuickTagCloud codex origin: $uri',
-        error,
-        stackTrace,
-        'QuickTagCloudToolbar',
-      );
-    }
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.cannotOpenUrl)),
-      );
-    }
-  }
-
-  Future<void> _showContributors(
-    BuildContext context,
-    QuickTagCloudCodexMeta meta,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(meta.title),
-        content: SizedBox(
-          width: 520,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 560),
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(meta.author),
-                  subtitle: Text(
-                    l10n.onlineGallery_codexEntryCount(
-                      meta.entryCount,
-                      meta.imagedCount,
-                    ),
-                  ),
-                  trailing: Text(meta.version),
-                ),
-                if (meta.source.trim().isNotEmpty)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.dataset_outlined),
-                    title: Text(l10n.onlineGallery_codexDeclaredSource),
-                    subtitle: SelectableText(meta.source.trim()),
-                  ),
-                const Divider(),
-                for (final contributor in meta.contributors)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.person_outline),
-                    title: Text(contributor.name),
-                    subtitle: contributor.role.isEmpty
-                        ? null
-                        : Text(contributor.role),
-                  ),
-                for (final link in meta.links)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.open_in_new),
-                    title: Text(link.label.isEmpty ? link.url : link.label),
-                    subtitle: Text(link.url),
-                    onTap: () => launchUrl(Uri.parse(link.url)),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton.icon(
-            key: const ValueKey('quick-tag-cloud-open-origin'),
-            onPressed: () => _openCodexOrigin(dialogContext, meta),
-            icon: const Icon(Icons.open_in_new, size: 17),
-            label: Text(l10n.onlineGallery_codexOpenOrigin),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(l10n.common_close),
-          ),
-        ],
-      ),
+  Future<void> _openAdvancedSearch() async {
+    final state = ref.read(onlineGalleryNotifierProvider);
+    final query = await showQuickTagCloudSearch(
+      context, initialQuery: widget.favoritesMode
+          ? state.favoriteSearchQuery : state.searchQuery,
     );
+    if (!mounted || query == null) return;
+    final notifier = ref.read(onlineGalleryNotifierProvider.notifier);
+    if (widget.favoritesMode) {
+      await notifier.searchFavorites(query);
+    } else {
+      await notifier.search(query);
+    }
   }
 }
 
 class _ToolbarButton extends StatelessWidget {
   const _ToolbarButton({
+    super.key,
     required this.icon,
     required this.label,
     required this.onPressed,
@@ -752,7 +401,7 @@ class _ToolbarButton extends StatelessWidget {
       style: TextButton.styleFrom(
         foregroundColor: colors.onSurfaceVariant,
         backgroundColor: colors.surfaceContainerHighest.withValues(alpha: 0.4),
-        visualDensity: VisualDensity.compact,
+        minimumSize: const Size(44, 44),
       ),
     );
   }

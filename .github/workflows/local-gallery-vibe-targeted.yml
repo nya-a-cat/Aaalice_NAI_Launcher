@@ -1,4 +1,4 @@
-name: Local Gallery Vibe Targeted Validation
+name: QuickTagCloud Native Integration Validation
 
 on:
   push:
@@ -15,7 +15,7 @@ env:
 
 jobs:
   targeted:
-    name: Analyze and run local gallery Vibe tests
+    name: Analyze and test QuickTagCloud native integration
     runs-on: windows-2022
     timeout-minutes: 20
 
@@ -24,8 +24,10 @@ jobs:
         uses: actions/checkout@v6
         with:
           lfs: false
+          fetch-depth: 2
 
       - name: Prepare incremental Flutter build
+        id: prepare
         uses: ./.github/actions/prepare-flutter-build
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -34,37 +36,51 @@ jobs:
       - name: Format changed Dart sources
         shell: pwsh
         run: |
-          $files = @(
-            'lib/core/database/datasources/gallery_vibe_family_repository.dart',
-            'lib/data/models/vibe/vibe_family.dart',
-            'lib/data/services/vibe_style',
-            'lib/presentation/providers/vibe_family_provider.dart',
-            'lib/presentation/screens/vibe_library/widgets/vibe_families',
-            'lib/presentation/screens/vibe_library/widgets/local_gallery_vibe_content_view.dart',
-            'lib/presentation/screens/vibe_library/widgets/vibe_library_source_workspace.dart',
-            'test/data/services/vibe_style_test.dart',
-            'test/core/database/datasources/gallery_vibe_family_repository_test.dart'
-          )
-          dart format @files
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $files = @(git diff HEAD^ HEAD --name-only --diff-filter=ACMR | Where-Object { $_.EndsWith('.dart') })
+          if ($files.Count -gt 0) {
+            dart format @files
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
           $patch = (git diff --binary --no-ext-diff) -join "`n"
-          [IO.File]::WriteAllText('vibe-generated.patch', $patch + "`n", [Text.UTF8Encoding]::new($false))
+          [IO.File]::WriteAllText('quicktag-generated.patch', $patch + "`n", [Text.UTF8Encoding]::new($false))
 
       - name: Upload generated source patch
         uses: actions/upload-artifact@v6
         with:
-          name: vibe-generated-sources
-          path: vibe-generated.patch
+          name: quicktag-generated-sources
+          path: quicktag-generated.patch
           retention-days: 1
 
       - name: Analyze
         run: flutter analyze
 
-      - name: Check Vibe grouping and source safety
+      - name: Check search, community, relay, and favorites
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
         shell: pwsh
         run: |
           ./scripts/test_affected.ps1 -TimeoutSeconds 120 -Path @(
-            'test/data/services/vibe_style_test.dart',
-            'test/core/database/datasources/gallery_vibe_family_repository_test.dart',
-            'test/presentation/screens/vibe_library/local_gallery_vibe_view_test.dart'
+            'test/data/datasources/remote/online_gallery/quick_tag_cloud_search_test.dart',
+            'test/data/datasources/remote/online_gallery/quick_tag_cloud_gallery_source_adapter_test.dart',
+            'test/data/services/online_gallery/quick_tag_cloud_native_query_plan_test.dart',
+            'test/data/services/online_gallery/quick_tag_cloud_community_test.dart',
+            'test/data/services/online_gallery/quick_tag_cloud_relay_service_test.dart',
+            'test/data/services/online_gallery/quick_tag_cloud_favorites_backup_test.dart',
+            'test/data/services/online_gallery/quick_tag_cloud_favorites_backup_store_test.dart',
+            'test/data/repositories/online_gallery_favorites_replacement_test.dart',
+            'test/data/repositories/online_gallery_local_favorites_repository_test.dart',
+            'test/presentation/providers/online_gallery_local_favorites_provider_test.dart'
+          )
+
+      - name: Check native UI and shared gallery regressions
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          ./scripts/test_affected.ps1 -TimeoutSeconds 120 -Path @(
+            'test/presentation/widgets/online_gallery/quick_tag_cloud_search_dialog_test.dart',
+            'test/presentation/widgets/online_gallery/quick_tag_cloud_relay_test.dart',
+            'test/presentation/widgets/online_gallery/quick_tag_cloud_community_widgets_test.dart',
+            'test/presentation/widgets/online_gallery/quick_tag_cloud_toolbar_test.dart',
+            'test/presentation/widgets/online_gallery/gallery_detail_dialog_test.dart',
+            'test/presentation/screens/online_gallery/online_gallery_overlay_exit_test.dart',
+            'test/presentation/screens/online_gallery/online_gallery_source_auth_test.dart'
           )

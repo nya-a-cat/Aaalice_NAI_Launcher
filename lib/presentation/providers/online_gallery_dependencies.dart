@@ -17,6 +17,7 @@ import '../../data/repositories/online_gallery_repository.dart';
 import '../../data/services/danbooru_auth_service.dart';
 import '../../data/services/gelbooru_auth_service.dart';
 import '../../data/services/online_gallery/online_gallery_query.dart';
+import 'online_gallery_local_favorites_provider.dart';
 import 'quick_tag_cloud_gallery_provider.dart';
 
 Dio onlineGalleryHttpClient(Ref ref) {
@@ -59,6 +60,13 @@ final quickTagCloudGallerySourceAdapterProvider =
         catalogService: ref.watch(quickTagCloudCatalogServiceProvider),
         userService: ref.watch(quickTagCloudUserServiceProvider),
         queryReader: () => ref.read(quickTagCloudFilterProvider),
+        favoriteKeysLoader: () async {
+          final favorites = ref.read(
+            onlineGalleryLocalFavoritesRepositoryProvider,
+          );
+          await favorites.ensureInitialized();
+          return favorites.stableKeys;
+        },
       );
     });
 

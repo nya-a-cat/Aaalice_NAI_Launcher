@@ -1,19 +1,20 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:hive/hive.dart';
-import 'package:path/path.dart' as p;
 
-import '../../core/constants/storage_keys.dart';
 import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/app_logger.dart';
-import '../../core/utils/prompt_tag_utils.dart';
 import '../models/online_gallery/gallery_item.dart';
 import '../models/online_gallery/gallery_source.dart';
 import '../models/online_gallery/online_gallery_favorite_record.dart';
-import '../services/online_gallery/quick_tag_cloud_access.dart';
-import '../services/online_gallery/quick_tag_cloud_media_resolver.dart';
-import '../services/online_gallery/quick_tag_cloud_user_service.dart';
+import 'online_gallery_favorites_replacement.dart';
+import 'quick_tag_cloud_favorite_search.dart';
+import 'quick_tag_cloud_favorites_migration.dart';
+
+export 'online_gallery_favorites_replacement.dart'
+    show
+        OnlineGalleryFavoritesConflictException,
+        OnlineGalleryFavoritesReplacementException;
 
 class OnlineGalleryFavoriteQuery {
   const OnlineGalleryFavoriteQuery({
@@ -74,7 +75,7 @@ class OnlineGalleryLocalFavoritesRepository {
        _legacyStorage = legacyStorage;
 
   static const String quickTagCloudMigrationMarkerKey =
-      '__migration_quick_tag_cloud_favorites_v1__';
+      QuickTagCloudFavoritesMigration.markerKey;
 
   final Box<dynamic> _box;
   final LocalStorageService _legacyStorage;
@@ -82,7 +83,6 @@ class OnlineGalleryLocalFavoritesRepository {
   final List<String> _sortedKeys = [];
   final Map<GallerySourceId, List<String>> _sortedKeysBySource = {};
   Future<void>? _initialization;
-  Future<void> _writeTail = Future<void>.value();
 
   bool get isInitialized => _initialization != null && _recordsLoaded;
   bool _recordsLoaded = false;
@@ -95,12 +95,19 @@ class OnlineGalleryLocalFavoritesRepository {
         throw error;
       });
 
-  Future<void> _initialize() async {
-    await _migrateQuickTagCloudFavorites();
+  Future<void> _initialize() =>
+      OnlineGalleryFavoritesReplacement.serialize(_box, _loadRecords);
+
+  Future<void> _loadRecords() async {
+    await OnlineGalleryFavoritesReplacement.recoverPending(_box);
+    await QuickTagCloudFavoritesMigration(_box, _legacyStorage).run();
     final loaded = <String, OnlineGalleryFavoriteRecord>{};
     for (final entry in _box.toMap().entries) {
       final key = entry.key.toString();
-      if (key == quickTagCloudMigrationMarkerKey) continue;
+      if (key == quickTagCloudMigrationMarkerKey ||
+          OnlineGalleryFavoritesReplacement.isReplacementIdKey(key)) {
+        continue;
+      }
       try {
         if (entry.value is! Map) {
           throw const FormatException('Favorite record is not a map');
@@ -131,6 +138,11 @@ class OnlineGalleryLocalFavoritesRepository {
   OnlineGalleryFavoriteRecord? getByStableKey(String stableKey) =>
       _records[stableKey];
 
+  /// Commit identifier of this source's last completed replacement.
+  /// Ordinary favorite writes retain it; replacements without an ID clear it.
+  String? lastSourceReplacementId(GallerySourceId sourceId) =>
+      OnlineGalleryFavoritesReplacement.lastReplacementId(_box, sourceId);
+
   OnlineGalleryFavoritePage query(OnlineGalleryFavoriteQuery query) {
     if (!_recordsLoaded) {
       throw StateError('Online gallery favorites are not initialized');
@@ -146,7 +158,10 @@ class OnlineGalleryLocalFavoritesRepository {
         .map(_normalizeTag)
         .where((value) => value.isNotEmpty)
         .toSet();
-    final terms = query.searchText
+    final nativeSearch = query.sourceId == GallerySourceId.quickTagCloud
+        ? QuickTagCloudFavoriteSearch(query.searchText)
+        : null;
+    final terms = (nativeSearch == null ? query.searchText : '')
         .trim()
         .toLowerCase()
         .replaceAll('_', ' ')
@@ -161,6 +176,7 @@ class OnlineGalleryLocalFavoritesRepository {
     final hasFilters =
         restrictsRatings ||
         blacklist.isNotEmpty ||
+        (nativeSearch?.plan.hasActiveSearch ?? false) ||
         terms.isNotEmpty ||
         (query.codexId != null && query.codexId != 'all') ||
         query.categoryPath.isNotEmpty ||
@@ -207,6 +223,7 @@ class OnlineGalleryLocalFavoritesRepository {
       if (blacklist.isNotEmpty && _recordTags(record).any(blacklist.contains)) {
         return false;
       }
+      if (nativeSearch != null && !nativeSearch.matches(record)) return false;
       if (terms.isNotEmpty) {
         final haystack = _searchHaystack(record);
         if (!terms.every(haystack.contains)) return false;
@@ -296,6 +313,56 @@ class OnlineGalleryLocalFavoritesRepository {
     });
   }
 
+  /// Replaces one source while preserving each record's original saved time.
+  ///
+  /// [expectedRecords] is compared by complete serialized value after queued
+  /// writes finish. A mismatch throws [OnlineGalleryFavoritesConflictException]
+  /// before persistence. Invalid identities, sources, or duplicate keys throw
+  /// [FormatException]. Persistence errors roll back through a local journal;
+  /// [OnlineGalleryFavoritesReplacementException.recoveryRequired] indicates
+  /// that a fresh repository must recover it before further writes.
+  /// [replacementId] is persisted with the records as a source-scoped commit
+  /// identifier; ordinary favorite edits leave that identifier unchanged.
+  Future<void> replaceSourceRecords(
+    GallerySourceId sourceId,
+    Iterable<OnlineGalleryFavoriteRecord> records, {
+    Iterable<OnlineGalleryFavoriteRecord>? expectedRecords,
+    String? replacementId,
+  }) async {
+    if (replacementId != null && replacementId.trim().isEmpty) {
+      throw ArgumentError.value(
+        replacementId,
+        'replacementId',
+        'Must not be empty',
+      );
+    }
+    final next = OnlineGalleryFavoritesReplacement.validate(sourceId, records);
+    final expected = expectedRecords == null
+        ? null
+        : OnlineGalleryFavoritesReplacement.validate(sourceId, expectedRecords);
+    await ensureInitialized();
+    await _runSerialized(() async {
+      final previous = OnlineGalleryFavoritesReplacement.readSource(
+        _box,
+        sourceId,
+      );
+      if (expected != null &&
+          !OnlineGalleryFavoritesReplacement.matches(previous, expected)) {
+        throw const OnlineGalleryFavoritesConflictException();
+      }
+      await OnlineGalleryFavoritesReplacement.persist(
+        box: _box,
+        sourceId: sourceId,
+        previous: previous,
+        next: next,
+        replacementId: replacementId,
+      );
+      _records.removeWhere((_, record) => record.sourceId == sourceId);
+      _records.addAll(next);
+      _rebuildIndexes();
+    });
+  }
+
   void _rebuildIndexes() {
     _sortedKeys
       ..clear()
@@ -350,115 +417,14 @@ class OnlineGalleryLocalFavoritesRepository {
     return savedOrder != 0 ? savedOrder : leftKey.compareTo(rightKey);
   }
 
-  Future<T> _runSerialized<T>(Future<T> Function() operation) {
-    final result = _writeTail.then((_) => operation());
-    _writeTail = result.then<void>(
-      (_) {},
-      onError: (Object _, StackTrace __) {},
-    );
-    return result;
-  }
-
-  Future<void> _migrateQuickTagCloudFavorites() async {
-    if (_box.get(quickTagCloudMigrationMarkerKey) == true) {
-      if (_legacyStorage.getSetting<String>(
-            StorageKeys.quickTagCloudFavoritesV1,
-          ) !=
-          null) {
-        await _legacyStorage.deleteSetting(
-          StorageKeys.quickTagCloudFavoritesV1,
-        );
-      }
-      return;
-    }
-
-    final encoded = _legacyStorage.getSetting<String>(
-      StorageKeys.quickTagCloudFavoritesV1,
-    );
-    final migrated = <String, OnlineGalleryFavoriteRecord>{};
-    var sourceIsValid = true;
-    if (encoded != null && encoded.isNotEmpty) {
-      Object? decoded;
-      var decodedSuccessfully = true;
-      try {
-        decoded = jsonDecode(encoded);
-      } catch (error, stack) {
-        sourceIsValid = false;
-        decodedSuccessfully = false;
-        AppLogger.w(
-          'Ignored damaged QuickTagCloud favorites migration source: '
-              '$error\n$stack',
-          'OnlineGalleryFavorites',
-        );
-      }
-      if (decoded is! List) {
-        sourceIsValid = false;
-        if (decodedSuccessfully) {
-          AppLogger.w(
-            'Ignored QuickTagCloud favorites migration source that is not a '
-                'list',
-            'OnlineGalleryFavorites',
-          );
+  Future<T> _runSerialized<T>(Future<T> Function() operation) =>
+      OnlineGalleryFavoritesReplacement.serialize(_box, () async {
+        if (_box.isOpen &&
+            _box.containsKey(OnlineGalleryFavoritesReplacement.journalKey)) {
+          throw StateError('Pending favorite replacement journal needs recovery');
         }
-      } else {
-        for (var index = 0; index < decoded.length; index++) {
-          try {
-            final value = decoded[index];
-            if (value is! Map) {
-              throw const FormatException('Legacy favorite is not a map');
-            }
-            final saved = QuickTagCloudSavedEntry.fromJson(
-              Map<String, dynamic>.from(value),
-            );
-            final record = _quickTagCloudRecord(saved);
-            // Round-trip validation prevents deleting the only legacy copy
-            // when a newly added snapshot field cannot be restored.
-            final validated = OnlineGalleryFavoriteRecord.fromMap(
-              record.toMap(),
-            );
-            migrated[validated.stableKey] = validated;
-          } catch (error, stack) {
-            sourceIsValid = false;
-            AppLogger.w(
-              'Ignored damaged QuickTagCloud favorite at index $index: '
-                  '$error\n$stack',
-              'OnlineGalleryFavorites',
-            );
-          }
-        }
-      }
-    }
-
-    if (!sourceIsValid) return;
-
-    final writes = <String, dynamic>{};
-    for (final entry in migrated.entries) {
-      final current = _box.get(entry.key);
-      if (current is Map) {
-        try {
-          OnlineGalleryFavoriteRecord.fromMap(current);
-          continue;
-        } catch (_) {
-          // A valid legacy snapshot is preferable to a damaged current entry.
-        }
-      }
-      writes[entry.key] = entry.value.toMap();
-    }
-    if (writes.isNotEmpty) await _box.putAll(writes);
-    for (final key in migrated.keys) {
-      final stored = _box.get(key);
-      if (stored is! Map ||
-          OnlineGalleryFavoriteRecord.fromMap(stored).stableKey != key) {
-        throw StateError(
-          'QuickTagCloud favorite migration verification failed',
-        );
-      }
-    }
-    await _box.put(quickTagCloudMigrationMarkerKey, true);
-    if (encoded != null) {
-      await _legacyStorage.deleteSetting(StorageKeys.quickTagCloudFavoritesV1);
-    }
-  }
+        return operation();
+      });
 }
 
 Set<String> _recordTags(OnlineGalleryFavoriteRecord record) {
@@ -507,148 +473,4 @@ String _searchHaystack(OnlineGalleryFavoriteRecord record) {
         .join(' '),
     detail.contributors.map((value) => '${value.name} ${value.role}').join(' '),
   ].whereType<String>().join('\n').toLowerCase().replaceAll('_', ' ');
-}
-
-OnlineGalleryFavoriteRecord _quickTagCloudRecord(
-  QuickTagCloudSavedEntry saved,
-) {
-  final codex = saved.codex;
-  final entry = saved.entry;
-  final workId = saved.stableKey;
-  final resolver = QuickTagCloudMediaResolver(media: saved.media);
-  final media = <GalleryMedia>[];
-  for (var index = 0; index < entry.images.length; index++) {
-    final image = entry.images[index];
-    final preview = resolver.imageItemUrl(
-      QuickTagCloudMediaKind.image,
-      entry,
-      image,
-      codex,
-    );
-    final hasOriginal = codex.hasOriginal && image.hasOriginal;
-    final download = hasOriginal
-        ? resolver.imageItemUrl(
-            QuickTagCloudMediaKind.original,
-            entry,
-            image,
-            codex,
-          )
-        : preview;
-    final dimensions = image.dimensions.isKnown
-        ? image.dimensions
-        : entry.dimensions;
-    final extension = p
-        .extension(Uri.tryParse(download)?.path ?? '')
-        .replaceFirst('.', '')
-        .toLowerCase();
-    media.add(
-      GalleryMedia(
-        id: '$workId:$index',
-        previewUrl: preview,
-        displayUrl: preview,
-        downloadUrl: download,
-        width: dimensions.width,
-        height: dimensions.height,
-        extension: extension.isEmpty ? null : extension,
-        rawMetadata: image.rawTag.isEmpty ? entry.rawTag : image.rawTag,
-        prompt: entry.tags,
-        negativePrompt: entry.negative,
-        metadata: {...image.raw, 'hasOriginal': hasOriginal},
-      ),
-    );
-  }
-  final cover = media.isEmpty
-      ? const GalleryMedia(id: 'no-image')
-      : media.first;
-  final attribution = <String>[];
-  for (final value in [entry.credit, entry.author, codex.author]) {
-    final normalized = value.trim();
-    if (normalized.isNotEmpty && !attribution.contains(normalized)) {
-      attribution.add(normalized);
-    }
-  }
-  final sourceUrl =
-      <String>[
-        ...saved.links.map((link) => link.url),
-        codex.source,
-        codex.sourceDataUrl,
-      ].firstWhere((value) {
-        final uri = Uri.tryParse(value);
-        return uri != null && uri.scheme == 'https' && uri.host.isNotEmpty;
-      }, orElse: () => '');
-  final metadata = <String, dynamic>{
-    'codexId': codex.id,
-    'codexTitle': codex.title,
-    'codexVersion': codex.version,
-    'codexAuthor': codex.author,
-    'codexNsfw': codex.nsfw,
-    'entryId': entry.id,
-    'entryAuthor': entry.author,
-    'entryCredit': entry.credit,
-    'prompt': entry.tags,
-    'negativePrompt': entry.negative,
-    'note': entry.note,
-    'categoryPath': entry.path,
-    'rawTag': entry.rawTag,
-    'entry': entry.raw,
-  };
-  final item = GalleryItem(
-    id: _stableNumericId(workId),
-    workId: workId,
-    sourceId: GallerySourceId.quickTagCloud,
-    site: GallerySourceId.quickTagCloud.key,
-    title: entry.title,
-    author: attribution.join(' · '),
-    description: entry.note,
-    createdAt: codex.version,
-    source: sourceUrl,
-    rating: QuickTagCloudAccess.galleryRating(entry, codex: codex),
-    imageWidth: cover.width,
-    imageHeight: cover.height,
-    tagString: entry.tags,
-    tags: PromptTagUtils.parseForDisplay(entry.tags),
-    fileExt: cover.extension,
-    fileUrl: cover.downloadUrl.isEmpty ? null : cover.downloadUrl,
-    largeFileUrl: cover.displayUrl.isEmpty ? null : cover.displayUrl,
-    previewFileUrl: cover.previewUrl.isEmpty ? null : cover.previewUrl,
-    cover: cover,
-    mediaCount: media.length,
-    rawSourceMetadata: metadata,
-  );
-  return OnlineGalleryFavoriteRecord.fromDetail(
-    GalleryDetail(
-      item: item,
-      media: List.unmodifiable(media),
-      prompt: entry.tags,
-      negativePrompt: entry.negative,
-      description: entry.note,
-      categoryPath: entry.path,
-      note: entry.note,
-      rawTags: entry.rawTag.isEmpty ? const [] : [entry.rawTag],
-      characterPrompts: [
-        for (final character in entry.characterPrompts)
-          GalleryCharacterPrompt(
-            label: character.label,
-            prompt: character.prompt,
-            negativePrompt: character.negative,
-          ),
-      ],
-      contributors: [
-        for (final contributor in saved.contributors)
-          GalleryContributor(name: contributor.name, role: contributor.role),
-      ],
-      sourceUrl: sourceUrl.isEmpty ? null : sourceUrl,
-      rawSourceMetadata: metadata,
-    ),
-    savedAt: saved.savedAt,
-  );
-}
-
-int _stableNumericId(String value) {
-  var hash = 0x811c9dc5;
-  for (final unit in value.codeUnits) {
-    hash ^= unit;
-    hash = (hash * 0x01000193) & 0x7fffffff;
-  }
-  return hash;
 }

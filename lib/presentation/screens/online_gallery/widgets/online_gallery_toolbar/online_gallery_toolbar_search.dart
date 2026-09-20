@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/online_gallery/gallery_tag_query.dart';
 import '../../../../../core/utils/localization_extension.dart';
+import '../../../../../data/datasources/remote/online_gallery/quick_tag_cloud_search_parser.dart';
 import '../../../../../data/models/online_gallery/danbooru_post.dart';
 import '../../../../providers/online_gallery_provider.dart';
 import '../../../../widgets/autocomplete/autocomplete_config.dart';
@@ -13,6 +14,7 @@ import '../../../../widgets/common/input_surface_container.dart';
 import '../../../online_gallery/online_gallery_screen_controller.dart';
 import 'online_gallery_toolbar.dart';
 import 'online_gallery_toolbar_bindings.dart';
+import 'online_gallery_query_count_suffix.dart';
 
 class OnlineGalleryToolbarSearch {
   const OnlineGalleryToolbarSearch(this.bindings);
@@ -58,8 +60,8 @@ class OnlineGalleryToolbarSearch {
         hintText: context.l10n.onlineGallery_searchFavorites,
         icon: Icons.search_rounded,
         treatSpacesAsSeparators: true,
-        onSubmitted: () => _galleryNotifier.searchFavorites(
-          _controller.favoriteSearchController.text,
+        onSubmitted: () => _submitTagSearch(
+          _controller.favoriteSearchController.text, onValid: _galleryNotifier.searchFavorites, codexOnly: true,
         ),
       );
     }
@@ -143,8 +145,8 @@ class OnlineGalleryToolbarSearch {
         hintText: context.l10n.onlineGallery_searchFavorites,
         icon: Icons.search_rounded,
         treatSpacesAsSeparators: true,
-        onSubmitted: () => _galleryNotifier.searchFavorites(
-          _controller.favoriteSearchController.text,
+        onSubmitted: () => _submitTagSearch(
+          _controller.favoriteSearchController.text, onValid: _galleryNotifier.searchFavorites, codexOnly: true,
         ),
       );
     }
@@ -356,51 +358,28 @@ class OnlineGalleryToolbarSearch {
   }
 
   bool _validateTagQuery(String value) {
-    if (GalleryTagQueryParser.parse(value).isValid) return true;
+    final codex = _activeSource(state) == GallerySourceId.quickTagCloud;
+    if (codex ? !QuickTagCloudSearchParser.parse(value).hasErrors
+        : GalleryTagQueryParser.parse(value).isValid) return true;
     AppToast.warning(
       context,
-      context.l10n.onlineGallery_maxTagsExceeded(maxGallerySearchTags),
+      codex ? context.l10n.onlineGallery_codexSearchInvalid
+          : context.l10n.onlineGallery_maxTagsExceeded(maxGallerySearchTags),
     );
     return false;
   }
 
-  void _submitTagSearch(String value, {required ValueChanged<String> onValid}) {
-    if (_validateTagQuery(value)) onValid(value);
+  void _submitTagSearch(String value, {required ValueChanged<String> onValid, bool codexOnly = false}) {
+    if ((codexOnly && _activeSource(state) != GallerySourceId.quickTagCloud) || _validateTagQuery(value)) onValid(value);
   }
 
   Widget _buildTagCountSuffix(
-    ThemeData theme,
-    TextEditingController controller, {
-    required VoidCallback onClear,
-  }) {
-    final count = GalleryTagQueryParser.parse(controller.text).ordinaryTagCount;
-    final exceeded = count > maxGallerySearchTags;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          '$count/$maxGallerySearchTags',
-          key: const ValueKey('online-gallery-tag-count'),
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: exceeded
-                ? theme.colorScheme.error
-                : theme.colorScheme.onSurfaceVariant,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
-        ),
-        if (controller.text.isNotEmpty)
-          IconButton(
-            tooltip: context.l10n.common_clear,
-            icon: Icon(
-              Icons.close,
-              size: 16,
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-            ),
-            onPressed: onClear,
-          ),
-      ],
-    );
-  }
+    ThemeData theme, TextEditingController controller,
+    {required VoidCallback onClear}
+  ) => buildOnlineGalleryQueryCountSuffix(
+    context, theme, controller, onClear: onClear,
+    codex: _activeSource(state) == GallerySourceId.quickTagCloud,
+  );
 
   Widget _buildSearchField(
     ThemeData theme, {

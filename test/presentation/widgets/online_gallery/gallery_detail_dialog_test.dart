@@ -26,6 +26,7 @@ void main() {
       var characterCopyCount = 0;
       var sentToGenerate = false;
       var addedToQueue = false;
+      var addedToRelay = 0;
       final item = GalleryItem(
         id: 0,
         workId: 'book/entry-1',
@@ -79,7 +80,7 @@ void main() {
                 detail: detail,
                 isFavorited: false,
                 favoriteLoading: false,
-                labels: _labels(),
+                labels: _labels(addToRelay: 'Add to relay'),
                 onCopyPrompt: () => copyCount++,
                 onCopyNegativePrompt: () => negativeCopyCount++,
                 onCopyCharacter: (_) => characterCopyCount++,
@@ -88,6 +89,7 @@ void main() {
                 onOpenSource: () {},
                 onSendToGenerate: () => sentToGenerate = true,
                 onAddToQueue: () async => addedToQueue = true,
+                onAddToRelay: () async => addedToRelay++,
                 onDownloadCurrentOriginal: (_) async {},
                 onTagSearch: (_) {},
                 onBlacklistChanged: () {},
@@ -170,6 +172,9 @@ void main() {
       expect(characterCopyCount, 1);
       expect(sentToGenerate, isTrue);
       expect(addedToQueue, isTrue);
+      await tester.tap(find.byKey(const ValueKey('gallery-detail-add-to-relay')));
+      await tester.pumpAndSettle();
+      expect(addedToRelay, 1);
       expect(
         tester
             .widget<OutlinedButton>(
@@ -384,7 +389,7 @@ void main() {
   });
 }
 
-GalleryDetailDialogLabels _labels() {
+GalleryDetailDialogLabels _labels({String? addToRelay}) {
   return GalleryDetailDialogLabels(
     sourceName: 'Codex',
     untitled: 'Untitled',
@@ -440,5 +445,6 @@ GalleryDetailDialogLabels _labels() {
     copyFullPrompt: 'Copy full prompt',
     copyRawArtistFragments: 'Copy raw artists',
     noArtistChain: 'No artist chain',
+    addToRelay: addToRelay,
   );
 }

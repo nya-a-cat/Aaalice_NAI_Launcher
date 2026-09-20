@@ -61,6 +61,7 @@ class GalleryDetailDialogLabels {
     required this.copyFullPrompt,
     required this.copyRawArtistFragments,
     required this.noArtistChain,
+    this.addToRelay,
   });
 
   final String sourceName;
@@ -117,6 +118,7 @@ class GalleryDetailDialogLabels {
   final String copyFullPrompt;
   final String copyRawArtistFragments;
   final String noArtistChain;
+  final String? addToRelay;
 }
 
 @immutable
@@ -134,6 +136,7 @@ class GalleryDetailViewModel {
     required this.downloadActionPending,
     required this.canToggleFavorite,
     required this.isOutputFiltered,
+    this.relayActionPending = false,
   });
 
   final GalleryItem item;
@@ -148,6 +151,7 @@ class GalleryDetailViewModel {
   final bool downloadActionPending;
   final bool canToggleFavorite;
   final bool Function(String tag) isOutputFiltered;
+  final bool relayActionPending;
 
   List<GalleryMedia> get media => detail.media;
   GalleryMedia? get currentMedia =>
@@ -200,6 +204,7 @@ class GalleryDetailActions {
     this.copyFullPrompt,
     this.copyRawArtistFragments,
     this.hasArtistChain,
+    this.addToRelay,
   });
 
   final VoidCallback close;
@@ -224,6 +229,7 @@ class GalleryDetailActions {
   final void Function(GalleryMedia media)? copyFullPrompt;
   final void Function(GalleryMedia media)? copyRawArtistFragments;
   final bool Function(GalleryMedia media)? hasArtistChain;
+  final Future<void> Function()? addToRelay;
 }
 
 bool galleryMediaHasOriginal(GalleryMedia media) {

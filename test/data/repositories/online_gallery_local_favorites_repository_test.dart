@@ -5,6 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/data/datasources/remote/online_gallery/quick_tag_cloud_gallery_mapper.dart';
+import 'package:nai_launcher/data/datasources/remote/online_gallery/quick_tag_cloud_gallery_repository.dart';
+import 'package:nai_launcher/data/datasources/remote/online_gallery/quick_tag_cloud_search_matcher.dart';
+import 'package:nai_launcher/data/datasources/remote/online_gallery/quick_tag_cloud_search_query.dart';
 import 'package:nai_launcher/data/models/online_gallery/gallery_item.dart';
 import 'package:nai_launcher/data/models/online_gallery/gallery_source.dart';
 import 'package:nai_launcher/data/repositories/online_gallery_local_favorites_repository.dart';
@@ -162,6 +166,34 @@ void main() {
     expect(restored.count, 1);
     expect(restored.contains('safebooru:valid'), isTrue);
     expect(box.containsKey('broken:key'), isTrue);
+  });
+
+  test('QuickTagCloud 收藏搜索执行字段、短语、排除和收藏布尔条件', () async {
+    final repository = _repository(box, storage);
+    await repository.ensureInitialized();
+    final saved = _quickTagCloudSavedEntry();
+    final source = QuickTagCloudGalleryRecord(
+      saved.meta,
+      saved.codex,
+      saved.entry,
+      saved.media,
+    );
+    await repository.upsert(const QuickTagCloudGalleryMapper().toGalleryDetail(source));
+    OnlineGalleryFavoritePage search(String text) => repository.query(
+      OnlineGalleryFavoriteQuery(
+        sourceId: GallerySourceId.quickTagCloud,
+        searchText: text,
+        ratings: const {'q'},
+      ),
+    );
+    expect(search('title:entry prompt:"best quality" negative:boy '
+        'author:Contributor path:Characters has:image fav:true').total, 1);
+    expect(search('fav:false').total, 0);
+    expect(search('-prompt:solo').total, 0);
+    final code = quickTagCloudDirectoryCode(['Characters']);
+    expect(search('dir:book:$code').total, 1);
+    expect(search('dir:other:$code').total, 0);
+    expect(() => search('fav:maybe'), throwsA(isA<QuickTagCloudSearchException>()));
   });
 
   test('QuickTagCloud 单 JSON 迁移经回读校验后写 marker 并删除旧 key', () async {

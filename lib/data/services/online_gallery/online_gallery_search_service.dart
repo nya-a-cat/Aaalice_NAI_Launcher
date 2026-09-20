@@ -6,8 +6,10 @@ import 'package:dio/dio.dart';
 import '../../../core/autocomplete/tag_catalog_repository.dart';
 import '../../../core/online_gallery/gallery_tag_query.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../datasources/remote/online_gallery/quick_tag_cloud_search_parser.dart';
 import '../../models/online_gallery/gallery_item.dart';
 import '../../models/online_gallery/gallery_source.dart';
+import 'quick_tag_cloud_native_query_plan.dart';
 
 typedef OnlineGalleryTagMetadataLoader =
     Future<Map<String, TagCatalogRecord>> Function(Iterable<String> terms);
@@ -40,6 +42,11 @@ class OnlineGallerySearchService {
     required String rawQuery,
     required OnlineGalleryTagMetadataLoader metadataLoader,
   }) async {
+    if (sourceId == GallerySourceId.quickTagCloud) {
+      final parsed = QuickTagCloudSearchParser.parse(rawQuery);
+      if (parsed.hasErrors) throw QuickTagCloudSearchException(parsed.issues);
+      return QuickTagCloudNativeQueryPlan(rawQuery);
+    }
     final cacheKey = [
       sourceId.key,
       feedKind.name,

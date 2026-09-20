@@ -119,10 +119,10 @@ void main() {
     ]);
   });
 
-  test('多标签搜索仅返回完整 Tag 集满足 AND 条件的词条', () async {
+  test('网站全文 AND 搜索保留短语与排除条件', () async {
     final matched = await adapter.search(
       const GallerySearchRequest(
-        query: 'hero cinematic_lighting -abstract',
+        query: 'hero "cinematic lighting" -abstract',
         cursor: '1',
         pageSize: 20,
         ratings: {'g'},

@@ -19,6 +19,7 @@ class QuickTagCloudGallerySourceAdapter extends GallerySourceAdapter {
     required QuickTagCloudRemoteCatalogService catalogService,
     required QuickTagCloudUserService userService,
     required QuickTagCloudQueryReader queryReader,
+    Future<Set<String>> Function()? favoriteKeysLoader,
     DateTime Function()? clock,
   }) : _userService = userService,
        _queryReader = queryReader,
@@ -30,6 +31,7 @@ class QuickTagCloudGallerySourceAdapter extends GallerySourceAdapter {
     _queryEngine = QuickTagCloudQueryEngine(
       repository: _repository,
       userService: userService,
+      favoriteKeysLoader: favoriteKeysLoader,
     );
   }
 

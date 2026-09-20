@@ -24,7 +24,7 @@ class GalleryDetailActionPanel extends StatelessWidget {
     final canDownloadAll =
         actions.downloadAll != null && viewModel.media.length > 1;
     const actionStyle = ButtonStyle(
-      minimumSize: WidgetStatePropertyAll(Size.fromHeight(42)),
+      minimumSize: WidgetStatePropertyAll(Size.fromHeight(44)),
       padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 12)),
     );
 
@@ -106,6 +106,22 @@ class GalleryDetailActionPanel extends StatelessWidget {
                       label: label(viewModel.labels.downloadAll),
                     )
                   : const SizedBox.shrink(),
+            ),
+          ],
+          if (actions.addToRelay != null && viewModel.labels.addToRelay != null) ...[
+            const SizedBox(height: 8),
+            FilledButton.tonalIcon(
+              key: const ValueKey('gallery-detail-add-to-relay'),
+              style: actionStyle,
+              onPressed: viewModel.hasCopyableContent && !viewModel.relayActionPending
+                  ? actions.addToRelay : null,
+              icon: viewModel.relayActionPending
+                  ? const SizedBox.square(
+                      dimension: 17,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.playlist_add_check_outlined, size: 18),
+              label: label(viewModel.labels.addToRelay!),
             ),
           ],
         ],
