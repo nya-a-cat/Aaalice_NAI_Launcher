@@ -93,49 +93,55 @@ void main() {
     expect(after.lastError, isA<HiveError>());
   });
 
-  test('external refresh keeps notifier and emits one initialized revision change', () async {
-    final notifier = container.read(
-      onlineGalleryLocalFavoritesProvider.notifier,
-    );
-    await notifier.initialize();
-    await notifier.upsert(_detail(), savedAt: DateTime.utc(2024));
-    final before = container.read(onlineGalleryLocalFavoritesProvider);
-    expect(before.isInitialized, isTrue);
-    expect(before.revision, greaterThan(0));
-    expect(before.count, 1);
+  test(
+    'external refresh keeps notifier and emits one initialized revision change',
+    () async {
+      final notifier = container.read(
+        onlineGalleryLocalFavoritesProvider.notifier,
+      );
+      await notifier.initialize();
+      await notifier.upsert(_detail(), savedAt: DateTime.utc(2024));
+      final before = container.read(onlineGalleryLocalFavoritesProvider);
+      expect(before.isInitialized, isTrue);
+      expect(before.revision, greaterThan(0));
+      expect(before.count, 1);
 
-    final previousValues = <(bool, int)?>[];
-    final nextValues = <(bool, int)>[];
-    final subscription = container.listen(
-      onlineGalleryLocalFavoritesProvider.select(
-        (state) => (state.isInitialized, state.revision),
-      ),
-      (previous, next) {
-        previousValues.add(previous);
-        nextValues.add(next);
-      },
-    );
-    addTearDown(subscription.close);
-    final repository = container.read(
-      onlineGalleryLocalFavoritesRepositoryProvider,
-    );
-    expect(await repository.remove('ai_tag:provider-item'), isTrue);
-    expect(repository.count, 0);
-    expect(container.read(onlineGalleryLocalFavoritesProvider).count, 1);
-    expect(nextValues, isEmpty);
+      final previousValues = <(bool, int)?>[];
+      final nextValues = <(bool, int)>[];
+      final subscription = container.listen(
+        onlineGalleryLocalFavoritesProvider.select(
+          (state) => (state.isInitialized, state.revision),
+        ),
+        (previous, next) {
+          previousValues.add(previous);
+          nextValues.add(next);
+        },
+      );
+      addTearDown(subscription.close);
+      final repository = container.read(
+        onlineGalleryLocalFavoritesRepositoryProvider,
+      );
+      expect(await repository.remove('ai_tag:provider-item'), isTrue);
+      expect(repository.count, 0);
+      expect(container.read(onlineGalleryLocalFavoritesProvider).count, 1);
+      expect(nextValues, isEmpty);
 
-    await notifier.refreshAfterExternalWrite();
+      await notifier.refreshAfterExternalWrite();
 
-    final after = container.read(onlineGalleryLocalFavoritesProvider);
-    expect(container.read(onlineGalleryLocalFavoritesProvider.notifier), same(notifier));
-    expect(after.isInitialized, isTrue);
-    expect(after.isLoading, isFalse);
-    expect(after.count, repository.count);
-    expect(after.revision, before.revision + 1);
-    expect(after.lastError, isNull);
-    expect(previousValues, [(true, before.revision)]);
-    expect(nextValues, [(true, before.revision + 1)]);
-  });
+      final after = container.read(onlineGalleryLocalFavoritesProvider);
+      expect(
+        container.read(onlineGalleryLocalFavoritesProvider.notifier),
+        same(notifier),
+      );
+      expect(after.isInitialized, isTrue);
+      expect(after.isLoading, isFalse);
+      expect(after.count, repository.count);
+      expect(after.revision, before.revision + 1);
+      expect(after.lastError, isNull);
+      expect(previousValues, [(true, before.revision)]);
+      expect(nextValues, [(true, before.revision + 1)]);
+    },
+  );
 }
 
 GalleryDetail _detail() {
